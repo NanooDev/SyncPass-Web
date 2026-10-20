@@ -1,10 +1,16 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import {
-  COGNITO_LOGIN_URL,
+  COGNITO_CLIENT_ID,
+  COGNITO_DOMAIN,
   COGNITO_LOGOUT_URL,
+  COGNITO_REDIRECT_URI,
   ROLES,
   type Role,
 } from '../config/auth.ts'
+import {
+  exchangeCodeForTokens,
+  startCognitoLogin,
+} from '../config/cognito-pkce.ts'
 import type { SyncPassUser } from './AuthContext.types.ts'
 import { AuthContext } from './auth-context.ts'
 
@@ -33,7 +39,7 @@ function getInitialAuth(): { user: SyncPassUser | null; token: string | null } {
     return { user: null, token: null }
   }
 
-  // 1. Detectar retorno desde AWS Cognito Hosted UI
+  // 1. Detectar retorno desde AWS Cognito con Implicit Grant (hash con id_token)
   if (window.location.hash.includes('id_token=')) {
     try {
       const hashParams = new URLSearchParams(window.location.hash.substring(1))
@@ -76,7 +82,7 @@ function getInitialAuth(): { user: SyncPassUser | null; token: string | null } {
     }
   }
 
-  // 2. Restaurar sesión de localStorage
+  // 2. Restaurar sesión previa de localStorage
   try {
     const savedUserStr = localStorage.getItem(STORAGE_KEY_USER)
     const savedToken = localStorage.getItem(STORAGE_KEY_TOKEN)
@@ -98,9 +104,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [initial] = useState(() => getInitialAuth())
   const [user, setUser] = useState<SyncPassUser | null>(initial.user)
   const [token, setToken] = useState<string | null>(initial.token)
+  const [isLoading, setIsLoading] = useState<boolean>(() => typeof window !== 'undefined' && window.location.search.includes('code='))
+
+  // Manejar retorno de Authorization Code (?code=...) desde Cognito
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.search.includes('code=')
+    ) {
+      const searchParams = new URLSearchParams(window.location.search)
+      const code = searchParams.get('code')
+      const verifier = sessionStorage.getItem('cognito_code_verifier') || ''
+
+      if (code) {
+        exchangeCodeForTokens(
+          COGNITO_DOMAIN,
+          COGNITO_CLIENT_ID,
+          COGNITO_REDIRECT_URI,
+          code,
+          verifier,
+        )
+          .then((tokens) => {
+            const payload = parseJwtPayload(tokens.id_token)
+            const email =
+              (payload?.email as string) ||
+              (payload?.['cognito:username'] as string) ||
+              'usuario@cognito.aws'
+
+            const cognitoGroups =
+              (payload?.['cognito:groups'] as string[]) || []
+            const mappedRoles: Role[] = cognitoGroups.includes('admin')
+              ? [ROLES.admin]
+              : cognitoGroups.includes('volunteer')
+                ? [ROLES.volunteer]
+                : cognitoGroups.includes('attendee')
+                  ? [ROLES.attendee]
+                  : [ROLES.coordinator]
+
+            const cognitoUser: SyncPassUser = {
+              id: (payload?.sub as string) || 'cognito-user',
+              email,
+              name: (payload?.name as string) || email.split('@')[0],
+              roles: mappedRoles,
+              authProvider: 'cognito',
+            }
+
+            const validToken = tokens.access_token || tokens.id_token
+            setUser(cognitoUser)
+            setToken(validToken)
+            localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(cognitoUser))
+            localStorage.setItem(STORAGE_KEY_TOKEN, validToken)
+            sessionStorage.removeItem('cognito_code_verifier')
+            window.history.replaceState(null, '', window.location.pathname)
+          })
+          .catch((err) => {
+            console.error('Error al procesar respuesta de Cognito:', err)
+          })
+          .finally(() => {
+            setIsLoading(false)
+          })
+      }
+    }
+  }, [])
 
   const loginWithCognito = () => {
-    window.location.href = COGNITO_LOGIN_URL
+    startCognitoLogin(COGNITO_DOMAIN, COGNITO_CLIENT_ID, COGNITO_REDIRECT_URI)
   }
 
   const logout = () => {
@@ -158,7 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         roles: user?.roles ?? [],
         isAuthenticated: !!user,
-        isLoading: false,
+        isLoading,
         loginWithCognito,
         logout,
         loginLocal,
