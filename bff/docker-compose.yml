@@ -1,0 +1,20 @@
+# Sync Pass BFF. Compatible con `docker compose` y con CasaOS (Custom Install).
+# En CasaOS se despliega con la imagen ya compilada (ver README Paso 10):
+# el jar va en /DATA/AppData/sync-pass-bff/app.jar y se usa eclipse-temurin:21-jre.
+# El puerto se publica en 0.0.0.0 para desarrollo directo por LAN;
+# el acceso externo entra por NPM (bff.casa interno + bff.claudioviajando.com público).
+name: sync-pass-bff
+
+services:
+  bff:
+    build: .
+    image: sync-pass-bff:latest
+    container_name: sync-pass-bff
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:3004:8080"
+    environment:
+      AUTH0_ISSUER: https://dev-qd6i88udlr5yzjtv.us.auth0.com/
+      AUTH0_JWK_SET_URI: https://dev-qd6i88udlr5yzjtv.us.auth0.com/.well-known/jwks.json
+      AUTH0_AUDIENCE: https://sync-pass-api
+      AUTH0_ROLES_CLAIM: https://sync-pass/roles

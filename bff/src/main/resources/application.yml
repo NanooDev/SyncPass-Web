@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+# Todo sobreescribible por env: AUTH0_ISSUER, AUTH0_JWK_SET_URI, AUTH0_AUDIENCE, AUTH0_ROLES_CLAIM
+auth0:
+  issuer: ${AUTH0_ISSUER:https://dev-qd6i88udlr5yzjtv.us.auth0.com/}
+  jwk-set-uri: ${AUTH0_JWK_SET_URI:https://dev-qd6i88udlr5yzjtv.us.auth0.com/.well-known/jwks.json}
+  audience: ${AUTH0_AUDIENCE:https://sync-pass-api}
+  roles-claim: ${AUTH0_ROLES_CLAIM:https://sync-pass/roles}
+
+cors:
+  allowed-origins:
+    - https://citt-sync-pass-front.vercel.app
+    - http://localhost:5173
