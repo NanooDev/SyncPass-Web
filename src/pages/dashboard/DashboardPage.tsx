@@ -4,6 +4,7 @@ import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitl
 import { useUserRoles } from '../../hooks/use-roles/useRoles.ts'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { ROLES, type Role } from '../../config/auth.ts'
+import { sendPushNotification, deriveNtfyTopic } from '../../services/ntfy.ts'
 import styles from './DashboardPage.module.css'
 
 interface CommunityProject {
@@ -71,6 +72,36 @@ export default function DashboardPage() {
   const [surveySubmitted, setSurveySubmitted] = useState<boolean>(false)
   const [actionNotice, setActionNotice] = useState<string>('')
   const [showQrModal, setShowQrModal] = useState<boolean>(false)
+
+  // Estados de Notificaciones Push ntfy.sh
+  const [pushTargetEmail, setPushTargetEmail] = useState<string>('voluntario.estudiante@duocuc.cl')
+  const [pushTitle, setPushTitle] = useState<string>('SyncPass Alerta Territorial')
+  const [pushMessage, setPushMessage] = useState<string>('Nuevo taller asignado en sede comunitaria.')
+  const [pushStatus, setPushStatus] = useState<string>('')
+  const [pushLoading, setPushLoading] = useState<boolean>(false)
+  const [pushActiveTopic, setPushActiveTopic] = useState<string>('')
+
+  useEffect(() => {
+    deriveNtfyTopic(pushTargetEmail).then(setPushActiveTopic)
+  }, [pushTargetEmail])
+
+  const handleSendPush = async () => {
+    if (!pushMessage.trim()) return
+    setPushLoading(true)
+    setPushStatus('')
+    const res = await sendPushNotification({
+      email: pushTargetEmail,
+      title: pushTitle,
+      message: pushMessage,
+      priority: 'high',
+    })
+    setPushLoading(false)
+    if (res.success) {
+      setPushStatus(`Notificación push emitida exitosamente al tópico ${res.topic}`)
+    } else {
+      setPushStatus(`Error al emitir notificación: ${res.error}`)
+    }
+  }
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
@@ -828,7 +859,7 @@ export default function DashboardPage() {
             <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '12px', border: '1px solid var(--border)' }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Servidor Cloud</div>
               <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>AWS EC2 Ubuntu</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--brand-emerald)', fontWeight: 700 }}>54.164.69.142 · Online</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--brand-emerald)', fontWeight: 700 }}>Producción Cloud · Online</div>
             </div>
 
             <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '12px', border: '1px solid var(--border)' }}>
@@ -841,6 +872,140 @@ export default function DashboardPage() {
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Motor de Datos</div>
               <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>PostgreSQL 16</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--brand-emerald)', fontWeight: 700 }}>mi_base_datos · Conectada</div>
+            </div>
+          </div>
+
+          {/* Centro de Notificaciones Push ntfy.sh */}
+          <div
+            style={{
+              marginTop: '1.5rem',
+              padding: '1.5rem',
+              background: 'var(--bg-subtle)',
+              borderRadius: '16px',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', margin: 0 }}>
+                  Centro de Emisión de Notificaciones Push (ntfy.sh)
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.2rem 0 0' }}>
+                  Envío directo de eventos SSE hacia dispositivos Android vinculados.
+                </p>
+              </div>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '20px',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  color: 'var(--brand-emerald)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                }}
+              >
+                SSE En Vivo
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                  Destinatario (Email del usuario)
+                </label>
+                <input
+                  type="email"
+                  value={pushTargetEmail}
+                  onChange={(e) => setPushTargetEmail(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.85rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    fontSize: '0.88rem',
+                  }}
+                />
+                <div style={{ fontSize: '0.75rem', color: 'var(--brand-indigo)', marginTop: '0.3rem', fontFamily: 'monospace' }}>
+                  Tópico: {pushActiveTopic}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                  Título del Mensaje
+                </label>
+                <input
+                  type="text"
+                  value={pushTitle}
+                  onChange={(e) => setPushTitle(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.85rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    fontSize: '0.88rem',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                Cuerpo de la Notificación
+              </label>
+              <input
+                type="text"
+                value={pushMessage}
+                onChange={(e) => setPushMessage(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.85rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.88rem',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleSendPush}
+                disabled={pushLoading || !pushMessage.trim()}
+                style={{
+                  background: 'var(--brand-indigo)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '0.65rem 1.4rem',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.88rem',
+                  cursor: pushLoading ? 'not-allowed' : 'pointer',
+                  opacity: pushLoading ? 0.7 : 1,
+                  transition: 'opacity 0.2s',
+                }}
+              >
+                {pushLoading ? 'Emitiendo evento...' : 'Emitir Notificación Push'}
+              </button>
+
+              {pushStatus && (
+                <span
+                  style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: pushStatus.startsWith('Error') ? 'var(--brand-rose)' : 'var(--brand-emerald)',
+                  }}
+                >
+                  {pushStatus}
+                </span>
+              )}
             </div>
           </div>
         </section>
