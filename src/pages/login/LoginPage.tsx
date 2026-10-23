@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [selectedRole, setSelectedRole] = useState<Role>(ROLES.coordinator)
+  const [showLocalForm, setShowLocalForm] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -27,298 +28,475 @@ export default function LoginPage() {
       loginLocal(email, selectedRole)
       setLoading(false)
       setLocation('/dashboard')
-    }, 400)
+    }, 300)
   }
 
   const handleQuickRole = (role: Role) => {
     switchRole(role)
-    setLocation('/dashboard')
+    setLocation(role === ROLES.admin ? '/users' : '/dashboard')
   }
 
   return (
-    <div style={{ maxWidth: '480px', margin: '2rem auto' }}>
+    <div
+      style={{
+        maxWidth: '560px',
+        margin: '1.5rem auto 3rem auto',
+        padding: '0 1rem',
+      }}
+    >
       <div
         style={{
-          border: '1px solid var(--border)',
-          borderRadius: '16px',
-          padding: '2.5rem 2rem',
-          background: 'var(--code-bg)',
-          boxShadow: 'var(--shadow)',
+          background: '#ffffff',
+          borderRadius: '20px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 1px rgba(15, 23, 42, 0.1)',
+          padding: '2.5rem 2.25rem',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
+        {/* Top Accent Gradient Bar */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 50%, #10b981 100%)',
+          }}
+        />
+
+        {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div
             style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+              color: '#ffffff',
               display: 'inline-flex',
-              padding: '0.6rem 1.2rem',
-              borderRadius: '8px',
-              background: 'var(--accent-bg)',
-              color: 'var(--accent)',
-              fontWeight: 800,
-              fontSize: '1.4rem',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 900,
+              fontSize: '1.35rem',
+              boxShadow: '0 8px 20px rgba(79, 70, 229, 0.3)',
               marginBottom: '1rem',
-              letterSpacing: '-0.5px',
             }}
           >
-            SyncPass
+            SP
           </div>
-          <h1 style={{ fontSize: '1.75rem', margin: '0 0 0.5rem 0' }}>
-            Portal de Acceso
+          <h1
+            style={{
+              fontSize: '1.75rem',
+              fontWeight: 800,
+              color: '#0f172a',
+              letterSpacing: '-0.03em',
+              marginBottom: '0.4rem',
+            }}
+          >
+            Portal de Acceso SyncPass
           </h1>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text)' }}>
-            Vinculación con el Medio • Duoc UC
+          <p style={{ fontSize: '0.92rem', color: '#64748b' }}>
+            Acreditación territorial y sincronización en la nube
           </p>
         </div>
 
-        {/* 1. Botón Oficial AWS Cognito */}
-        <div style={{ marginBottom: '1.75rem' }}>
+        {/* Cloud Authentication Primary Action */}
+        <div style={{ marginBottom: '2rem' }}>
           <button
-            type="button"
             onClick={loginWithCognito}
             style={{
               width: '100%',
+              padding: '0.95rem 1.25rem',
+              background: '#0f172a',
+              color: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #1e293b',
+              fontWeight: 700,
+              fontSize: '0.98rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.75rem',
-              padding: '0.85rem',
-              borderRadius: '10px',
-              border: '1px solid #2563eb',
-              background: '#eff6ff',
-              color: '#1e3a8a',
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)',
               transition: 'all 0.2s ease',
             }}
-          >
-            <span>Iniciar sesión con Amazon Cognito</span>
-          </button>
-          <p
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text)',
-              marginTop: '0.5rem',
-              textAlign: 'center',
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#1e293b'
+              e.currentTarget.style.transform = 'translateY(-1px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#0f172a'
+              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
-            User Pool: <code>us-east-1_RlB8Ft9Z2</code>
-          </p>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+            </svg>
+            <span>Continuar con Amazon Cognito</span>
+          </button>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              marginTop: '0.65rem',
+              fontSize: '0.75rem',
+              color: '#059669',
+              fontWeight: 600,
+            }}
+          >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
+            <span>User Pool `us-east-1_RlB8Ft9Z2` · Protocolo PKCE RFC 7636</span>
+          </div>
         </div>
 
+        {/* Section Divider */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            margin: '1.5rem 0',
-            color: 'var(--text)',
-            fontSize: '0.8rem',
             gap: '1rem',
+            margin: '1.75rem 0',
           }}
         >
-          <hr style={{ flex: 1, borderColor: 'var(--border)' }} />
-          <span>O ingresa con credenciales institucionales</span>
-          <hr style={{ flex: 1, borderColor: 'var(--border)' }} />
-        </div>
-
-        {/* 2. Formulario de Credenciales Locales */}
-        <form onSubmit={handleLocalSubmit}>
-          {error && (
-            <div
-              style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#ef4444',
-                padding: '0.75rem',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                marginBottom: '1rem',
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <div style={{ marginBottom: '1rem' }}>
-            <label
-              htmlFor="email-input"
-              style={{
-                display: 'block',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--text-h)',
-                marginBottom: '0.35rem',
-              }}
-            >
-              Correo Institucional
-            </label>
-            <input
-              id="email-input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ejemplo@duocuc.cl"
-              required
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                padding: '0.65rem 0.85rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--text-h)',
-                fontSize: '0.95rem',
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <label
-              htmlFor="password-input"
-              style={{
-                display: 'block',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--text-h)',
-                marginBottom: '0.35rem',
-              }}
-            >
-              Contraseña
-            </label>
-            <input
-              id="password-input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                padding: '0.65rem 0.85rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--text-h)',
-                fontSize: '0.95rem',
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label
-              htmlFor="role-select"
-              style={{
-                display: 'block',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--text-h)',
-                marginBottom: '0.35rem',
-              }}
-            >
-              Rol asignado para la sesión
-            </label>
-            <select
-              id="role-select"
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as Role)}
-              style={{
-                width: '100%',
-                padding: '0.65rem 0.85rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--text-h)',
-                fontSize: '0.95rem',
-              }}
-            >
-              <option value={ROLES.coordinator}>Docente / Coordinador</option>
-              <option value={ROLES.volunteer}>Estudiante Voluntario</option>
-              <option value={ROLES.attendee}>Beneficiario Comunitario</option>
-              <option value={ROLES.admin}>Administrador General</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
+          <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          <span
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: 'var(--accent)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
+              fontSize: '0.78rem',
               fontWeight: 700,
-              fontSize: '0.95rem',
-              cursor: loading ? 'wait' : 'pointer',
+              color: '#94a3b8',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
             }}
           >
-            {loading ? 'Ingresando...' : 'Iniciar Sesión'}
-          </button>
-        </form>
+            Acceso Rápido por Perfil (Evaluación)
+          </span>
+          <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+        </div>
 
-        {/* 3. Selector de Roles Demo de 1-Clic */}
+        {/* 4 Interactive Role Cards Grid */}
         <div
           style={{
-            marginTop: '2rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid var(--border)',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '0.75rem',
+            marginBottom: '1.75rem',
           }}
         >
-          <p
-            style={{
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              color: 'var(--text)',
-              marginBottom: '0.75rem',
-              letterSpacing: '0.05em',
-            }}
-          >
-            Acceso Rápido por Rol (Evaluación)
-          </p>
+          {/* Docente / Coordinador */}
           <div
+            onClick={() => handleQuickRole(ROLES.coordinator)}
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '0.5rem',
+              padding: '1rem',
+              borderRadius: '12px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              textAlign: 'left',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#4f46e5'
+              e.currentTarget.style.background = '#eef2ff'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.background = '#f8fafc'
+              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
-            <button
-              type="button"
-              onClick={() => handleQuickRole(ROLES.coordinator)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
-              title="Entrar como Docente Coordinador"
+            <div
+              style={{
+                display: 'inline-flex',
+                padding: '0.35rem',
+                borderRadius: '8px',
+                background: '#e0e7ff',
+                color: '#4338ca',
+                marginBottom: '0.5rem',
+              }}
             >
-              <b>Docente</b>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickRole(ROLES.volunteer)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
-              title="Entrar como Estudiante Voluntario"
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+                <path d="M6 6h10" />
+                <path d="M6 10h10" />
+              </svg>
+            </div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Docente</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Quórum & QR de Taller</div>
+          </div>
+
+          {/* Estudiante Voluntario */}
+          <div
+            onClick={() => handleQuickRole(ROLES.volunteer)}
+            style={{
+              padding: '1rem',
+              borderRadius: '12px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              textAlign: 'left',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#059669'
+              e.currentTarget.style.background = '#ecfdf5'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.background = '#f8fafc'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                padding: '0.35rem',
+                borderRadius: '8px',
+                background: '#d1fae5',
+                color: '#059669',
+                marginBottom: '0.5rem',
+              }}
             >
-              <b>Voluntario</b>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickRole(ROLES.attendee)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
-              title="Entrar como Beneficiario"
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                <rect x="7" y="7" width="10" height="10" rx="1" />
+              </svg>
+            </div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Voluntario</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Acreditación & Offline</div>
+          </div>
+
+          {/* Beneficiario Comunitario */}
+          <div
+            onClick={() => handleQuickRole(ROLES.attendee)}
+            style={{
+              padding: '1rem',
+              borderRadius: '12px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              textAlign: 'left',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#0284c7'
+              e.currentTarget.style.background = '#f0f9ff'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.background = '#f8fafc'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                padding: '0.35rem',
+                borderRadius: '8px',
+                background: '#e0f2fe',
+                color: '#0284c7',
+                marginBottom: '0.5rem',
+              }}
             >
-              <b>Beneficiario</b>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickRole(ROLES.admin)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
-              title="Entrar como Administrador"
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Beneficiario</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Pase QR & Encuesta 30s</div>
+          </div>
+
+          {/* Administrador General */}
+          <div
+            onClick={() => handleQuickRole(ROLES.admin)}
+            style={{
+              padding: '1rem',
+              borderRadius: '12px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              textAlign: 'left',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#d97706'
+              e.currentTarget.style.background = '#fffbeb'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.background = '#f8fafc'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                padding: '0.35rem',
+                borderRadius: '8px',
+                background: '#fef3c7',
+                color: '#d97706',
+                marginBottom: '0.5rem',
+              }}
             >
-              <b>Admin</b>
-            </button>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Admin</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Métricas & Usuarios</div>
           </div>
         </div>
+
+        {/* Toggle Local Credentials Form */}
+        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={() => setShowLocalForm(!showLocalForm)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#4f46e5',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              padding: '0.25rem 0.5rem',
+            }}
+          >
+            {showLocalForm ? 'Ocultar formulario manual' : '¿Deseas ingresar con formulario manual?'}
+          </button>
+        </div>
+
+        {showLocalForm && (
+          <form onSubmit={handleLocalSubmit} style={{ marginTop: '1rem' }}>
+            {error && (
+              <div
+                style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#dc2626',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  marginBottom: '1rem',
+                }}
+              >
+                {error}
+              </div>
+            )}
+            <div style={{ marginBottom: '1rem' }}>
+              <label
+                htmlFor="login-email"
+                style={{
+                  display: 'block',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  marginBottom: '0.35rem',
+                }}
+              >
+                Correo Electrónico
+              </label>
+              <input
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="usuario@duocuc.cl"
+                style={{ width: '100%', boxSizing: 'border-box' }}
+              />
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label
+                htmlFor="login-password"
+                style={{
+                  display: 'block',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  marginBottom: '0.35rem',
+                }}
+              >
+                Contraseña
+              </label>
+              <input
+                id="login-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                style={{ width: '100%', boxSizing: 'border-box' }}
+              />
+            </div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label
+                htmlFor="login-role"
+                style={{
+                  display: 'block',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: '#334155',
+                  marginBottom: '0.35rem',
+                }}
+              >
+                Rol Asignado
+              </label>
+              <select
+                id="login-role"
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value as Role)}
+                style={{ width: '100%', boxSizing: 'border-box' }}
+              >
+                <option value={ROLES.coordinator}>Docente / Coordinador</option>
+                <option value={ROLES.volunteer}>Estudiante Voluntario</option>
+                <option value={ROLES.attendee}>Beneficiario Comunitario</option>
+                <option value={ROLES.admin}>Administrador General</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                background: '#4f46e5',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: 600,
+              }}
+            >
+              {loading ? 'Accediendo...' : 'Iniciar Sesión'}
+            </button>
+          </form>
+        )}
+      </div>
+
+      {/* Backend & Deployment Metadata */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '1rem 0.5rem',
+          fontSize: '0.78rem',
+          color: '#94a3b8',
+        }}
+      >
+        <span>AWS EC2 Spring Boot: 54.164.69.142</span>
+        <span>Duoc UC · Vinculación Territorial</span>
       </div>
     </div>
   )

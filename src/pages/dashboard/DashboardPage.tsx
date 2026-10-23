@@ -1,18 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'wouter'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import { useUserRoles } from '../../hooks/use-roles/useRoles.ts'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
-import { ROLES, ROLE_LABELS, type Role } from '../../config/auth.ts'
+import { ROLES, type Role } from '../../config/auth.ts'
 import styles from './DashboardPage.module.css'
-
-// Tarjetas de métricas base
-const CARDS = [
-  { title: 'Proyectos activos', value: 3, hint: 'coordinator' },
-  { title: 'Eventos próximos', value: 5, hint: 'coordinator' },
-  { title: 'Asistencias (QR)', value: 128, hint: 'volunteer' },
-  { title: 'Encuestas pendientes', value: 2, hint: 'attendee' },
-]
 
 interface CommunityProject {
   id: string
@@ -22,6 +14,7 @@ interface CommunityProject {
   attendeesCount: number
   capacity: number
   status: 'Activo' | 'En curso' | 'Finalizado'
+  coordinatorName: string
 }
 
 const INITIAL_PROJECTS: CommunityProject[] = [
@@ -33,6 +26,7 @@ const INITIAL_PROJECTS: CommunityProject[] = [
     attendeesCount: 28,
     capacity: 40,
     status: 'En curso',
+    coordinatorName: 'Prof. Mariano Acevedo',
   },
   {
     id: 'p2',
@@ -42,6 +36,7 @@ const INITIAL_PROJECTS: CommunityProject[] = [
     attendeesCount: 15,
     capacity: 25,
     status: 'Activo',
+    coordinatorName: 'Prof. Mariano Acevedo',
   },
   {
     id: 'p3',
@@ -51,6 +46,7 @@ const INITIAL_PROJECTS: CommunityProject[] = [
     attendeesCount: 35,
     capacity: 35,
     status: 'Finalizado',
+    coordinatorName: 'Prof. Álvaro León',
   },
 ]
 
@@ -60,829 +56,852 @@ export default function DashboardPage() {
   const activeRole: Role = (roles[0] as Role) || ROLES.coordinator
   const localAuth = useAuth()
 
-  // Estados interactivos
   const [projects] = useState<CommunityProject[]>(INITIAL_PROJECTS)
   const [selectedProjectId, setSelectedProjectId] = useState<string>('p1')
   const [offlineMode, setOfflineMode] = useState<boolean>(false)
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(3)
   const [manualRut, setManualRut] = useState<string>('')
   const [accreditedList, setAccreditedList] = useState<string[]>([
-    'María González (12.345.678-9) - Acreditado QR',
-    'Juan Pérez (14.567.890-K) - Acreditado QR',
-    'Rosa Morales (10.987.654-3) - Acreditado Manual',
+    'María González (12.345.678-9) · 15:12 hrs · QR Validado',
+    'Juan Pérez (14.567.890-K) · 15:14 hrs · QR Validado',
+    'Rosa Morales (10.987.654-3) · 15:18 hrs · Registro Manual',
   ])
   const [surveyRating, setSurveyRating] = useState<number>(5)
   const [surveyComment, setSurveyComment] = useState<string>('')
   const [surveySubmitted, setSurveySubmitted] = useState<boolean>(false)
   const [actionNotice, setActionNotice] = useState<string>('')
+  const [showQrModal, setShowQrModal] = useState<boolean>(false)
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  // Renderizar QR en Canvas nativo sin librerías externas
+  useEffect(() => {
+    if (!showQrModal || !canvasRef.current) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const size = canvas.width
+    ctx.clearRect(0, 0, size, size)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, size, size)
+
+    const blocks = 21
+    const blockSize = size / blocks
+    ctx.fillStyle = '#0f172a'
+
+    // Generar patrón visual tipo QR determinista
+    for (let r = 0; r < blocks; r++) {
+      for (let c = 0; c < blocks; c++) {
+        const isCorner =
+          (r < 7 && c < 7) || (r < 7 && c >= blocks - 7) || (r >= blocks - 7 && c < 7)
+        if (isCorner) {
+          const isBorder =
+            r === 0 || r === 6 || c === 0 || c === 6 ||
+            r === blocks - 7 || r === blocks - 1 || c === blocks - 7 || c === blocks - 1
+          const isCore =
+            (r >= 2 && r <= 4 && c >= 2 && c <= 4) ||
+            (r >= 2 && r <= 4 && c >= blocks - 5 && c <= blocks - 3) ||
+            (r >= blocks - 5 && r <= blocks - 3 && c >= 2 && c <= 4)
+          if (isBorder || isCore) {
+            ctx.fillRect(c * blockSize, r * blockSize, blockSize, blockSize)
+          }
+        } else if ((r * 11 + c * 17 + (selectedProjectId.charCodeAt(0) || 7)) % 3 === 0) {
+          ctx.fillRect(c * blockSize, r * blockSize, blockSize, blockSize)
+        }
+      }
+    }
+  }, [showQrModal, selectedProjectId])
 
   const handleAccreditation = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!manualRut) return
-    const entry = `${manualRut} - Acreditado Manualmente`
+    if (!manualRut.trim()) return
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const entry = `${manualRut.trim()} · ${now} hrs · Acreditado Manual`
     setAccreditedList([entry, ...accreditedList])
     setManualRut('')
     if (offlineMode) {
       setPendingSyncCount((c) => c + 1)
-      setActionNotice('Registro guardado localmente (Offline).')
+      setActionNotice('Registro guardado localmente en almacenamiento offline.')
     } else {
-      setActionNotice('Registro sincronizado exitosamente con la nube.')
+      setActionNotice('Registro sincronizado exitosamente con el backend AWS EC2.')
     }
-    setTimeout(() => setActionNotice(''), 3000)
+    setTimeout(() => setActionNotice(''), 3500)
   }
 
   const handleSyncNow = () => {
-    setActionNotice(`Sincronizando ${pendingSyncCount} registros con AWS...`)
+    setActionNotice(`Sincronizando ${pendingSyncCount} registros con AWS EC2 (54.164.69.142)...`)
     setTimeout(() => {
       setPendingSyncCount(0)
-      setActionNotice('¡Todos los registros sincronizados correctamente!')
-      setTimeout(() => setActionNotice(''), 3000)
-    }, 1200)
+      setActionNotice('Todos los registros territoriales han sido sincronizados.')
+      setTimeout(() => setActionNotice(''), 3500)
+    }, 1000)
+  }
+
+  const handleSimulatedScan = () => {
+    const fakeRuts = ['18.921.344-2', '16.482.901-5', '11.233.409-7', '20.109.845-K']
+    const randomRut = fakeRuts[Math.floor(Math.random() * fakeRuts.length)]
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const entry = `Beneficiario (${randomRut}) · ${now} hrs · QR Validado`
+    setAccreditedList([entry, ...accreditedList])
+    if (offlineMode) {
+      setPendingSyncCount((c) => c + 1)
+      setActionNotice('Escáner QR: Asistencia guardada localmente (Offline).')
+    } else {
+      setActionNotice('Escáner QR: Acreditación sincronizada con éxito.')
+    }
+    setTimeout(() => setActionNotice(''), 3500)
   }
 
   const handleSurveySubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSurveySubmitted(true)
-    setTimeout(() => {
-      setActionNotice('¡Gracias por evaluar esta actividad comunitaria!')
-      setTimeout(() => setActionNotice(''), 3000)
-    }, 300)
+    setActionNotice('Encuesta de satisfacción registrada con éxito.')
+    setTimeout(() => setActionNotice(''), 4000)
   }
 
   const selectedProject =
     projects.find((p) => p.id === selectedProjectId) || projects[0]
 
   return (
-    <section style={{ maxWidth: '1050px', margin: '0 auto' }}>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          marginBottom: '1rem',
-        }}
-      >
-        <div>
-          <h1 style={{ margin: '0 0 0.25rem 0' }}>Panel de Control</h1>
-          <p style={{ color: 'var(--text)' }}>
-            Rol activo:{' '}
-            <b>{ROLE_LABELS[activeRole] || activeRole}</b> • Vinculación con el
-            Medio Duoc UC
-          </p>
-        </div>
-
-        {/* Selector de rol rápido dentro del dashboard */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: 'var(--code-bg)',
-            padding: '0.4rem 0.8rem',
-            borderRadius: '8px',
-            border: '1px solid var(--border)',
-          }}
-        >
-          <span style={{ fontSize: '0.8rem', color: 'var(--text)' }}>
-            Cambiar vista:
-          </span>
-          <select
-            value={activeRole}
-            onChange={(e) => localAuth.switchRole(e.target.value as Role)}
-            style={{
-              background: 'var(--bg)',
-              color: 'var(--text-h)',
-              border: '1px solid var(--border)',
-              borderRadius: '6px',
-              padding: '0.2rem 0.5rem',
-              fontSize: '0.85rem',
-            }}
-          >
-            <option value={ROLES.coordinator}>Docente / Coordinador</option>
-            <option value={ROLES.volunteer}>Estudiante Voluntario</option>
-            <option value={ROLES.attendee}>Beneficiario Comunitario</option>
-            <option value={ROLES.admin}>Administrador</option>
-          </select>
-        </div>
-      </div>
-
+    <div className={styles.dashboardContainer}>
+      {/* Toast de Notificaciones */}
       {actionNotice && (
-        <div
-          style={{
-            background: 'var(--accent-bg)',
-            border: '1px solid var(--accent-border)',
-            color: 'var(--accent)',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.25rem',
-            fontWeight: 500,
-          }}
-        >
-          {actionNotice}
+        <div className={styles.noticeToast}>
+          <span>{actionNotice}</span>
+          <button
+            onClick={() => setActionNotice('')}
+            style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem' }}
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Grid de Métricas Principales */}
-      <div className={styles.grid}>
-        {CARDS.map((c) => (
-          <article key={c.title} className={styles.card}>
-            <p className={styles.number}>{c.value}</p>
-            <h2>{c.title}</h2>
-            <small style={{ color: 'var(--text)' }}>
-              Módulo: {ROLE_LABELS[c.hint as Role] || c.hint}
-            </small>
-          </article>
-        ))}
+      {/* Top Header & Role Segmented Control */}
+      <div className={styles.topBar}>
+        <div className={styles.titleArea}>
+          <h1>Panel de Operaciones SyncPass</h1>
+          <p>
+            Entorno de Vinculación Territorial · Sesión activa:{' '}
+            <b style={{ color: '#0f172a' }}>{localAuth.user?.name || 'Mariano Acevedo'}</b>
+          </p>
+        </div>
+
+        {/* Modern Segmented Role Switcher */}
+        <div className={styles.roleSegment}>
+          <button
+            onClick={() => localAuth.switchRole(ROLES.coordinator)}
+            className={`${styles.roleBtn} ${activeRole === ROLES.coordinator ? styles.activeRole : ''}`}
+          >
+            Docente
+          </button>
+          <button
+            onClick={() => localAuth.switchRole(ROLES.volunteer)}
+            className={`${styles.roleBtn} ${activeRole === ROLES.volunteer ? styles.activeRole : ''}`}
+          >
+            Voluntario
+          </button>
+          <button
+            onClick={() => localAuth.switchRole(ROLES.attendee)}
+            className={`${styles.roleBtn} ${activeRole === ROLES.attendee ? styles.activeRole : ''}`}
+          >
+            Beneficiario
+          </button>
+          <button
+            onClick={() => localAuth.switchRole(ROLES.admin)}
+            className={`${styles.roleBtn} ${activeRole === ROLES.admin ? styles.activeRole : ''}`}
+          >
+            Admin
+          </button>
+        </div>
       </div>
 
-      {/* VISTAS ESPECÍFICAS SEGÚN ROL */}
+      {/* KPI Stats Grid */}
+      <div className={styles.kpiGrid}>
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Quórum Promedio</span>
+            <span className={styles.kpiBadge}>+14% vs meta</span>
+          </div>
+          <div className={styles.kpiValue}>87.5%</div>
+          <div className={styles.kpiSub}>78 de 100 cupos totales cubiertos</div>
+        </div>
 
-      {/* 1. MÓDULO DOCENTE / COORDINADOR */}
-      {(activeRole === ROLES.coordinator || activeRole === ROLES.admin) && (
-        <div
-          style={{
-            marginTop: '2.5rem',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            background: 'var(--code-bg)',
-          }}
-        >
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Acreditaciones QR</span>
+            <span className={styles.kpiBadge} style={{ background: '#eef2ff', color: '#4f46e5' }}>
+              En Vivo
+            </span>
+          </div>
+          <div className={styles.kpiValue}>{128 + accreditedList.length}</div>
+          <div className={styles.kpiSub}>Velocidad media: 1.8 seg / vecino</div>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Modo Operativo</span>
+            <span
+              className={styles.kpiBadge}
+              style={{
+                background: offlineMode ? '#fef3c7' : '#ecfdf5',
+                color: offlineMode ? '#d97706' : '#059669',
+              }}
+            >
+              {offlineMode ? 'Modo Offline' : 'En Línea'}
+            </span>
+          </div>
+          <div className={styles.kpiValue}>{pendingSyncCount}</div>
+          <div className={styles.kpiSub}>Registros pendientes de sincronizar</div>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiHeader}>
+            <span className={styles.kpiTitle}>Satisfacción</span>
+            <span className={styles.kpiBadge}>4.9 de 5.0</span>
+          </div>
+          <div className={styles.kpiValue}>98%</div>
+          <div className={styles.kpiSub}>Basado en 84 encuestas inmediatas</div>
+        </div>
+      </div>
+
+      {/* VISTA 1: DOCENTE / COORDINADOR */}
+      {activeRole === ROLES.coordinator && (
+        <section>
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem',
+              justifyContent: 'space-between',
+              marginBottom: '1.25rem',
             }}
           >
             <div>
-              <h2 style={{ margin: 0 }}>Proyectos y Talleres Comunitarios</h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
-                Gestión territorial y control de asistencia en tiempo real
-              </p>
+              <h2 style={{ fontSize: '1.25rem', color: '#0f172a' }}>Talleres Comunitarios en Curso</h2>
+              <p style={{ fontSize: '0.85rem' }}>Supervisión de cupos, quórum y acreditación en terreno</p>
             </div>
             <button
-              onClick={() => alert('Formulario de nuevo proyecto en desarrollo')}
+              onClick={() => setShowQrModal(true)}
               style={{
-                background: 'var(--accent)',
+                background: '#4f46e5',
                 color: '#fff',
                 border: 'none',
+                padding: '0.6rem 1.1rem',
+                borderRadius: '10px',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
               }}
             >
-              + Nuevo Taller
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+              </svg>
+              <span>Generar Pase QR del Taller</span>
             </button>
           </div>
 
+          <div className={styles.projectGrid}>
+            {projects.map((proj) => {
+              const percent = Math.round((proj.attendeesCount / proj.capacity) * 100)
+              const isSelected = proj.id === selectedProjectId
+              return (
+                <div
+                  key={proj.id}
+                  onClick={() => setSelectedProjectId(proj.id)}
+                  className={`${styles.projectCard} ${isSelected ? styles.activeProject : ''}`}
+                >
+                  <div className={styles.projectTop}>
+                    <span
+                      className={`${styles.statusPill} ${
+                        proj.status === 'Activo'
+                          ? styles.statusActivo
+                          : proj.status === 'En curso'
+                          ? styles.statusEnCurso
+                          : styles.statusFinalizado
+                      }`}
+                    >
+                      {proj.status}
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>
+                      {proj.date}
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.35rem' }}>
+                    {proj.name}
+                  </h3>
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1rem' }}>
+                    {proj.location}
+                  </p>
+
+                  <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{ width: `${percent}%` }} />
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span style={{ color: '#0f172a' }}>
+                      Asistencia: {proj.attendeesCount} / {proj.capacity}
+                    </span>
+                    <span style={{ color: percent >= 80 ? '#059669' : '#4f46e5' }}>
+                      {percent}% Quórum
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* VISTA 2: ESTUDIANTE VOLUNTARIO */}
+      {activeRole === ROLES.volunteer && (
+        <section>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1rem',
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #e2e8f0',
+              padding: '1.75rem',
+              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
               marginBottom: '1.5rem',
             }}
           >
-            {projects.map((proj) => (
-              <div
-                key={proj.id}
-                onClick={() => setSelectedProjectId(proj.id)}
-                style={{
-                  border: `2px solid ${
-                    selectedProjectId === proj.id
-                      ? 'var(--accent)'
-                      : 'var(--border)'
-                  }`,
-                  borderRadius: '10px',
-                  padding: '1rem',
-                  background: 'var(--bg)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <div
+            {/* Field Status & Offline Switch Bar */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                paddingBottom: '1.25rem',
+                marginBottom: '1.5rem',
+                borderBottom: '1px solid #e2e8f0',
+              }}
+            >
+              <div>
+                <h2 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.25rem' }}>
+                  Terminal de Acreditación Territorial
+                </h2>
+                <p style={{ fontSize: '0.85rem' }}>
+                  Operación en terreno con soporte para zonas sin conexión a internet
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  onClick={() => setOfflineMode(!offlineMode)}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem',
+                    background: offlineMode ? '#fef3c7' : '#ecfdf5',
+                    color: offlineMode ? '#92400e' : '#065f46',
+                    border: '1px solid ' + (offlineMode ? '#fde68a' : '#a7f3d0'),
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: '10px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
                   }}
                 >
                   <span
                     style={{
-                      fontSize: '0.75rem',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                      background:
-                        proj.status === 'En curso'
-                          ? 'rgba(16, 185, 129, 0.15)'
-                          : 'rgba(59, 130, 246, 0.15)',
-                      color:
-                        proj.status === 'En curso' ? '#10b981' : '#3b82f6',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {proj.status}
-                  </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text)' }}>
-                    {proj.date}
-                  </span>
-                </div>
-                <h3 style={{ fontSize: '1rem', margin: '0 0 0.5rem 0' }}>
-                  {proj.name}
-                </h3>
-                <p
-                  style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--text)',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  Sede: {proj.location}
-                </p>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  <span>
-                    Cupos: <b>{proj.attendeesCount}</b> / {proj.capacity}
-                  </span>
-                  <div
-                    style={{
-                      width: '60px',
-                      height: '6px',
-                      background: 'var(--border)',
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${(proj.attendeesCount / proj.capacity) * 100}%`,
-                        height: '100%',
-                        background: 'var(--accent)',
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Detalle del Taller seleccionado y Pase QR del evento */}
-          <div
-            style={{
-              borderTop: '1px solid var(--border)',
-              paddingTop: '1.25rem',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1.5rem',
-              alignItems: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: '120px',
-                height: '120px',
-                background: '#fff',
-                padding: '8px',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(5, 1fr)',
-                  gap: '4px',
-                  width: '90px',
-                  height: '90px',
-                }}
-              >
-                {Array.from({ length: 25 }).map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      background: (i * 7) % 3 === 0 ? '#1e293b' : '#cbd5e1',
-                      borderRadius: '2px',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: offlineMode ? '#d97706' : '#10b981',
                     }}
                   />
-                ))}
-              </div>
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  color: '#475569',
-                  marginTop: '4px',
-                }}
-              >
-                QR Acreditación
-              </span>
-            </div>
-
-            <div style={{ flex: 1, minWidth: '240px' }}>
-              <h3 style={{ margin: '0 0 0.25rem 0' }}>
-                {selectedProject.name}
-              </h3>
-              <p
-                style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--text)',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Código de acreditación rápida para estudiantes voluntarios y
-                vecinos inscritos.
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  onClick={() =>
-                    alert(
-                      `Código QR generado para ${selectedProject.name} con ID: ${selectedProject.id}`,
-                    )
-                  }
-                >
-                  Descargar QR
+                  <span>{offlineMode ? 'Modo Offline Activo' : 'En Línea (Cloud)'}</span>
                 </button>
-                <button
-                  onClick={() =>
-                    alert('Generando reporte PDF de asistencia para Duoc UC')
-                  }
-                >
-                  Descargar Asistencia (PDF)
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* 2. MÓDULO ESTUDIANTE VOLUNTARIO */}
-      {(activeRole === ROLES.volunteer || activeRole === ROLES.admin) && (
-        <div
-          style={{
-            marginTop: '2.5rem',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            background: 'var(--code-bg)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '1rem',
-              marginBottom: '1rem',
-            }}
-          >
-            <div>
-              <h2 style={{ margin: 0 }}>Modo Acreditación en Terreno</h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
-                Taller activo: Alfabetización Digital (Sede Villa El Roble)
-              </p>
-            </div>
-
-            {/* Toggle de Modo Offline */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: offlineMode
-                  ? 'rgba(239, 68, 68, 0.1)'
-                  : 'rgba(16, 185, 129, 0.1)',
-              }}
-            >
-              <span>{offlineMode ? '[OFFLINE] Modo Local' : '[ONLINE] En Línea'}</span>
-              <button
-                onClick={() => setOfflineMode(!offlineMode)}
-                style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
-              >
-                {offlineMode ? 'Reconectar Red' : 'Simular Sin Red'}
-              </button>
-              {pendingSyncCount > 0 && (
-                <button
-                  onClick={handleSyncNow}
-                  style={{
-                    fontSize: '0.75rem',
-                    padding: '0.2rem 0.5rem',
-                    background: '#f59e0b',
-                    color: '#fff',
-                    border: 'none',
-                  }}
-                >
-                  Sincronizar ({pendingSyncCount})
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1.5rem',
-            }}
-          >
-            {/* Formulario de Registro Manual o Escaneo */}
-            <div
-              style={{
-                background: 'var(--bg)',
-                padding: '1.25rem',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>
-                Registro Rápido de Vecino
-              </h3>
-              <form onSubmit={handleAccreditation}>
-                <div style={{ marginBottom: '0.75rem' }}>
-                  <label
-                    htmlFor="rut-input"
+                {pendingSyncCount > 0 && (
+                  <button
+                    onClick={handleSyncNow}
                     style={{
-                      display: 'block',
-                      fontSize: '0.85rem',
-                      marginBottom: '0.25rem',
+                      background: '#0f172a',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '0.45rem 0.9rem',
+                      borderRadius: '10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
                     }}
                   >
-                    RUT del Beneficiario
-                  </label>
+                    Sincronizar {pendingSyncCount} pendientes
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Fast Check-In Form & Simulated QR Scanner */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '1.5rem',
+              }}
+            >
+              {/* Form Manual */}
+              <div>
+                <h3 style={{ fontSize: '1rem', color: '#0f172a', marginBottom: '0.75rem' }}>
+                  Acreditación Rápida por Cédula / RUT
+                </h3>
+                <form onSubmit={handleAccreditation} style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
-                    id="rut-input"
                     type="text"
-                    placeholder="Ej. 18.765.432-1"
                     value={manualRut}
                     onChange={(e) => setManualRut(e.target.value)}
-                    style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '0.5rem',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border)',
-                      background: 'var(--code-bg)',
-                      color: 'var(--text-h)',
-                    }}
+                    placeholder="Ej: 19.823.456-7"
+                    style={{ flex: 1 }}
                   />
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     type="submit"
                     style={{
-                      flex: 1,
-                      background: 'var(--accent)',
+                      background: '#059669',
                       color: '#fff',
                       border: 'none',
+                      padding: '0.65rem 1rem',
+                      fontWeight: 700,
                     }}
                   >
-                    Registrar Asistencia
+                    Registrar
                   </button>
+                </form>
+
+                <div style={{ marginTop: '1rem' }}>
                   <button
                     type="button"
-                    onClick={() => {
-                      const rutSimulado = `1${Math.floor(
-                        1000000 + Math.random() * 9000000,
-                      )}-K`
-                      setAccreditedList([
-                        `Simulado QR (${rutSimulado})`,
-                        ...accreditedList,
-                      ])
-                      setActionNotice('Escáner QR: Asistencia registrada.')
-                      setTimeout(() => setActionNotice(''), 3000)
-                    }}
-                    title="Simular lectura de cámara QR"
-                  >
-                    Escanear QR
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Asistencias Recientes */}
-            <div
-              style={{
-                background: 'var(--bg)',
-                padding: '1.25rem',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '1rem',
-                  marginBottom: '0.75rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <span>Acreditados Hoy</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
-                  Total: {accreditedList.length}
-                </span>
-              </h3>
-              <ul
-                style={{
-                  listStyle: 'none',
-                  padding: 0,
-                  margin: 0,
-                  maxHeight: '140px',
-                  overflowY: 'auto',
-                }}
-              >
-                {accreditedList.map((item, idx) => (
-                  <li
-                    key={idx}
+                    onClick={handleSimulatedScan}
                     style={{
-                      fontSize: '0.85rem',
-                      padding: '0.4rem 0',
-                      borderBottom: '1px solid var(--border)',
+                      width: '100%',
+                      padding: '0.75rem',
+                      background: '#f8fafc',
+                      color: '#0f172a',
+                      border: '1px dashed #cbd5e1',
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      fontSize: '0.88rem',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '0.5rem',
                     }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#4f46e5'
+                      e.currentTarget.style.background = '#eef2ff'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#cbd5e1'
+                      e.currentTarget.style.background = '#f8fafc'
+                    }}
                   >
-                    <span style={{ color: '#059669', fontWeight: 'bold' }}>✓</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                    <span>Simular Lectura de Cámara QR</span>
+                  </button>
+                </div>
+              </div>
 
-      {/* 3. MÓDULO BENEFICIARIO COMUNITARIO */}
-      {(activeRole === ROLES.attendee || activeRole === ROLES.admin) && (
-        <div
-          style={{
-            marginTop: '2.5rem',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            background: 'var(--code-bg)',
-          }}
-        >
-          <h2 style={{ margin: '0 0 0.5rem 0' }}>Portal del Beneficiario</h2>
-          <p
-            style={{
-              fontSize: '0.85rem',
-              color: 'var(--text)',
-              marginBottom: '1.25rem',
-            }}
-          >
-            Consulta tus talleres inscritos y danos tu retroalimentación para
-            seguir mejorando.
-          </p>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1.5rem',
-            }}
-          >
-            {/* Pase digital del vecino */}
-            <div
-              style={{
-                background: 'var(--bg)',
-                padding: '1.25rem',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-                textAlign: 'center',
-              }}
-            >
-              <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
-                Tu Pase Digital SyncPass
-              </h3>
-              <p
-                style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--text)',
-                  marginBottom: '1rem',
-                }}
-              >
-                Muestra este código al estudiante voluntario en la entrada del
-                taller:
-              </p>
-              <div
-                style={{
-                  display: 'inline-block',
-                  background: '#fff',
-                  padding: '12px',
-                  borderRadius: '10px',
-                  border: '1px solid var(--border)',
-                }}
-              >
+              {/* Registro Reciente */}
+              <div>
+                <h3 style={{ fontSize: '1rem', color: '#0f172a', marginBottom: '0.75rem' }}>
+                  Acreditaciones Recientes en este Dispositivo
+                </h3>
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(7, 10px)',
-                    gap: '2px',
+                    background: '#f8fafc',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    padding: '0.5rem 0.75rem',
+                    maxHeight: '160px',
+                    overflowY: 'auto',
                   }}
                 >
-                  {Array.from({ length: 49 }).map((_, i) => (
+                  {accreditedList.map((item, idx) => (
                     <div
-                      key={i}
+                      key={idx}
                       style={{
-                        width: '10px',
-                        height: '10px',
-                        background:
-                          (i * 11) % 4 === 0 || i % 6 === 0
-                            ? '#1e293b'
-                            : '#e2e8f0',
+                        padding: '0.45rem 0',
+                        fontSize: '0.82rem',
+                        borderBottom: idx < accreditedList.length - 1 ? '1px solid #f1f5f9' : 'none',
+                        color: '#334155',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                       }}
-                    />
+                    >
+                      <span style={{ color: '#059669', fontWeight: 800 }}>✓</span>
+                      <span>{item}</span>
+                    </div>
                   ))}
                 </div>
               </div>
-              <p
-                style={{
-                  fontSize: '0.8rem',
-                  marginTop: '0.75rem',
-                  color: 'var(--text)',
-                }}
-              >
-                ID: SP-BENEFICIARIO-2026
-              </p>
             </div>
+          </div>
+        </section>
+      )}
 
-            {/* Encuesta rápida de 30 segundos */}
+      {/* VISTA 3: BENEFICIARIO COMUNITARIO */}
+      {activeRole === ROLES.attendee && (
+        <section
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '1.5rem',
+          }}
+        >
+          {/* Pase Digital QR */}
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #e2e8f0',
+              padding: '2rem',
+              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+              textAlign: 'center',
+            }}
+          >
             <div
               style={{
-                background: 'var(--bg)',
-                padding: '1.25rem',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
+                display: 'inline-block',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '9999px',
+                background: '#eef2ff',
+                color: '#4f46e5',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '1rem',
               }}
             >
-              <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
-                Encuesta Inmediata de Satisfacción
-              </h3>
-              {surveySubmitted ? (
-                <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                  <div
-                    style={{
-                      display: 'inline-block',
-                      padding: '0.4rem 0.9rem',
-                      background: '#d1fae5',
-                      color: '#065f46',
-                      borderRadius: '8px',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      marginBottom: '0.75rem',
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    ENCUESTA ENVIADA CON ÉXITO
-                  </div>
-                  <h4 style={{ margin: '0 0 0.5rem 0' }}>
-                    ¡Muchas gracias por tu respuesta!
-                  </h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
-                    Tus comentarios ayudan a los docentes y estudiantes de Duoc UC
-                    a seguir apoyando a la comunidad.
-                  </p>
+              Credencial Digital SyncPass
+            </div>
+            <h3 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.25rem' }}>
+              María González Valenzuela
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              RUT: 12.345.678-9 · Vecina Titular
+            </p>
+
+            <div
+              style={{
+                width: '180px',
+                height: '180px',
+                margin: '0 auto 1.25rem auto',
+                background: '#f8fafc',
+                border: '2px dashed #cbd5e1',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: '0.5rem',
+              }}
+            >
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="1.5">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+              </svg>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                Pase Verificado
+              </span>
+            </div>
+
+            <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
+              Taller asignado: <b>{selectedProject.name}</b>
+            </div>
+          </div>
+
+          {/* Encuesta Inmediata de Satisfacción */}
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #e2e8f0',
+              padding: '2rem',
+              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+            }}
+          >
+            <h3 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.25rem' }}>
+              Encuesta Inmediata de Satisfacción
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              Tu respuesta toma solo 30 segundos y apoya la vinculación territorial
+            </p>
+
+            {surveySubmitted ? (
+              <div
+                style={{
+                  background: '#ecfdf5',
+                  border: '1px solid #a7f3d0',
+                  borderRadius: '14px',
+                  padding: '2rem 1.5rem',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    background: '#059669',
+                    color: '#fff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: '1.2rem',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  ✓
                 </div>
-              ) : (
-                <form onSubmit={handleSurveySubmit}>
-                  <p
+                <h4 style={{ fontSize: '1.05rem', color: '#065f46', marginBottom: '0.25rem' }}>
+                  ¡Muchas gracias por tu valoración!
+                </h4>
+                <p style={{ fontSize: '0.82rem', color: '#047857' }}>
+                  Tu calificación fue registrada y sincronizada en el panel de Duoc UC.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSurveySubmit}>
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label
                     style={{
+                      display: 'block',
                       fontSize: '0.85rem',
-                      color: 'var(--text)',
-                      marginBottom: '0.75rem',
+                      fontWeight: 600,
+                      color: '#334155',
+                      marginBottom: '0.5rem',
                     }}
                   >
-                    ¿Cómo calificarías la actividad de hoy?
-                  </p>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '0.5rem',
-                      fontSize: '1.5rem',
-                      cursor: 'pointer',
-                      marginBottom: '1rem',
-                    }}
-                  >
+                    ¿Cómo calificarías la utilidad de este taller?
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span
+                      <button
+                        type="button"
                         key={star}
                         onClick={() => setSurveyRating(star)}
                         style={{
-                          color:
-                            star <= surveyRating ? '#f59e0b' : 'var(--border)',
+                          flex: 1,
+                          padding: '0.6rem 0',
+                          background: star <= surveyRating ? '#4f46e5' : '#f8fafc',
+                          color: star <= surveyRating ? '#ffffff' : '#64748b',
+                          border: '1px solid ' + (star <= surveyRating ? '#4f46e5' : '#e2e8f0'),
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
                         }}
                       >
-                        ★
-                      </span>
+                        {star} ★
+                      </button>
                     ))}
                   </div>
+                </div>
 
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label
-                      htmlFor="survey-comment"
-                      style={{
-                        display: 'block',
-                        fontSize: '0.85rem',
-                        marginBottom: '0.25rem',
-                      }}
-                    >
-                      ¿Qué aprendiste o qué podemos mejorar? (Opcional)
-                    </label>
-                    <textarea
-                      id="survey-comment"
-                      rows={2}
-                      value={surveyComment}
-                      onChange={(e) => setSurveyComment(e.target.value)}
-                      placeholder="Me gustó la paciencia de los estudiantes..."
-                      style={{
-                        width: '100%',
-                        boxSizing: 'border-box',
-                        borderRadius: '6px',
-                        border: '1px solid var(--border)',
-                        background: 'var(--code-bg)',
-                        color: 'var(--text-h)',
-                        padding: '0.5rem',
-                        fontSize: '0.85rem',
-                      }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label
                     style={{
-                      width: '100%',
-                      background: 'var(--accent)',
-                      color: '#fff',
-                      border: 'none',
+                      display: 'block',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#334155',
+                      marginBottom: '0.5rem',
                     }}
                   >
-                    Enviar Encuesta Rápida
-                  </button>
-                </form>
-              )}
-            </div>
+                    Comentario breve u observación:
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={surveyComment}
+                    onChange={(e) => setSurveyComment(e.target.value)}
+                    placeholder="El contenido fue muy claro y práctico para aplicarlo en el hogar..."
+                    style={{ width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    background: '#4f46e5',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontWeight: 700,
+                    fontSize: '0.92rem',
+                    boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                  }}
+                >
+                  Enviar Encuesta
+                </button>
+              </form>
+            )}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* 4. MÓDULO ADMINISTRADOR */}
+      {/* VISTA 4: ADMINISTRADOR GENERAL */}
       {activeRole === ROLES.admin && (
-        <div
+        <section
           style={{
-            marginTop: '2.5rem',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            background: 'var(--code-bg)',
+            background: '#ffffff',
+            borderRadius: '20px',
+            border: '1px solid #e2e8f0',
+            padding: '2rem',
+            boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
           }}
         >
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.5rem',
             }}
           >
             <div>
-              <h2 style={{ margin: '0 0 0.25rem 0' }}>
-                Administración General SyncPass
-              </h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0 }}>
-                Control de accesos RBAC, sincronización de base de datos y
-                auditoría
-              </p>
+              <h2 style={{ fontSize: '1.25rem', color: '#0f172a' }}>Auditoría y Telemetría Institucional</h2>
+              <p style={{ fontSize: '0.85rem' }}>Estado de la infraestructura cloud y control de acceso</p>
             </div>
             <Link
               href="/users"
               style={{
-                background: 'var(--accent)',
+                background: '#0f172a',
                 color: '#fff',
-                padding: '0.5rem 1rem',
+                padding: '0.55rem 1rem',
                 borderRadius: '8px',
-                textDecoration: 'none',
+                fontSize: '0.85rem',
                 fontWeight: 600,
+                textDecoration: 'none',
+              }}
+            >
+              Gestionar Usuarios
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '1rem',
+            }}
+          >
+            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Servidor Cloud</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>AWS EC2 Ubuntu</div>
+              <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>54.164.69.142 · Online</div>
+            </div>
+
+            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Identidad Federada</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>AWS Cognito</div>
+              <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>PKCE S256 · Operativo</div>
+            </div>
+
+            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Motor de Datos</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>PostgreSQL 16</div>
+              <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>mi_base_datos · Conectada</div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Modal de Pase QR para Docente */}
+      {showQrModal && (
+        <div
+          onClick={() => setShowQrModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '1rem',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              padding: '2rem',
+              maxWidth: '380px',
+              width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            }}
+          >
+            <h3 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.35rem' }}>
+              Pase QR del Taller
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              {selectedProject.name}
+            </p>
+
+            <div
+              style={{
+                background: '#ffffff',
+                padding: '1rem',
+                borderRadius: '16px',
+                border: '1px solid #e2e8f0',
+                display: 'inline-block',
+                marginBottom: '1.25rem',
+              }}
+            >
+              <canvas ref={canvasRef} width={220} height={220} />
+            </div>
+
+            <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '1.25rem' }}>
+              Proyecta o imprime este código en la sede comunitaria para acreditación inmediata
+            </p>
+
+            <button
+              onClick={() => setShowQrModal(false)}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                background: '#0f172a',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '10px',
+                fontWeight: 700,
                 fontSize: '0.9rem',
               }}
             >
-              Gestionar Usuarios →
-            </Link>
+              Cerrar Pase
+            </button>
           </div>
         </div>
       )}
-    </section>
+    </div>
   )
 }
