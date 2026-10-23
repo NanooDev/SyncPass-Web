@@ -298,7 +298,7 @@ export default function DashboardPage() {
                     marginBottom: '0.75rem',
                   }}
                 >
-                  📍 {proj.location}
+                  Sede: {proj.location}
                 </p>
                 <div
                   style={{
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                   : 'rgba(16, 185, 129, 0.1)',
               }}
             >
-              <span>{offlineMode ? '📶❌ Modo Offline' : '🟢 En Línea'}</span>
+              <span>{offlineMode ? '[OFFLINE] Modo Local' : '[ONLINE] En Línea'}</span>
               <button
                 onClick={() => setOfflineMode(!offlineMode)}
                 style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}
@@ -566,7 +566,7 @@ export default function DashboardPage() {
                     }}
                     title="Simular lectura de cámara QR"
                   >
-                    📷 Escanear QR
+                    Escanear QR
                   </button>
                 </div>
               </form>
@@ -615,7 +615,7 @@ export default function DashboardPage() {
                       gap: '0.5rem',
                     }}
                   >
-                    <span>✅</span>
+                    <span style={{ color: '#059669', fontWeight: 'bold' }}>✓</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -734,8 +734,20 @@ export default function DashboardPage() {
               </h3>
               {surveySubmitted ? (
                 <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-                    🎉
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      padding: '0.4rem 0.9rem',
+                      background: '#d1fae5',
+                      color: '#065f46',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      marginBottom: '0.75rem',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    ENCUESTA ENVIADA CON ÉXITO
                   </div>
                   <h4 style={{ margin: '0 0 0.5rem 0' }}>
                     ¡Muchas gracias por tu respuesta!
