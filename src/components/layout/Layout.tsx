@@ -88,11 +88,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          <div className={styles.statusPill} title="API Backend Spring Boot en AWS EC2">
-            <span className={styles.statusDot}></span>
-            <span>API EC2: 54.164.69.142</span>
-          </div>
-
           {/* Botón de Modo Claro / Modo Oscuro */}
           <button
             onClick={toggleTheme}

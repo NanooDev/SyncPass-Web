@@ -71,30 +71,8 @@
   background: var(--brand-indigo-light);
 }
 
-.statusPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  background: var(--brand-emerald-light);
-  border: 1px solid rgba(5, 150, 105, 0.25);
-  color: var(--brand-emerald);
-  font-size: 0.75rem;
-  font-weight: 700;
-  margin-left: auto;
-}
-
-.statusDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--brand-emerald);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-  animation: pulseSubtle 2s infinite ease-in-out;
-}
-
 .themeToggleBtn {
+  margin-left: auto;
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--text-main);
