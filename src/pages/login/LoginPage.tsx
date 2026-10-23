@@ -46,13 +46,14 @@ export default function LoginPage() {
     >
       <div
         style={{
-          background: '#ffffff',
+          background: 'var(--bg-card)',
           borderRadius: '20px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 1px rgba(15, 23, 42, 0.1)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-card)',
           padding: '2.5rem 2.25rem',
           position: 'relative',
           overflow: 'hidden',
+          transition: 'background-color 0.2s ease, border-color 0.2s ease',
         }}
       >
         {/* Top Accent Gradient Bar */}
@@ -91,14 +92,14 @@ export default function LoginPage() {
             style={{
               fontSize: '1.75rem',
               fontWeight: 800,
-              color: '#0f172a',
+              color: 'var(--text-main)',
               letterSpacing: '-0.03em',
               marginBottom: '0.4rem',
             }}
           >
             Portal de Acceso SyncPass
           </h1>
-          <p style={{ fontSize: '0.92rem', color: '#64748b' }}>
+          <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)' }}>
             Acreditación territorial y sincronización en la nube
           </p>
         </div>
@@ -110,26 +111,18 @@ export default function LoginPage() {
             style={{
               width: '100%',
               padding: '0.95rem 1.25rem',
-              background: '#0f172a',
-              color: '#ffffff',
+              background: 'var(--text-main)',
+              color: 'var(--bg-card)',
               borderRadius: '12px',
-              border: '1px solid #1e293b',
+              border: '1px solid var(--border)',
               fontWeight: 700,
               fontSize: '0.98rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.75rem',
-              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)',
+              boxShadow: 'var(--shadow-sm)',
               transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#1e293b'
-              e.currentTarget.style.transform = 'translateY(-1px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#0f172a'
-              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -145,11 +138,11 @@ export default function LoginPage() {
               gap: '0.4rem',
               marginTop: '0.65rem',
               fontSize: '0.75rem',
-              color: '#059669',
+              color: 'var(--brand-emerald)',
               fontWeight: 600,
             }}
           >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-emerald)' }} />
             <span>User Pool `us-east-1_RlB8Ft9Z2` · Protocolo PKCE RFC 7636</span>
           </div>
         </div>
@@ -163,19 +156,19 @@ export default function LoginPage() {
             margin: '1.75rem 0',
           }}
         >
-          <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
           <span
             style={{
               fontSize: '0.78rem',
               fontWeight: 700,
-              color: '#94a3b8',
+              color: 'var(--text-dim)',
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
             }}
           >
             Acceso Rápido por Perfil (Evaluación)
           </span>
-          <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
         </div>
 
         {/* 4 Interactive Role Cards Grid */}
@@ -193,21 +186,11 @@ export default function LoginPage() {
             style={{
               padding: '1rem',
               borderRadius: '12px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               textAlign: 'left',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#4f46e5'
-              e.currentTarget.style.background = '#eef2ff'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0'
-              e.currentTarget.style.background = '#f8fafc'
-              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             <div
@@ -215,8 +198,8 @@ export default function LoginPage() {
                 display: 'inline-flex',
                 padding: '0.35rem',
                 borderRadius: '8px',
-                background: '#e0e7ff',
-                color: '#4338ca',
+                background: 'var(--brand-indigo-light)',
+                color: 'var(--brand-indigo)',
                 marginBottom: '0.5rem',
               }}
             >
@@ -226,8 +209,8 @@ export default function LoginPage() {
                 <path d="M6 10h10" />
               </svg>
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Docente</div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Quórum & QR de Taller</div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>Docente</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Quórum & QR de Taller</div>
           </div>
 
           {/* Estudiante Voluntario */}
@@ -236,21 +219,11 @@ export default function LoginPage() {
             style={{
               padding: '1rem',
               borderRadius: '12px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               textAlign: 'left',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#059669'
-              e.currentTarget.style.background = '#ecfdf5'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0'
-              e.currentTarget.style.background = '#f8fafc'
-              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             <div
@@ -258,8 +231,8 @@ export default function LoginPage() {
                 display: 'inline-flex',
                 padding: '0.35rem',
                 borderRadius: '8px',
-                background: '#d1fae5',
-                color: '#059669',
+                background: 'var(--brand-emerald-light)',
+                color: 'var(--brand-emerald)',
                 marginBottom: '0.5rem',
               }}
             >
@@ -271,8 +244,8 @@ export default function LoginPage() {
                 <rect x="7" y="7" width="10" height="10" rx="1" />
               </svg>
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Voluntario</div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Acreditación & Offline</div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>Voluntario</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Acreditación & Offline</div>
           </div>
 
           {/* Beneficiario Comunitario */}
@@ -281,21 +254,11 @@ export default function LoginPage() {
             style={{
               padding: '1rem',
               borderRadius: '12px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               textAlign: 'left',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#0284c7'
-              e.currentTarget.style.background = '#f0f9ff'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0'
-              e.currentTarget.style.background = '#f8fafc'
-              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             <div
@@ -303,8 +266,8 @@ export default function LoginPage() {
                 display: 'inline-flex',
                 padding: '0.35rem',
                 borderRadius: '8px',
-                background: '#e0f2fe',
-                color: '#0284c7',
+                background: 'var(--brand-cyan-light)',
+                color: 'var(--brand-cyan)',
                 marginBottom: '0.5rem',
               }}
             >
@@ -315,8 +278,8 @@ export default function LoginPage() {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Beneficiario</div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Pase QR & Encuesta 30s</div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>Beneficiario</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pase QR & Encuesta 30s</div>
           </div>
 
           {/* Administrador General */}
@@ -325,21 +288,11 @@ export default function LoginPage() {
             style={{
               padding: '1rem',
               borderRadius: '12px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               textAlign: 'left',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#d97706'
-              e.currentTarget.style.background = '#fffbeb'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0'
-              e.currentTarget.style.background = '#f8fafc'
-              e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             <div
@@ -347,8 +300,8 @@ export default function LoginPage() {
                 display: 'inline-flex',
                 padding: '0.35rem',
                 borderRadius: '8px',
-                background: '#fef3c7',
-                color: '#d97706',
+                background: 'var(--brand-amber-light)',
+                color: 'var(--brand-amber)',
                 marginBottom: '0.5rem',
               }}
             >
@@ -356,8 +309,8 @@ export default function LoginPage() {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Admin</div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Métricas & Usuarios</div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>Admin</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Métricas & Usuarios</div>
           </div>
         </div>
 
@@ -369,7 +322,7 @@ export default function LoginPage() {
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#4f46e5',
+              color: 'var(--brand-indigo)',
               fontSize: '0.82rem',
               fontWeight: 600,
               padding: '0.25rem 0.5rem',
@@ -384,9 +337,9 @@ export default function LoginPage() {
             {error && (
               <div
                 style={{
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  color: '#dc2626',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  color: '#ef4444',
                   padding: '0.75rem',
                   borderRadius: '8px',
                   fontSize: '0.82rem',
@@ -403,7 +356,7 @@ export default function LoginPage() {
                   display: 'block',
                   fontSize: '0.82rem',
                   fontWeight: 600,
-                  color: '#334155',
+                  color: 'var(--text-main)',
                   marginBottom: '0.35rem',
                 }}
               >
@@ -425,7 +378,7 @@ export default function LoginPage() {
                   display: 'block',
                   fontSize: '0.82rem',
                   fontWeight: 600,
-                  color: '#334155',
+                  color: 'var(--text-main)',
                   marginBottom: '0.35rem',
                 }}
               >
@@ -447,7 +400,7 @@ export default function LoginPage() {
                   display: 'block',
                   fontSize: '0.82rem',
                   fontWeight: 600,
-                  color: '#334155',
+                  color: 'var(--text-main)',
                   marginBottom: '0.35rem',
                 }}
               >
@@ -471,7 +424,7 @@ export default function LoginPage() {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                background: '#4f46e5',
+                background: 'var(--brand-indigo)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '8px',
@@ -492,7 +445,7 @@ export default function LoginPage() {
           justifyContent: 'space-between',
           padding: '1rem 0.5rem',
           fontSize: '0.78rem',
-          color: '#94a3b8',
+          color: 'var(--text-dim)',
         }}
       >
         <span>AWS EC2 Spring Boot: 54.164.69.142</span>

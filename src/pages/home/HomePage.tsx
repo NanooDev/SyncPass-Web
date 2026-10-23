@@ -46,14 +46,14 @@ export default function HomePage() {
 
         {isAuthenticated ? (
           <div style={{ marginTop: '1.5rem' }}>
-            <p style={{ marginBottom: '1rem', fontWeight: 600, color: '#334155' }}>
-              Sesión iniciada como: <b style={{ color: '#0f172a' }}>{user?.email || 'Usuario'}</b>
+            <p style={{ marginBottom: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+              Sesión iniciada como: <b style={{ color: 'var(--text-main)' }}>{user?.email || 'Usuario'}</b>
               {roles.length > 0 && (
                 <span
                   style={{
                     marginLeft: '0.5rem',
-                    background: '#eef2ff',
-                    color: '#4f46e5',
+                    background: 'var(--brand-indigo-light)',
+                    color: 'var(--brand-indigo)',
                     padding: '3px 10px',
                     borderRadius: '9999px',
                     fontSize: '0.8rem',
@@ -85,21 +85,21 @@ export default function HomePage() {
       {/* 3 Modern Feature Cards */}
       <section className={styles.featureGrid}>
         <article className={styles.featureCard}>
-          <div className={styles.iconWrapper} style={{ background: '#eef2ff', color: '#4f46e5' }}>
+          <div className={styles.iconWrapper} style={{ background: 'var(--brand-indigo-light)', color: 'var(--brand-indigo)' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
           </div>
-          <h2 style={{ fontSize: '1.18rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
+          <h2 style={{ fontSize: '1.18rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
             Arquitectura Offline-First
           </h2>
-          <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
             Diseñado para operar en zonas con conectividad nula o intermitente. La base de datos local SQLite almacena las asistencias y sincroniza automáticamente al reconectar con AWS EC2.
           </p>
         </article>
 
         <article className={styles.featureCard}>
-          <div className={styles.iconWrapper} style={{ background: '#ecfdf5', color: '#059669' }}>
+          <div className={styles.iconWrapper} style={{ background: 'var(--brand-emerald-light)', color: 'var(--brand-emerald)' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="7" height="7" />
               <rect x="14" y="3" width="7" height="7" />
@@ -107,24 +107,24 @@ export default function HomePage() {
               <rect x="14" y="14" width="7" height="7" />
             </svg>
           </div>
-          <h2 style={{ fontSize: '1.18rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
+          <h2 style={{ fontSize: '1.18rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
             Acreditación Rápida con QR
           </h2>
-          <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
             Validación de asistentes en menos de 2 segundos mediante cámara o pase digital en Canvas. Incorpora fallback de contingencia por búsqueda de Cédula de Identidad / RUT.
           </p>
         </article>
 
         <article className={styles.featureCard}>
-          <div className={styles.iconWrapper} style={{ background: '#fffbeb', color: '#d97706' }}>
+          <div className={styles.iconWrapper} style={{ background: 'var(--brand-amber-light)', color: 'var(--brand-amber)' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </div>
-          <h2 style={{ fontSize: '1.18rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
+          <h2 style={{ fontSize: '1.18rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
             Encuestas Inmediatas de 30s
           </h2>
-          <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
             Al confirmar la asistencia, el vecino responde una encuesta de satisfacción directamente en el móvil del voluntario, eliminando la pérdida de fichas en papel y la digitación posterior.
           </p>
         </article>
@@ -133,19 +133,19 @@ export default function HomePage() {
       {/* Role Switcher Demo Banner */}
       <section
         style={{
-          background: '#ffffff',
+          background: 'var(--bg-card)',
           borderRadius: '20px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--border)',
           padding: '2rem',
           textAlign: 'center',
-          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.04)',
+          boxShadow: 'var(--shadow-card)',
           marginBottom: '3rem',
         }}
       >
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.35rem' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
           Simulación Interactiva de Roles (RBAC)
         </h2>
-        <p style={{ fontSize: '0.88rem', color: '#64748b', marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
           Prueba de inmediato la experiencia y permisos específicos de cada actor:
         </p>
 
@@ -156,13 +156,14 @@ export default function HomePage() {
               window.location.href = '/dashboard'
             }}
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               padding: '0.55rem 1rem',
               borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.85rem',
-              color: '#0f172a',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
             }}
           >
             Docente / Coordinador
@@ -173,13 +174,14 @@ export default function HomePage() {
               window.location.href = '/dashboard'
             }}
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               padding: '0.55rem 1rem',
               borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.85rem',
-              color: '#0f172a',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
             }}
           >
             Estudiante Voluntario
@@ -190,13 +192,14 @@ export default function HomePage() {
               window.location.href = '/dashboard'
             }}
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               padding: '0.55rem 1rem',
               borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.85rem',
-              color: '#0f172a',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
             }}
           >
             Beneficiario Comunitario
@@ -207,13 +210,14 @@ export default function HomePage() {
               window.location.href = '/users'
             }}
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              background: 'var(--bg-subtle)',
+              border: '1px solid var(--border)',
               padding: '0.55rem 1rem',
               borderRadius: '10px',
               fontWeight: 700,
               fontSize: '0.85rem',
-              color: '#0f172a',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
             }}
           >
             Administrador General

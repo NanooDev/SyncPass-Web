@@ -354,10 +354,10 @@ export default function DashboardPage() {
                       fontWeight: 600,
                     }}
                   >
-                    <span style={{ color: '#0f172a' }}>
+                    <span style={{ color: 'var(--text-main)' }}>
                       Asistencia: {proj.attendeesCount} / {proj.capacity}
                     </span>
-                    <span style={{ color: percent >= 80 ? '#059669' : '#4f46e5' }}>
+                    <span style={{ color: percent >= 80 ? 'var(--brand-emerald)' : 'var(--brand-indigo)' }}>
                       {percent}% Quórum
                     </span>
                   </div>
@@ -373,11 +373,11 @@ export default function DashboardPage() {
         <section>
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-card)',
               borderRadius: '20px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border)',
               padding: '1.75rem',
-              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+              boxShadow: 'var(--shadow-card)',
               marginBottom: '1.5rem',
             }}
           >
@@ -391,14 +391,14 @@ export default function DashboardPage() {
                 gap: '1rem',
                 paddingBottom: '1.25rem',
                 marginBottom: '1.5rem',
-                borderBottom: '1px solid #e2e8f0',
+                borderBottom: '1px solid var(--border)',
               }}
             >
               <div>
-                <h2 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.25rem' }}>
+                <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
                   Terminal de Acreditación Territorial
                 </h2>
-                <p style={{ fontSize: '0.85rem' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                   Operación en terreno con soporte para zonas sin conexión a internet
                 </p>
               </div>
@@ -407,9 +407,9 @@ export default function DashboardPage() {
                 <button
                   onClick={() => setOfflineMode(!offlineMode)}
                   style={{
-                    background: offlineMode ? '#fef3c7' : '#ecfdf5',
-                    color: offlineMode ? '#92400e' : '#065f46',
-                    border: '1px solid ' + (offlineMode ? '#fde68a' : '#a7f3d0'),
+                    background: offlineMode ? 'var(--brand-amber-light)' : 'var(--brand-emerald-light)',
+                    color: offlineMode ? 'var(--brand-amber)' : 'var(--brand-emerald)',
+                    border: '1px solid ' + (offlineMode ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'),
                     padding: '0.45rem 0.9rem',
                     borderRadius: '10px',
                     fontSize: '0.82rem',
@@ -417,6 +417,7 @@ export default function DashboardPage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.4rem',
+                    cursor: 'pointer',
                   }}
                 >
                   <span
@@ -434,14 +435,15 @@ export default function DashboardPage() {
                   <button
                     onClick={handleSyncNow}
                     style={{
-                      background: '#0f172a',
+                      background: 'var(--brand-indigo)',
                       color: '#ffffff',
                       border: 'none',
                       padding: '0.45rem 0.9rem',
                       borderRadius: '10px',
                       fontSize: '0.82rem',
                       fontWeight: 700,
-                      boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
+                      boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                      cursor: 'pointer',
                     }}
                   >
                     Sincronizar {pendingSyncCount} pendientes
@@ -460,7 +462,7 @@ export default function DashboardPage() {
             >
               {/* Form Manual */}
               <div>
-                <h3 style={{ fontSize: '1rem', color: '#0f172a', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
                   Acreditación Rápida por Cédula / RUT
                 </h3>
                 <form onSubmit={handleAccreditation} style={{ display: 'flex', gap: '0.5rem' }}>
@@ -469,16 +471,25 @@ export default function DashboardPage() {
                     value={manualRut}
                     onChange={(e) => setManualRut(e.target.value)}
                     placeholder="Ej: 19.823.456-7"
-                    style={{ flex: 1 }}
+                    style={{
+                      flex: 1,
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-main)',
+                      padding: '0.65rem 0.9rem',
+                      borderRadius: '8px',
+                    }}
                   />
                   <button
                     type="submit"
                     style={{
-                      background: '#059669',
+                      background: 'var(--brand-emerald)',
                       color: '#fff',
                       border: 'none',
                       padding: '0.65rem 1rem',
                       fontWeight: 700,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
                     }}
                   >
                     Registrar
@@ -492,9 +503,9 @@ export default function DashboardPage() {
                     style={{
                       width: '100%',
                       padding: '0.75rem',
-                      background: '#f8fafc',
-                      color: '#0f172a',
-                      border: '1px dashed #cbd5e1',
+                      background: 'var(--bg-subtle)',
+                      color: 'var(--text-main)',
+                      border: '1px dashed var(--border)',
                       borderRadius: '10px',
                       fontWeight: 600,
                       fontSize: '0.88rem',
@@ -502,14 +513,7 @@ export default function DashboardPage() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '0.5rem',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#4f46e5'
-                      e.currentTarget.style.background = '#eef2ff'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#cbd5e1'
-                      e.currentTarget.style.background = '#f8fafc'
+                      cursor: 'pointer',
                     }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -523,14 +527,14 @@ export default function DashboardPage() {
 
               {/* Registro Reciente */}
               <div>
-                <h3 style={{ fontSize: '1rem', color: '#0f172a', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
                   Acreditaciones Recientes en este Dispositivo
                 </h3>
                 <div
                   style={{
-                    background: '#f8fafc',
+                    background: 'var(--bg-subtle)',
                     borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--border)',
                     padding: '0.5rem 0.75rem',
                     maxHeight: '160px',
                     overflowY: 'auto',
@@ -542,14 +546,14 @@ export default function DashboardPage() {
                       style={{
                         padding: '0.45rem 0',
                         fontSize: '0.82rem',
-                        borderBottom: idx < accreditedList.length - 1 ? '1px solid #f1f5f9' : 'none',
-                        color: '#334155',
+                        borderBottom: idx < accreditedList.length - 1 ? '1px solid var(--border)' : 'none',
+                        color: 'var(--text-muted)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
                       }}
                     >
-                      <span style={{ color: '#059669', fontWeight: 800 }}>✓</span>
+                      <span style={{ color: 'var(--brand-emerald)', fontWeight: 800 }}>✓</span>
                       <span>{item}</span>
                     </div>
                   ))}
@@ -572,11 +576,11 @@ export default function DashboardPage() {
           {/* Pase Digital QR */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-card)',
               borderRadius: '20px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border)',
               padding: '2rem',
-              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+              boxShadow: 'var(--shadow-card)',
               textAlign: 'center',
             }}
           >
@@ -585,8 +589,8 @@ export default function DashboardPage() {
                 display: 'inline-block',
                 padding: '0.25rem 0.75rem',
                 borderRadius: '9999px',
-                background: '#eef2ff',
-                color: '#4f46e5',
+                background: 'var(--brand-indigo-light)',
+                color: 'var(--brand-indigo)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
@@ -596,10 +600,10 @@ export default function DashboardPage() {
             >
               Credencial Digital SyncPass
             </div>
-            <h3 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.25rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
               María González Valenzuela
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
               RUT: 12.345.678-9 · Vecina Titular
             </p>
 
@@ -608,8 +612,8 @@ export default function DashboardPage() {
                 width: '180px',
                 height: '180px',
                 margin: '0 auto 1.25rem auto',
-                background: '#f8fafc',
-                border: '2px dashed #cbd5e1',
+                background: 'var(--bg-subtle)',
+                border: '2px dashed var(--border)',
                 borderRadius: '16px',
                 display: 'flex',
                 alignItems: 'center',
@@ -618,44 +622,44 @@ export default function DashboardPage() {
                 gap: '0.5rem',
               }}
             >
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="1.5">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--brand-indigo)' }}>
                 <rect x="3" y="3" width="7" height="7" />
                 <rect x="14" y="3" width="7" height="7" />
                 <rect x="3" y="14" width="7" height="7" />
                 <rect x="14" y="14" width="7" height="7" />
               </svg>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                 Pase Verificado
               </span>
             </div>
 
-            <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-              Taller asignado: <b>{selectedProject.name}</b>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              Taller asignado: <b style={{ color: 'var(--text-main)' }}>{selectedProject.name}</b>
             </div>
           </div>
 
           {/* Encuesta Inmediata de Satisfacción */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-card)',
               borderRadius: '20px',
-              border: '1px solid #e2e8f0',
+              border: '1px solid var(--border)',
               padding: '2rem',
-              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+              boxShadow: 'var(--shadow-card)',
             }}
           >
-            <h3 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.25rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
               Encuesta Inmediata de Satisfacción
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
               Tu respuesta toma solo 30 segundos y apoya la vinculación territorial
             </p>
 
             {surveySubmitted ? (
               <div
                 style={{
-                  background: '#ecfdf5',
-                  border: '1px solid #a7f3d0',
+                  background: 'var(--brand-emerald-light)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
                   borderRadius: '14px',
                   padding: '2rem 1.5rem',
                   textAlign: 'center',
@@ -666,7 +670,7 @@ export default function DashboardPage() {
                     width: '42px',
                     height: '42px',
                     borderRadius: '50%',
-                    background: '#059669',
+                    background: 'var(--brand-emerald)',
                     color: '#fff',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -678,10 +682,10 @@ export default function DashboardPage() {
                 >
                   ✓
                 </div>
-                <h4 style={{ fontSize: '1.05rem', color: '#065f46', marginBottom: '0.25rem' }}>
+                <h4 style={{ fontSize: '1.05rem', color: 'var(--brand-emerald)', marginBottom: '0.25rem' }}>
                   ¡Muchas gracias por tu valoración!
                 </h4>
-                <p style={{ fontSize: '0.82rem', color: '#047857' }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                   Tu calificación fue registrada y sincronizada en el panel de Duoc UC.
                 </p>
               </div>
@@ -693,7 +697,7 @@ export default function DashboardPage() {
                       display: 'block',
                       fontSize: '0.85rem',
                       fontWeight: 600,
-                      color: '#334155',
+                      color: 'var(--text-main)',
                       marginBottom: '0.5rem',
                     }}
                   >
@@ -708,12 +712,13 @@ export default function DashboardPage() {
                         style={{
                           flex: 1,
                           padding: '0.6rem 0',
-                          background: star <= surveyRating ? '#4f46e5' : '#f8fafc',
-                          color: star <= surveyRating ? '#ffffff' : '#64748b',
-                          border: '1px solid ' + (star <= surveyRating ? '#4f46e5' : '#e2e8f0'),
+                          background: star <= surveyRating ? 'var(--brand-indigo)' : 'var(--bg-subtle)',
+                          color: star <= surveyRating ? '#ffffff' : 'var(--text-muted)',
+                          border: '1px solid ' + (star <= surveyRating ? 'var(--brand-indigo)' : 'var(--border)'),
                           borderRadius: '8px',
                           fontWeight: 700,
                           fontSize: '0.9rem',
+                          cursor: 'pointer',
                         }}
                       >
                         {star} ★
@@ -728,7 +733,7 @@ export default function DashboardPage() {
                       display: 'block',
                       fontSize: '0.85rem',
                       fontWeight: 600,
-                      color: '#334155',
+                      color: 'var(--text-main)',
                       marginBottom: '0.5rem',
                     }}
                   >
@@ -739,7 +744,15 @@ export default function DashboardPage() {
                     value={surveyComment}
                     onChange={(e) => setSurveyComment(e.target.value)}
                     placeholder="El contenido fue muy claro y práctico para aplicarlo en el hogar..."
-                    style={{ width: '100%', boxSizing: 'border-box' }}
+                    style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-main)',
+                      borderRadius: '8px',
+                      padding: '0.65rem',
+                    }}
                   />
                 </div>
 
@@ -748,13 +761,14 @@ export default function DashboardPage() {
                   style={{
                     width: '100%',
                     padding: '0.8rem',
-                    background: '#4f46e5',
+                    background: 'var(--brand-indigo)',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '10px',
                     fontWeight: 700,
                     fontSize: '0.92rem',
-                    boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                    boxShadow: 'var(--shadow-card)',
+                    cursor: 'pointer',
                   }}
                 >
                   Enviar Encuesta
@@ -769,11 +783,11 @@ export default function DashboardPage() {
       {activeRole === ROLES.admin && (
         <section
           style={{
-            background: '#ffffff',
+            background: 'var(--bg-card)',
             borderRadius: '20px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border)',
             padding: '2rem',
-            boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           <div
@@ -785,13 +799,13 @@ export default function DashboardPage() {
             }}
           >
             <div>
-              <h2 style={{ fontSize: '1.25rem', color: '#0f172a' }}>Auditoría y Telemetría Institucional</h2>
-              <p style={{ fontSize: '0.85rem' }}>Estado de la infraestructura cloud y control de acceso</p>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Auditoría y Telemetría Institucional</h2>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Estado de la infraestructura cloud y control de acceso</p>
             </div>
             <Link
               href="/users"
               style={{
-                background: '#0f172a',
+                background: 'var(--brand-indigo)',
                 color: '#fff',
                 padding: '0.55rem 1rem',
                 borderRadius: '8px',
@@ -811,22 +825,22 @@ export default function DashboardPage() {
               gap: '1rem',
             }}
           >
-            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Servidor Cloud</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>AWS EC2 Ubuntu</div>
-              <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>54.164.69.142 · Online</div>
+            <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Servidor Cloud</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>AWS EC2 Ubuntu</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--brand-emerald)', fontWeight: 700 }}>54.164.69.142 · Online</div>
             </div>
 
-            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Identidad Federada</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>AWS Cognito</div>
-              <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>PKCE S256 · Operativo</div>
+            <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Identidad Federada</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>AWS Cognito</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--brand-emerald)', fontWeight: 700 }}>PKCE S256 · Operativo</div>
             </div>
 
-            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Motor de Datos</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>PostgreSQL 16</div>
-              <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 700 }}>mi_base_datos · Conectada</div>
+            <div style={{ padding: '1rem', background: 'var(--bg-subtle)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Motor de Datos</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>PostgreSQL 16</div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--brand-emerald)', fontWeight: 700 }}>mi_base_datos · Conectada</div>
             </div>
           </div>
         </section>
@@ -839,7 +853,7 @@ export default function DashboardPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
+            background: 'rgba(11, 15, 25, 0.75)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
@@ -851,19 +865,20 @@ export default function DashboardPage() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#ffffff',
+              background: 'var(--bg-card)',
               borderRadius: '24px',
+              border: '1px solid var(--border)',
               padding: '2rem',
               maxWidth: '380px',
               width: '100%',
               textAlign: 'center',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              boxShadow: 'var(--shadow-hover)',
             }}
           >
-            <h3 style={{ fontSize: '1.25rem', color: '#0f172a', marginBottom: '0.35rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>
               Pase QR del Taller
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
               {selectedProject.name}
             </p>
 
@@ -872,7 +887,7 @@ export default function DashboardPage() {
                 background: '#ffffff',
                 padding: '1rem',
                 borderRadius: '16px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--border)',
                 display: 'inline-block',
                 marginBottom: '1.25rem',
               }}
@@ -880,7 +895,7 @@ export default function DashboardPage() {
               <canvas ref={canvasRef} width={220} height={220} />
             </div>
 
-            <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '1.25rem' }}>
               Proyecta o imprime este código en la sede comunitaria para acreditación inmediata
             </p>
 
@@ -889,12 +904,13 @@ export default function DashboardPage() {
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                background: '#0f172a',
+                background: 'var(--brand-indigo)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '10px',
                 fontWeight: 700,
                 fontSize: '0.9rem',
+                cursor: 'pointer',
               }}
             >
               Cerrar Pase
