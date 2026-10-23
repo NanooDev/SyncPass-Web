@@ -73,13 +73,14 @@ export default function DashboardPage() {
   const [actionNotice, setActionNotice] = useState<string>('')
   const [showQrModal, setShowQrModal] = useState<boolean>(false)
 
-  // Estados de Notificaciones Push ntfy.sh
+  // Estados de Notificaciones Push ntfy.sh y BFF
   const [pushTargetEmail, setPushTargetEmail] = useState<string>('voluntario.estudiante@duocuc.cl')
   const [pushTitle, setPushTitle] = useState<string>('SyncPass Alerta Territorial')
   const [pushMessage, setPushMessage] = useState<string>('Nuevo taller asignado en sede comunitaria.')
   const [pushStatus, setPushStatus] = useState<string>('')
   const [pushLoading, setPushLoading] = useState<boolean>(false)
   const [pushActiveTopic, setPushActiveTopic] = useState<string>('')
+  const [useBffToggle, setUseBffToggle] = useState<boolean>(true)
 
   useEffect(() => {
     deriveNtfyTopic(pushTargetEmail).then(setPushActiveTopic)
@@ -94,10 +95,12 @@ export default function DashboardPage() {
       title: pushTitle,
       message: pushMessage,
       priority: 'high',
+      useBff: useBffToggle,
     })
     setPushLoading(false)
     if (res.success) {
-      setPushStatus(`Notificación push emitida exitosamente al tópico ${res.topic}`)
+      const canal = res.source === 'bff' ? 'BFF Spring Boot /api/notificar' : 'ntfy.sh directo'
+      setPushStatus(`Notificación push emitida exitosamente (${canal}) al tópico ${res.topic}`)
     } else {
       setPushStatus(`Error al emitir notificación: ${res.error}`)
     }
@@ -972,6 +975,19 @@ export default function DashboardPage() {
                   fontSize: '0.88rem',
                 }}
               />
+            </div>
+
+            <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input
+                type="checkbox"
+                id="useBffCheck"
+                checked={useBffToggle}
+                onChange={(e) => setUseBffToggle(e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <label htmlFor="useBffCheck" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                Enrutar a través del BFF Spring Boot (<code>POST /api/notificar</code>) con fallback automático a ntfy.sh
+              </label>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
