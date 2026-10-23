@@ -54,13 +54,14 @@ function getInitialAuth(): { user: SyncPassUser | null; token: string | null } {
           'usuario@cognito.aws'
 
         const cognitoGroups = (payload?.['cognito:groups'] as string[]) || []
-        const mappedRoles: Role[] = cognitoGroups.includes('admin')
-          ? [ROLES.admin]
-          : cognitoGroups.includes('volunteer')
-            ? [ROLES.volunteer]
-            : cognitoGroups.includes('attendee')
-              ? [ROLES.attendee]
-              : [ROLES.coordinator]
+        const mappedRoles: Role[] =
+          cognitoGroups.includes('admin') || cognitoGroups.includes('administrador')
+            ? [ROLES.admin]
+            : cognitoGroups.includes('volunteer') || cognitoGroups.includes('voluntario')
+              ? [ROLES.volunteer]
+              : cognitoGroups.includes('attendee') || cognitoGroups.includes('beneficiario')
+                ? [ROLES.attendee]
+                : [ROLES.coordinator]
 
         const cognitoUser: SyncPassUser = {
           id: (payload?.sub as string) || 'cognito-user',
@@ -133,13 +134,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             const cognitoGroups =
               (payload?.['cognito:groups'] as string[]) || []
-            const mappedRoles: Role[] = cognitoGroups.includes('admin')
-              ? [ROLES.admin]
-              : cognitoGroups.includes('volunteer')
-                ? [ROLES.volunteer]
-                : cognitoGroups.includes('attendee')
-                  ? [ROLES.attendee]
-                  : [ROLES.coordinator]
+            const mappedRoles: Role[] =
+              cognitoGroups.includes('admin') || cognitoGroups.includes('administrador')
+                ? [ROLES.admin]
+                : cognitoGroups.includes('volunteer') || cognitoGroups.includes('voluntario')
+                  ? [ROLES.volunteer]
+                  : cognitoGroups.includes('attendee') || cognitoGroups.includes('beneficiario')
+                    ? [ROLES.attendee]
+                    : [ROLES.coordinator]
 
             const cognitoUser: SyncPassUser = {
               id: (payload?.sub as string) || 'cognito-user',
