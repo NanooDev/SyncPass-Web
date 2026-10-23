@@ -84,7 +84,7 @@ export default function HomePage() {
               Ingresar al Sistema
             </Link>
             <button onClick={handleCognitoLogin} title="Iniciar con AWS Cognito">
-              ☁️ AWS Cognito
+              AWS Cognito (SSO)
             </button>
           </div>
         )}
@@ -107,7 +107,22 @@ export default function HomePage() {
             background: 'var(--code-bg)',
           }}
         >
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>📍</div>
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '6px',
+              background: '#e0e7ff',
+              color: '#1e3a8a',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: '0.75rem',
+            }}
+          >
+            Modo Local
+          </div>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
             Operación Territorial Offline
           </h2>
@@ -126,7 +141,22 @@ export default function HomePage() {
             background: 'var(--code-bg)',
           }}
         >
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>⚡</div>
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '6px',
+              background: '#d1fae5',
+              color: '#065f46',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: '0.75rem',
+            }}
+          >
+            Acreditación 2D
+          </div>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
             Acreditación Rápida con QR
           </h2>
@@ -145,7 +175,22 @@ export default function HomePage() {
             background: 'var(--code-bg)',
           }}
         >
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>⭐</div>
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '6px',
+              background: '#fef3c7',
+              color: '#92400e',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginBottom: '0.75rem',
+            }}
+          >
+            Feedback
+          </div>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
             Encuestas Inmediatas
           </h2>
@@ -193,7 +238,7 @@ export default function HomePage() {
               window.location.href = '/dashboard'
             }}
           >
-            🎓 Docente / Coordinador
+            Docente / Coordinador
           </button>
           <button
             onClick={() => {
@@ -201,7 +246,7 @@ export default function HomePage() {
               window.location.href = '/dashboard'
             }}
           >
-            🤝 Estudiante Voluntario
+            Estudiante Voluntario
           </button>
           <button
             onClick={() => {
@@ -209,7 +254,7 @@ export default function HomePage() {
               window.location.href = '/dashboard'
             }}
           >
-            🏡 Beneficiario Comunitario
+            Beneficiario Comunitario
           </button>
           <button
             onClick={() => {
@@ -217,7 +262,7 @@ export default function HomePage() {
               window.location.href = '/users'
             }}
           >
-            🛡️ Administrador General
+            Administrador General
           </button>
         </div>
       </section>

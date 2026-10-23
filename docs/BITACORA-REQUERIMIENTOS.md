@@ -1,13 +1,13 @@
 # Bitácora de Requerimientos y Planes de Implementación
 
 > **Proyecto:** SyncPass (Plataforma Web Fullstack)  
-> **Alumno:** Mariano Acevedo ([@NanooDev](https://github.com/NanooDev))  
+> **Integrantes (Dupla):** Mariano Acevedo (@NanooDev) y Álvaro León (alv.leon@duocuc.cl)  
 > **Institución:** Duoc UC  
 > **Fecha de Inicio:** Octubre 2026
 
 ---
 
-## 📋 1. Registro de Solicitudes y Requerimientos del Usuario
+## 1. Registro de Solicitudes y Requerimientos del Usuario
 
 ### Requerimiento 1: Aislamiento y Protección del Proyecto Anterior (MotoShop)
 - **Solicitud del usuario:**
@@ -67,17 +67,17 @@
 
 ---
 
-## 🛠️ 2. Resumen de Ejecución Técnica
+## 2. Resumen de Ejecución Técnica
 
 | Hito | Estado | Observación |
 |---|---|---|
-| Creación de directorio `C:\dev\web\syncpass-web` | ✅ Completado | Aislado de `proyecto-react-fs2` |
-| Inicialización de Git | ✅ Completado | `git init` ejecutado |
-| Instalación de dependencias | ✅ Completado | React 19, TypeScript, Vite, Tailwind CSS v4, Wouter |
-| Configuración AWS Cognito | ✅ Completado | Parámetros cargados en `src/config/auth.ts` |
-| Autenticación Contextual y Hooks | ✅ Completado | `AuthProvider`, `useAuth`, `useRoles`, `RequireAuth` |
-| Creación de Vistas y Rutas | ✅ Completado | `/`, `/login`, `/dashboard`, `/users` |
-| Pruebas Unitarias (Vitest) | ✅ Completado | 14 de 14 tests superados exitosamente |
-| Análisis de Calidad (Oxlint) | ✅ Completado | 0 errores y 0 advertencias |
-| Compilación de Producción (Vite) | ✅ Completado | Build generado en `dist/` en < 300ms |
-| Documentación del Repositorio | ✅ Completado | `README.md`, `BITACORA-REQUERIMIENTOS.md`, `CASO-SYNCPASS.md` |
+| Creación de directorio `C:\dev\web\syncpass-web` | Completado | Aislado de `proyecto-react-fs2` |
+| Inicialización de Git | Completado | `git init` ejecutado |
+| Instalación de dependencias | Completado | React 19, TypeScript, Vite, Tailwind CSS v4, Wouter |
+| Configuración AWS Cognito | Completado | Parámetros cargados en `src/config/auth.ts` |
+| Autenticación Contextual y Hooks | Completado | `AuthProvider`, `useAuth`, `useRoles`, `RequireAuth` |
+| Creación de Vistas y Rutas | Completado | `/`, `/login`, `/dashboard`, `/users` |
+| Pruebas Unitarias (Vitest) | Completado | 14 de 14 tests superados exitosamente |
+| Análisis de Calidad (Oxlint) | Completado | 0 errores y 0 advertencias |
+| Compilación de Producción (Vite) | Completado | Build generado en `dist/` en < 300ms |
+| Documentación del Repositorio | Completado | `README.md`, `BITACORA-REQUERIMIENTOS.md`, `CASO-SYNCPASS.md` |

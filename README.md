@@ -1,29 +1,32 @@
 # SyncPass Web — Sistema de Gestión y Acreditación Comunitaria
 
 > **Asignatura:** Desarrollo Fullstack / Vinculación con el Medio (Duoc UC)  
-> **Autor:** Mariano Acevedo ([@NanooDev](https://github.com/NanooDev))  
+> **Integrantes (Dupla de Trabajo):**  
+> - Mariano Acevedo ([@NanooDev](https://github.com/NanooDev) · `marianoacevedo1809@gmail.com`)  
+> - Álvaro León (`alv.leon@duocuc.cl`)  
 > **Versión:** 1.0.0
 
 ---
 
-## 📌 1. Descripción del Proyecto
+## 1. Descripción del Proyecto
 
 **SyncPass Web** es el portal de administración, monitoreo y acreditación territorial del ecosistema **SyncPass**. Diseñado especialmente para iniciativas de **Vinculación con el Medio de Duoc UC**, permite coordinar talleres, operativos comunitarios y encuestas de satisfacción en juntas de vecinos, colegios y sedes sociales con soporte para operaciones sin conexión a internet (**Offline-First**).
 
 ---
 
-## 📚 2. Documentación del Proyecto (`docs/`)
+## 2. Documentación del Proyecto (`docs/`)
 
 Toda la documentación técnica y bitácoras de desarrollo se encuentran centralizadas en la carpeta [`docs/`](./docs/):
 
-- 📖 [**`docs/CASO-SYNCPASS.md`**](./docs/CASO-SYNCPASS.md): Especificación del caso territorial Duoc UC, problemática y modelo de solución.
-- 📋 [**`docs/BITACORA-REQUERIMIENTOS.md`**](./docs/BITACORA-REQUERIMIENTOS.md): Registro cronológico de requerimientos y decisiones técnicas.
-- ☁️ [**`docs/03-GUIA-AWS-COGNITO.md`**](./docs/03-GUIA-AWS-COGNITO.md): Guía de configuración y resolución del error *Invalid request* (flujo OAuth PKCE).
-- 🗓️ [**`docs/04-PLAN-DE-TRABAJO.md`**](./docs/04-PLAN-DE-TRABAJO.md): Estado de las fases del proyecto y checklist de entrega.
+- [**`docs/CASO-SYNCPASS.md`**](./docs/CASO-SYNCPASS.md): Especificación del caso territorial Duoc UC, problemática y modelo de solución.
+- [**`docs/BITACORA-REQUERIMIENTOS.md`**](./docs/BITACORA-REQUERIMIENTOS.md): Registro cronológico de requerimientos y decisiones técnicas.
+- [**`docs/03-GUIA-AWS-COGNITO.md`**](./docs/03-GUIA-AWS-COGNITO.md): Guía de configuración y resolución del flujo OAuth PKCE.
+- [**`docs/04-PLAN-DE-TRABAJO.md`**](./docs/04-PLAN-DE-TRABAJO.md): Estado de las fases del proyecto y checklist de entrega.
+- [**`docs/07_guia_colaboracion_dupla_git.md`**](./docs/07_guia_colaboracion_dupla_git.md): Guía de colaboración en dupla, división de tareas y comandos de autoría Git para Mariano y Álvaro.
 
 ---
 
-## 🚀 3. Stack Tecnológico
+## 3. Stack Tecnológico
 
 - **Frontend Core:** [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - **Empaquetador y Dev Server:** [Vite 8](https://vitejs.dev/)
@@ -34,7 +37,7 @@ Toda la documentación técnica y bitácoras de desarrollo se encuentran central
 
 ---
 
-## 👥 4. Matriz de Roles y Permisos (RBAC)
+## 4. Matriz de Roles y Permisos (RBAC)
 
 El sistema implementa un control de acceso basado en roles con 4 perfiles diferenciados:
 
@@ -58,7 +61,7 @@ El sistema implementa un control de acceso basado en roles con 4 perfiles difere
 
 ---
 
-## 💻 6. Puesta en Marcha Local
+## 6. Puesta en Marcha Local
 
 ### Prerrequisitos:
 - Node.js >= 18.x
@@ -86,7 +89,7 @@ npm run lint       # Analiza el código con Oxlint (0 errores, 0 warnings)
 
 ---
 
-## 📂 7. Estructura de Directorios
+## 7. Estructura de Directorios
 
 ```text
 syncpass-web/
@@ -94,7 +97,8 @@ syncpass-web/
 │   ├── CASO-SYNCPASS.md
 │   ├── BITACORA-REQUERIMIENTOS.md
 │   ├── 03-GUIA-AWS-COGNITO.md
-│   └── 04-PLAN-DE-TRABAJO.md
+│   ├── 04-PLAN-DE-TRABAJO.md
+│   └── 07_guia_colaboracion_dupla_git.md
 ├── public/                 # Archivos estáticos y favicons
 ├── src/
 │   ├── assets/             # Recursos gráficos e imágenes
@@ -113,12 +117,12 @@ syncpass-web/
 
 ---
 
-## 🛡️ 8. Modo de Evaluación y Demostración Rápida
+## 8. Modo de Evaluación y Demostración Rápida
 
 Para facilitar la revisión por parte de los docentes evaluadores sin requerir credenciales en AWS:
 1. Accede a la página de [Iniciar Sesión](/login).
 2. En la sección **Acceso Rápido de Prueba (Evaluación)**, haz clic directamente en cualquiera de los botones:
-   - 🎓 **Docente:** Visualiza gestión de proyectos, cupos y generación de QR.
-   - 🤝 **Voluntario:** Visualiza acreditación en terreno, registro manual y simulación de escáner QR.
-   - 🏡 **Beneficiario:** Visualiza pase digital QR y encuesta de satisfacción.
-   - 🛡️ **Admin:** Accede a métricas institucionales y `/users`.
+   - **Docente:** Visualiza gestión de proyectos, cupos y generación de QR.
+   - **Voluntario:** Visualiza acreditación en terreno, registro manual y simulación de escáner QR.
+   - **Beneficiario:** Visualiza pase digital QR y encuesta de satisfacción.
+   - **Admin:** Accede a métricas institucionales y `/users`.

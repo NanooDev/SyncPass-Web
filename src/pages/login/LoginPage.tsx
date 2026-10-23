@@ -50,13 +50,14 @@ export default function LoginPage() {
           <div
             style={{
               display: 'inline-flex',
-              padding: '0.75rem',
-              borderRadius: '12px',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '8px',
               background: 'var(--accent-bg)',
               color: 'var(--accent)',
               fontWeight: 800,
-              fontSize: '1.5rem',
+              fontSize: '1.4rem',
               marginBottom: '1rem',
+              letterSpacing: '-0.5px',
             }}
           >
             SyncPass
@@ -82,17 +83,16 @@ export default function LoginPage() {
               gap: '0.75rem',
               padding: '0.85rem',
               borderRadius: '10px',
-              border: '1px solid #f59e0b',
-              background: '#fef3c7',
-              color: '#92400e',
+              border: '1px solid #2563eb',
+              background: '#eff6ff',
+              color: '#1e3a8a',
               fontWeight: 700,
               fontSize: '0.95rem',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
           >
-            <span>☁️</span>
-            <span>Iniciar sesión con AWS Cognito (Hosted UI)</span>
+            <span>Iniciar sesión con Amazon Cognito</span>
           </button>
           <p
             style={{
@@ -117,7 +117,7 @@ export default function LoginPage() {
           }}
         >
           <hr style={{ flex: 1, borderColor: 'var(--border)' }} />
-          <span>O ingresa con credenciales</span>
+          <span>O ingresa con credenciales institucionales</span>
           <hr style={{ flex: 1, borderColor: 'var(--border)' }} />
         </div>
 
@@ -235,7 +235,7 @@ export default function LoginPage() {
               <option value={ROLES.coordinator}>Docente / Coordinador</option>
               <option value={ROLES.volunteer}>Estudiante Voluntario</option>
               <option value={ROLES.attendee}>Beneficiario Comunitario</option>
-              <option value={ROLES.admin}>Administrador</option>
+              <option value={ROLES.admin}>Administrador General</option>
             </select>
           </div>
 
@@ -276,7 +276,7 @@ export default function LoginPage() {
               letterSpacing: '0.05em',
             }}
           >
-            Acceso Rápido de Prueba (Evaluación)
+            Acceso Rápido por Rol (Evaluación)
           </p>
           <div
             style={{
@@ -288,34 +288,34 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => handleQuickRole(ROLES.coordinator)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'left' }}
+              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
               title="Entrar como Docente Coordinador"
             >
-              🎓 <b>Docente</b>
+              <b>Docente</b>
             </button>
             <button
               type="button"
               onClick={() => handleQuickRole(ROLES.volunteer)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'left' }}
+              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
               title="Entrar como Estudiante Voluntario"
             >
-              🤝 <b>Voluntario</b>
+              <b>Voluntario</b>
             </button>
             <button
               type="button"
               onClick={() => handleQuickRole(ROLES.attendee)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'left' }}
+              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
               title="Entrar como Beneficiario"
             >
-              🏡 <b>Beneficiario</b>
+              <b>Beneficiario</b>
             </button>
             <button
               type="button"
               onClick={() => handleQuickRole(ROLES.admin)}
-              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'left' }}
+              style={{ fontSize: '0.8rem', padding: '0.5rem', textAlign: 'center' }}
               title="Entrar como Administrador"
             >
-              🛡️ <b>Admin</b>
+              <b>Admin</b>
             </button>
           </div>
         </div>

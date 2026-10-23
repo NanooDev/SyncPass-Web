@@ -2,12 +2,13 @@
 
 > **Institución:** Duoc UC  
 > **Área:** Escuela de Informática y Telecomunicaciones  
+> **Integrantes (Dupla):** Mariano Acevedo (@NanooDev) y Álvaro León (alv.leon@duocuc.cl)  
 > **Ecosistema:** Vinculación con el Medio • Innovación Social  
 > **Sistema:** SyncPass (Plataforma Territorial de Acreditación y Evaluación)
 
 ---
 
-## 📖 1. Contexto y Problemática
+## 1. Contexto y Problemática
 
 Las instituciones de educación superior como **Duoc UC** realizan periódicamente actividades de **Vinculación con el Medio** en diversos sectores de la comunidad (juntas de vecinos, escuelas públicas, centros comunitarios periféricos). 
 
@@ -24,7 +25,7 @@ Estas actividades incluyen:
 
 ---
 
-## 🎯 2. La Solución SyncPass
+## 2. La Solución SyncPass
 
 **SyncPass** es una solución integral compuesta por:
 1. **Aplicación Móvil Android (Kotlin):** Utilizada por los estudiantes voluntarios en terreno para escanear pases digitales QR, registrar asistencias de forma offline y levantar encuestas de 30 segundos.
@@ -33,7 +34,7 @@ Estas actividades incluyen:
 
 ---
 
-## 🎭 3. Actores del Sistema (4 Roles)
+## 3. Actores del Sistema (4 Roles)
 
 ```mermaid
 graph TD

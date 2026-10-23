@@ -1,12 +1,12 @@
 # Plan de Trabajo y Bitácora de Desarrollo — SyncPass Web
 
-> **Alumno:** Mariano Acevedo ([@NanooDev](https://github.com/NanooDev))  
+> **Integrantes (Dupla):** Mariano Acevedo (@NanooDev) y Álvaro León (alv.leon@duocuc.cl)  
 > **Proyecto:** SyncPass (Plataforma Territorial de Acreditación)  
 > **Módulo:** Frontend Fullstack (React 19 + TypeScript + Vite)
 
 ---
 
-## 📅 Hitos del Plan de Trabajo
+## Hitos del Plan de Trabajo
 
 ### Fase 1: Aislamiento de Entorno y Arquitectura
 - [x] Mantener `proyecto-react-fs2` intacto (respaldo para Evaluación 1 / MotoShop).

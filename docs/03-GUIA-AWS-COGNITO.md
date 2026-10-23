@@ -1,12 +1,12 @@
 # Guía de Integración AWS Cognito — SyncPass Web
 
-> **Autor:** Mariano Acevedo ([@NanooDev](https://github.com/NanooDev))  
+> **Integrantes (Dupla):** Mariano Acevedo (@NanooDev) y Álvaro León (alv.leon@duocuc.cl)  
 > **Servicio Cloud:** Amazon Web Services (AWS) — Amazon Cognito User Pools  
 > **Estado:** Configurado y Operativo
 
 ---
 
-## 📌 1. Parámetros del User Pool
+## 1. Parámetros del User Pool
 
 - **Región:** `us-east-1` (US East - N. Virginia)
 - **User Pool ID:** `us-east-1_RlB8Ft9Z2`
@@ -18,7 +18,7 @@
 
 ---
 
-## 🔍 2. Solución al Error "Invalid request" en AWS Cognito
+## 2. Solución al Error "Invalid request" en AWS Cognito
 
 ### Causa del error:
 Al presionar el botón de inicio de sesión con Cognito, la pantalla mostraba:
