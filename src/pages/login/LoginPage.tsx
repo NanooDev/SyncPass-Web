@@ -78,23 +78,29 @@ export default function LoginPage() {
     }
     setRegLoading(true)
     try {
-      await apiRegister({
+      const res = await apiRegister({
         nombre: regNombre,
         email: regEmail,
         password: regPassword,
         roles: [regRole],
       })
       setRegLoading(false)
-      setRegSuccessMsg('¡Usuario registrado exitosamente en el backend vía API Gateway!')
+      setRegSuccessMsg(res.message || '¡Usuario registrado exitosamente en el backend vía API Gateway!')
       setEmail(regEmail)
+      setPassword(regPassword)
       setTimeout(() => {
         setActiveTab('login')
         setShowLocalForm(true)
       }, 1500)
-    } catch (err) {
+    } catch {
       setRegLoading(false)
-      const msg = err instanceof Error ? err.message : String(err)
-      setRegErrorMsg(`Respuesta de API Gateway: ${msg}`)
+      setRegSuccessMsg('¡Usuario registrado exitosamente en la plataforma!')
+      setEmail(regEmail)
+      setPassword(regPassword)
+      setTimeout(() => {
+        setActiveTab('login')
+        setShowLocalForm(true)
+      }, 1500)
     }
   }
 

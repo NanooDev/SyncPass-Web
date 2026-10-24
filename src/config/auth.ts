@@ -40,9 +40,12 @@ export const ROLES_CLAIM: string =
 export const AUTH0_AUDIENCE: string =
   env.VITE_AUTH0_AUDIENCE ?? 'https://sync-pass-api'
 
-// URL del BFF
+// URL del BFF / API Gateway (HTTPS Seguro)
+const rawBffUrl = env.VITE_BFF_URL ?? 'https://5xvspck6jb.execute-api.us-east-1.amazonaws.com'
 export const BFF_URL: string =
-  env.VITE_BFF_URL ?? 'https://bff.claudioviajando.com'
+  rawBffUrl.includes('54.164.69.142') || !rawBffUrl.startsWith('http')
+    ? 'https://5xvspck6jb.execute-api.us-east-1.amazonaws.com'
+    : rawBffUrl
 
 export interface BffUser {
   id: string
