@@ -55,6 +55,22 @@ export default function LoginPage() {
     }
     setLoading(true)
     try {
+      // Guardar usuario en directorio local para que aparezca en /users
+      try {
+        const raw = localStorage.getItem('syncpass_registered_users')
+        const storedUsers = raw ? JSON.parse(raw) : []
+        if (!storedUsers.some((u: { email: string }) => u.email.toLowerCase() === email.toLowerCase())) {
+          storedUsers.unshift({
+            id: `usr-${Date.now()}`,
+            email: email,
+            role: selectedRole,
+          })
+          localStorage.setItem('syncpass_registered_users', JSON.stringify(storedUsers))
+        }
+      } catch {
+        // Fallback silencioso
+      }
+
       // Intentar login real a través del API Gateway (/api/auth/login)
       await apiLogin(email, password)
       setLoading(false)
@@ -78,6 +94,23 @@ export default function LoginPage() {
     }
     setRegLoading(true)
     try {
+      // Guardar usuario registrado en directorio local persistente
+      try {
+        const raw = localStorage.getItem('syncpass_registered_users')
+        const storedUsers = raw ? JSON.parse(raw) : []
+        const updated = [
+          {
+            id: `usr-${Date.now()}`,
+            email: regEmail,
+            role: regRole,
+          },
+          ...storedUsers.filter((u: { email: string }) => u.email.toLowerCase() !== regEmail.toLowerCase()),
+        ]
+        localStorage.setItem('syncpass_registered_users', JSON.stringify(updated))
+      } catch {
+        // Fallback
+      }
+
       const res = await apiRegister({
         nombre: regNombre,
         email: regEmail,

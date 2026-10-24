@@ -13,6 +13,26 @@ const DEMO_USERS: BffUser[] = [
   { id: 'usr-4', email: 'maria.gonzalez@comunidad.cl', role: 'attendee' },
 ]
 
+function getStoredUsers(): BffUser[] {
+  try {
+    const raw = localStorage.getItem('syncpass_registered_users')
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function getCombinedUsers(): BffUser[] {
+  const stored = getStoredUsers()
+  const combined = [...stored]
+  DEMO_USERS.forEach((du) => {
+    if (!combined.some((u) => u.email.toLowerCase() === du.email.toLowerCase())) {
+      combined.push(du)
+    }
+  })
+  return combined
+}
+
 export default function UsersPage() {
   useDocumentTitle('Usuarios | Sync Pass')
   const { getAccessTokenSilently, loginWithRedirect } = useAuth0()
@@ -47,7 +67,7 @@ export default function UsersPage() {
 
         if (isLoginRequired) {
           if (alive) {
-            setUsers(DEMO_USERS)
+            setUsers(getCombinedUsers())
           }
           return
         }
@@ -87,7 +107,7 @@ export default function UsersPage() {
             <button
               onClick={() => {
                 setError(null)
-                setUsers(DEMO_USERS)
+                setUsers(getCombinedUsers())
               }}
               style={{
                 fontSize: '0.85rem',
