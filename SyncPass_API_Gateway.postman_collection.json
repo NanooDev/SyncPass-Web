@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "SyncPass API Gateway (AWS EC2 + Cognito + ntfy)",
+    "_postman_id": "syncpass-api-gateway-evaluacion",
+    "description": "Coleccion de peticiones para demostracion tecnica en Postman: API Gateway HTTPS, rutas publicas y protegidas, autenticacion y notificaciones push.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://5xvspck6jb.execute-api.us-east-1.amazonaws.com"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check (Ruta Publica - 200 OK)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Verifica que el API Gateway enruta hacia el backend EC2 en Spring Boot. No requiere token JWT."
+      }
+    },
+    {
+      "name": "2. Login de Usuario (Ruta Publica - POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"docente.dev@gmail.com\",\n  \"password\": \"Password123.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        },
+        "description": "Endpoint publico de login. Demuestra que no exige JWT previo para iniciar sesion."
+      }
+    },
+    {
+      "name": "3. Registro de Usuario (Ruta Publica - POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Mariano Acevedo\",\n  \"email\": \"mariano.acevedo@duocuc.cl\",\n  \"password\": \"Password123.\",\n  \"roles\": [\"coordinator\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/registro",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "registro"]
+        },
+        "description": "Endpoint de registro de usuario consumido a traves de API Gateway hacia EC2."
+      }
+    },
+    {
+      "name": "4. Ruta Protegida sin Token (Demostracion 401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users"]
+        },
+        "description": "Demuestra la politica JWT: al consultar una ruta privada sin cabecera Authorization, responde 401 Unauthorized."
+      }
+    },
+    {
+      "name": "5. Consultar Topico de Notificacion (GET)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/notificar/topic/docente.dev@gmail.com",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "notificar", "topic", "docente.dev@gmail.com"]
+        },
+        "description": "Consulta el topico derivado por SHA-256 en el backend."
+      }
+    },
+    {
+      "name": "6. Emitir Notificacion Push Directa a Celular (ntfy.sh)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Title",
+            "value": "Alerta desde Postman"
+          },
+          {
+            "key": "Priority",
+            "value": "high"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "Notificacion push enviada en vivo desde Postman hacia la aplicacion Android de SyncPass."
+        },
+        "url": {
+          "raw": "https://ntfy.sh/app_vibe_8e63635b0c5401804b4b",
+          "protocol": "https",
+          "host": ["ntfy", "sh"],
+          "path": ["app_vibe_8e63635b0c5401804b4b"]
+        },
+        "description": "Emite una notificacion que activa inmediatamente el servicio en segundo plano de la app Android."
+      }
+    }
+  ]
+}

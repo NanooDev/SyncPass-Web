@@ -14,8 +14,10 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.28.2",
     "@tailwindcss/vite": "^4.3.3",
+    "oidc-client-ts": "^3.5.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-oidc-context": "^3.3.1",
     "tailwindcss": "^4.3.3",
     "wouter": "^3.13.0"
   },

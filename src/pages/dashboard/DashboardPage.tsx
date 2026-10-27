@@ -57,7 +57,14 @@ export default function DashboardPage() {
   const activeRole: Role = (roles[0] as Role) || ROLES.coordinator
   const localAuth = useAuth()
 
-  const [projects] = useState<CommunityProject[]>(INITIAL_PROJECTS)
+  const [projects, setProjects] = useState<CommunityProject[]>(() => {
+    try {
+      const saved = localStorage.getItem('syncpass_projects')
+      return saved ? JSON.parse(saved) : INITIAL_PROJECTS
+    } catch {
+      return INITIAL_PROJECTS
+    }
+  })
   const [selectedProjectId, setSelectedProjectId] = useState<string>('p1')
   const [offlineMode, setOfflineMode] = useState<boolean>(false)
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(3)
@@ -72,6 +79,101 @@ export default function DashboardPage() {
   const [surveySubmitted, setSurveySubmitted] = useState<boolean>(false)
   const [actionNotice, setActionNotice] = useState<string>('')
   const [showQrModal, setShowQrModal] = useState<boolean>(false)
+
+  // Estados del Mantenedor CRUD de Proyectos Comunitarios
+  const [showProjectModal, setShowProjectModal] = useState<boolean>(false)
+  const [editingProject, setEditingProject] = useState<CommunityProject | null>(null)
+  const [formName, setFormName] = useState<string>('')
+  const [formLocation, setFormLocation] = useState<string>('')
+  const [formDate, setFormDate] = useState<string>('')
+  const [formCapacity, setFormCapacity] = useState<number>(30)
+  const [formStatus, setFormStatus] = useState<'Activo' | 'En curso' | 'Finalizado'>('Activo')
+
+  const saveProjects = (newProjects: CommunityProject[]) => {
+    setProjects(newProjects)
+    try {
+      localStorage.setItem('syncpass_projects', JSON.stringify(newProjects))
+    } catch {
+      // Fallback
+    }
+  }
+
+  const openCreateModal = () => {
+    setEditingProject(null)
+    setFormName('')
+    setFormLocation('')
+    setFormDate('Hoy, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' hrs')
+    setFormCapacity(30)
+    setFormStatus('Activo')
+    setShowProjectModal(true)
+  }
+
+  const openEditModal = (proj: CommunityProject, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingProject(proj)
+    setFormName(proj.name)
+    setFormLocation(proj.location)
+    setFormDate(proj.date)
+    setFormCapacity(proj.capacity)
+    setFormStatus(proj.status)
+    setShowProjectModal(true)
+  }
+
+  const handleDeleteProject = (projId: string, projName: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (window.confirm(`¿Confirmas eliminar la iniciativa territorial "${projName}"?`)) {
+      const updated = projects.filter((p) => p.id !== projId)
+      saveProjects(updated)
+      setActionNotice(`Iniciativa "${projName}" eliminada correctamente del mantenedor.`)
+      setTimeout(() => setActionNotice(''), 3500)
+    }
+  }
+
+  const handleSaveProject = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formName.trim() || !formLocation.trim()) return
+
+    if (editingProject) {
+      const updated = projects.map((p) =>
+        p.id === editingProject.id
+          ? {
+              ...p,
+              name: formName.trim(),
+              location: formLocation.trim(),
+              date: formDate.trim(),
+              capacity: formCapacity,
+              status: formStatus,
+            }
+          : p
+      )
+      saveProjects(updated)
+      setActionNotice(`Iniciativa "${formName.trim()}" actualizada exitosamente en el mantenedor.`)
+    } else {
+      const newProj: CommunityProject = {
+        id: `p-${Date.now()}`,
+        name: formName.trim(),
+        location: formLocation.trim(),
+        date: formDate.trim(),
+        attendeesCount: 0,
+        capacity: formCapacity,
+        status: formStatus,
+        coordinatorName: localAuth.user?.name || 'Prof. Mariano Acevedo',
+      }
+      saveProjects([newProj, ...projects])
+      setSelectedProjectId(newProj.id)
+      setActionNotice(`Iniciativa "${formName.trim()}" creada en el mantenedor CRUD y lista para terreno.`)
+      // Notificación push automática a territorio
+      sendPushNotification({
+        email: pushTargetEmail,
+        title: 'Nueva Iniciativa SyncPass',
+        message: `Se ha creado el taller: ${formName.trim()} en ${formLocation.trim()}`,
+        priority: 'high',
+        useBff: false,
+      }).catch(() => {})
+    }
+    setShowProjectModal(false)
+    setTimeout(() => setActionNotice(''), 3500)
+  }
 
   // Estados de Notificaciones Push ntfy.sh y BFF
   const [pushTargetEmail, setPushTargetEmail] = useState<string>('voluntario.estudiante@duocuc.cl')
@@ -315,30 +417,56 @@ export default function DashboardPage() {
               <h2 style={{ fontSize: '1.25rem', color: '#0f172a' }}>Talleres Comunitarios en Curso</h2>
               <p style={{ fontSize: '0.85rem' }}>Supervisión de cupos, quórum y acreditación en terreno</p>
             </div>
-            <button
-              onClick={() => setShowQrModal(true)}
-              style={{
-                background: '#4f46e5',
-                color: '#fff',
-                border: 'none',
-                padding: '0.6rem 1.1rem',
-                borderRadius: '10px',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-              </svg>
-              <span>Generar Pase QR del Taller</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={openCreateModal}
+                style={{
+                  background: 'var(--brand-emerald, #10b981)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '0.6rem 1.1rem',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>+ Nueva Iniciativa (CRUD)</span>
+              </button>
+              <button
+                onClick={() => setShowQrModal(true)}
+                style={{
+                  background: '#4f46e5',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '0.6rem 1.1rem',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+                <span>Generar Pase QR del Taller</span>
+              </button>
+            </div>
           </div>
 
           <div className={styles.projectGrid}>
@@ -394,6 +522,52 @@ export default function DashboardPage() {
                     <span style={{ color: percent >= 80 ? 'var(--brand-emerald)' : 'var(--brand-indigo)' }}>
                       {percent}% Quórum
                     </span>
+                  </div>
+
+                  {/* Acciones CRUD del Mantenedor */}
+                  <div
+                    style={{
+                      marginTop: '0.85rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid var(--border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <button
+                      onClick={(e) => openEditModal(proj, e)}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-main)',
+                        padding: '0.3rem 0.65rem',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                      title="Editar iniciativa"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteProject(proj.id, proj.name, e)}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        color: '#ef4444',
+                        padding: '0.3rem 0.65rem',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                      title="Eliminar del mantenedor"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               )
@@ -1096,6 +1270,198 @@ export default function DashboardPage() {
             >
               Cerrar Pase
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Creación / Edición del Mantenedor CRUD */}
+      {showProjectModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem',
+          }}
+          onClick={() => setShowProjectModal(false)}
+        >
+          <div
+            style={{
+              background: 'var(--bg-card)',
+              borderRadius: '20px',
+              border: '1px solid var(--border)',
+              padding: '2rem',
+              maxWidth: '480px',
+              width: '100%',
+              boxShadow: 'var(--shadow-hover)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+                {editingProject ? 'Editar Iniciativa Territorial' : 'Nueva Iniciativa Territorial'}
+              </h3>
+              <button
+                onClick={() => setShowProjectModal(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.1rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProject} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                  Nombre del Taller / Actividad:
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="Ej: Taller de Robótica Comunitaria"
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-subtle)',
+                    color: 'var(--text-main)',
+                    fontSize: '0.88rem',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                  Sede Territorial / Ubicación:
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formLocation}
+                  onChange={(e) => setFormLocation(e.target.value)}
+                  placeholder="Ej: Sede Vecinal N°8 San Joaquín"
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-subtle)',
+                    color: 'var(--text-main)',
+                    fontSize: '0.88rem',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                    Cupos (Capacidad):
+                  </label>
+                  <input
+                    type="number"
+                    min={5}
+                    max={200}
+                    required
+                    value={formCapacity}
+                    onChange={(e) => setFormCapacity(Number(e.target.value))}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-subtle)',
+                      color: 'var(--text-main)',
+                      fontSize: '0.88rem',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                    Estado Operativo:
+                  </label>
+                  <select
+                    value={formStatus}
+                    onChange={(e) => setFormStatus(e.target.value as 'Activo' | 'En curso' | 'Finalizado')}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-subtle)',
+                      color: 'var(--text-main)',
+                      fontSize: '0.88rem',
+                    }}
+                  >
+                    <option value="Activo">Activo</option>
+                    <option value="En curso">En curso</option>
+                    <option value="Finalizado">Finalizado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                  Fecha y Horario:
+                </label>
+                <input
+                  type="text"
+                  value={formDate}
+                  onChange={(e) => setFormDate(e.target.value)}
+                  placeholder="Ej: Sábado, 10:30 hrs"
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-subtle)',
+                    color: 'var(--text-main)',
+                    fontSize: '0.88rem',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowProjectModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '0.65rem',
+                    background: 'transparent',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-main)',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    padding: '0.65rem',
+                    background: 'var(--brand-emerald, #10b981)',
+                    border: 'none',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                  }}
+                >
+                  {editingProject ? 'Guardar Cambios' : 'Crear en Mantenedor'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

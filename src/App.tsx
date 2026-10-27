@@ -6,8 +6,11 @@ import DashboardPage from './pages/dashboard/DashboardPage.tsx'
 import HomePage from './pages/home/HomePage.tsx'
 import UsersPage from './pages/users/UsersPage.tsx'
 import LoginPage from './pages/login/LoginPage.tsx'
+import { useAuth } from './hooks/use-auth/useAuth.ts'
 
 export default function App() {
+  const auth = useAuth()
+ console.log('auth', auth)
   return (
     <Layout>
       <Switch>
