@@ -1,12 +1,10 @@
 .header {
   position: sticky;
   top: 0;
-  background: color-mix(in srgb, var(--bg-card) 85%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   z-index: 50;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 

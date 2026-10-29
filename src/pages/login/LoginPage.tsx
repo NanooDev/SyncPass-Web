@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocation } from 'wouter'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { ROLES, type Role } from '../../config/auth.ts'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
-import { apiHealthCheck, apiLogin, apiRegister } from '../../clients/api.ts'
+import { apiLogin, apiRegister } from '../../clients/api.ts'
 
 export default function LoginPage() {
   useDocumentTitle('Iniciar Sesión | Sync Pass')
@@ -12,10 +12,6 @@ export default function LoginPage() {
 
   // Estado de navegación entre Iniciar Sesión y Registro
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
-
-  // Telemetría en vivo del API Gateway (/api/health)
-  const [healthStatus, setHealthStatus] = useState<string>('Verificando API Gateway...')
-  const [isHealthOnline, setIsHealthOnline] = useState<boolean | null>(null)
 
   // Campos de Login
   const [email, setEmail] = useState('')
@@ -33,18 +29,6 @@ export default function LoginPage() {
   const [regSuccessMsg, setRegSuccessMsg] = useState('')
   const [regErrorMsg, setRegErrorMsg] = useState('')
   const [regLoading, setRegLoading] = useState(false)
-
-  useEffect(() => {
-    apiHealthCheck()
-      .then((data) => {
-        setIsHealthOnline(true)
-        setHealthStatus(`Conectado vía API Gateway (${data.service}: ${data.status})`)
-      })
-      .catch(() => {
-        setIsHealthOnline(false)
-        setHealthStatus('API Gateway en reposo (Modo Local Activo)')
-      })
-  }, [])
 
   const handleLocalSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -208,33 +192,6 @@ export default function LoginPage() {
           <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)' }}>
             Acreditación territorial y sincronización en la nube
           </p>
-
-          {/* Telemetría en Vivo de API Gateway */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              marginTop: '0.75rem',
-              padding: '0.3rem 0.85rem',
-              borderRadius: '20px',
-              background: isHealthOnline ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-subtle)',
-              border: `1px solid ${isHealthOnline ? 'rgba(16, 185, 129, 0.3)' : 'var(--border)'}`,
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: isHealthOnline ? 'var(--brand-emerald)' : 'var(--text-muted)',
-            }}
-          >
-            <span
-              style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                background: isHealthOnline ? 'var(--brand-emerald)' : 'var(--text-dim)',
-              }}
-            />
-            <span>{healthStatus}</span>
-          </div>
         </div>
 
         {/* Tab Switcher: Iniciar Sesión / Registrarse */}
@@ -284,7 +241,7 @@ export default function LoginPage() {
               transition: 'all 0.15s ease',
             }}
           >
-            Registrarse en API Gateway
+            Registrarse
           </button>
         </div>
 
@@ -317,21 +274,6 @@ export default function LoginPage() {
                 </svg>
                 <span>Continuar con Amazon Cognito</span>
               </button>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  marginTop: '0.65rem',
-                  fontSize: '0.75rem',
-                  color: 'var(--brand-emerald)',
-                  fontWeight: 600,
-                }}
-              >
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-emerald)' }} />
-                <span>API Gateway HTTPS · Protocolo PKCE RFC 7636</span>
-              </div>
             </div>
 
             {/* Section Divider */}

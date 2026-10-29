@@ -266,7 +266,7 @@ export default function DashboardPage() {
   }
 
   const handleSyncNow = () => {
-    setActionNotice(`Sincronizando ${pendingSyncCount} registros con AWS EC2 (54.164.69.142)...`)
+    setActionNotice(`Sincronizando ${pendingSyncCount} registros con AWS API Gateway (5xvspck6jb)...`)
     setTimeout(() => {
       setPendingSyncCount(0)
       setActionNotice('Todos los registros territoriales han sido sincronizados.')
@@ -320,7 +320,7 @@ export default function DashboardPage() {
           <h1>Panel de Operaciones SyncPass</h1>
           <p>
             Entorno de Vinculación Territorial · Sesión activa:{' '}
-            <b style={{ color: '#0f172a' }}>{localAuth.user?.name || 'Mariano Acevedo'}</b>
+            <b style={{ color: 'var(--text-main)' }}>{localAuth.user?.name || 'Mariano Acevedo'}</b>
           </p>
         </div>
 
@@ -414,8 +414,8 @@ export default function DashboardPage() {
             }}
           >
             <div>
-              <h2 style={{ fontSize: '1.25rem', color: '#0f172a' }}>Talleres Comunitarios en Curso</h2>
-              <p style={{ fontSize: '0.85rem' }}>Supervisión de cupos, quórum y acreditación en terreno</p>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em', margin: '0 0 0.25rem 0' }}>Talleres Comunitarios en Curso</h2>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>Supervisión de cupos, quórum y acreditación en terreno</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button
@@ -496,10 +496,10 @@ export default function DashboardPage() {
                     </span>
                   </div>
 
-                  <h3 style={{ fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.35rem' }}>
+                  <h3 className={styles.projectTitle}>
                     {proj.name}
                   </h3>
-                  <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1rem' }}>
+                  <p className={styles.projectSubtitle}>
                     {proj.location}
                   </p>
 
