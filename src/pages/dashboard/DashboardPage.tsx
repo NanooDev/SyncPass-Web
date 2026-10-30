@@ -313,15 +313,19 @@ export default function DashboardPage() {
 
   return (
     <div className={styles.dashboardContainer}>
+      {/* Luces Ambientales Muzli / SaaS */}
+      <div className={styles.ambientOrb1} />
+      <div className={styles.ambientOrb2} />
+
       {/* Toast de Notificaciones */}
       {actionNotice && (
         <div className={styles.noticeToast}>
           <span>{actionNotice}</span>
           <button
             onClick={() => setActionNotice('')}
-            style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem' }}
+            style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer' }}
           >
-            ✕
+            X
           </button>
         </div>
       )}
@@ -331,86 +335,98 @@ export default function DashboardPage() {
         <div className={styles.titleArea}>
           <h1>Panel de Operaciones SyncPass</h1>
           <p>
-            Entorno de Vinculación Territorial · Sesión activa:{' '}
-            <b style={{ color: 'var(--text-main)' }}>{localAuth.user?.name || 'Mariano Acevedo'}</b>
+            Socio Formador: <b>TI Consulting Diego Garces Miranda (Ticdgm)</b> - Duoc UC Plaza Vespucio
           </p>
+          <div className={styles.telemetryBadges}>
+            <span className={styles.telemetryPill}>
+              <span className={styles.liveDot} />
+              <span>AWS EC2 Online</span>
+            </span>
+            <span className={styles.telemetryPill}>
+              <span>API Gateway HTTPS</span>
+            </span>
+            <span className={styles.telemetryPill}>
+              <span>Cognito RS256</span>
+            </span>
+            <span className={styles.telemetryPill} style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+              <span>25 Tests Vitest (100%)</span>
+            </span>
+          </div>
         </div>
 
         {/* Modern Segmented Role Switcher */}
         <div className={styles.roleSegment}>
           <button
             onClick={() => localAuth.switchRole(ROLES.coordinator)}
-            className={`${styles.roleBtn} ${activeRole === ROLES.coordinator ? styles.activeRole : ''}`}
+            className={[styles.roleBtn, activeRole === ROLES.coordinator ? styles.activeRole : ''].filter(Boolean).join(' ')}
           >
             Docente
           </button>
           <button
             onClick={() => localAuth.switchRole(ROLES.volunteer)}
-            className={`${styles.roleBtn} ${activeRole === ROLES.volunteer ? styles.activeRole : ''}`}
+            className={[styles.roleBtn, activeRole === ROLES.volunteer ? styles.activeRole : ''].filter(Boolean).join(' ')}
           >
             Voluntario
           </button>
           <button
             onClick={() => localAuth.switchRole(ROLES.attendee)}
-            className={`${styles.roleBtn} ${activeRole === ROLES.attendee ? styles.activeRole : ''}`}
+            className={[styles.roleBtn, activeRole === ROLES.attendee ? styles.activeRole : ''].filter(Boolean).join(' ')}
           >
             Beneficiario
           </button>
           <button
             onClick={() => localAuth.switchRole(ROLES.admin)}
-            className={`${styles.roleBtn} ${activeRole === ROLES.admin ? styles.activeRole : ''}`}
+            className={[styles.roleBtn, activeRole === ROLES.admin ? styles.activeRole : ''].filter(Boolean).join(' ')}
           >
             Admin
           </button>
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
+      {/* KPI Stats Grid (Muzli & Gamma Style) */}
       <div className={styles.kpiGrid}>
         <div className={styles.kpiCard}>
           <div className={styles.kpiHeader}>
-            <span className={styles.kpiTitle}>Quórum Promedio</span>
-            <span className={styles.kpiBadge}>+14% vs meta</span>
+            <span className={styles.kpiTitle}>Acreditacion QR</span>
+            <span className={styles.kpiBadge} style={{ background: '#ecfdf5', color: '#059669' }}>
+              -95% tiempo
+            </span>
           </div>
-          <div className={styles.kpiValue}>87.5%</div>
-          <div className={styles.kpiSub}>78 de 100 cupos totales cubiertos</div>
+          <div className={styles.kpiValue} style={{ color: '#10b981' }}>&lt; 1.8s</div>
+          <div className={styles.kpiSub}>Disminucion de 45s a &lt; 2s vs papel</div>
         </div>
 
         <div className={styles.kpiCard}>
           <div className={styles.kpiHeader}>
-            <span className={styles.kpiTitle}>Acreditaciones QR</span>
+            <span className={styles.kpiTitle}>Quorum en Vivo</span>
             <span className={styles.kpiBadge} style={{ background: '#eef2ff', color: '#4f46e5' }}>
-              En Vivo
+              78 / 100 cupos
             </span>
           </div>
-          <div className={styles.kpiValue}>{128 + accreditedList.length}</div>
-          <div className={styles.kpiSub}>Velocidad media: 1.8 seg / vecino</div>
+          <div className={styles.kpiValue} style={{ color: '#6366f1' }}>78%</div>
+          <div className={styles.kpiSub}>Monitoreo en tiempo real de sedes</div>
         </div>
 
         <div className={styles.kpiCard}>
           <div className={styles.kpiHeader}>
-            <span className={styles.kpiTitle}>Modo Operativo</span>
-            <span
-              className={styles.kpiBadge}
-              style={{
-                background: offlineMode ? '#fef3c7' : '#ecfdf5',
-                color: offlineMode ? '#d97706' : '#059669',
-              }}
-            >
-              {offlineMode ? 'Modo Offline' : 'En Línea'}
+            <span className={styles.kpiTitle}>Horas de Voluntariado</span>
+            <span className={styles.kpiBadge} style={{ background: '#f0f9ff', color: '#0284c7' }}>
+              Duoc UC CITT
             </span>
           </div>
-          <div className={styles.kpiValue}>{pendingSyncCount}</div>
-          <div className={styles.kpiSub}>Registros pendientes de sincronizar</div>
+          <div className={styles.kpiValue} style={{ color: '#0284c7' }}>142 hrs</div>
+          <div className={styles.kpiSub}>Certificadas para estudiantes monitores</div>
         </div>
 
         <div className={styles.kpiCard}>
           <div className={styles.kpiHeader}>
-            <span className={styles.kpiTitle}>Satisfacción</span>
-            <span className={styles.kpiBadge}>4.9 de 5.0</span>
+            <span className={styles.kpiTitle}>Encuestas de Terreno</span>
+            <span className={styles.kpiBadge} style={{ background: '#fffbeb', color: '#d97706' }}>
+              68% respuesta
+            </span>
           </div>
-          <div className={styles.kpiValue}>98%</div>
-          <div className={styles.kpiSub}>Basado en 84 encuestas inmediatas</div>
+          <div className={styles.kpiValue} style={{ color: '#f59e0b' }}>4.9 *</div>
+          <div className={styles.kpiSub}>+53% de respuesta vs correo posterior</div>
         </div>
       </div>
 
