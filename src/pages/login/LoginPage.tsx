@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { ROLES, type Role } from '../../config/auth.ts'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import { apiLogin, apiRegister } from '../../clients/api.ts'
+import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
   useDocumentTitle('Iniciar Sesión | Sync Pass')
@@ -127,36 +128,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        maxWidth: '560px',
-        margin: '1.5rem auto 3rem auto',
-        padding: '0 1rem',
-      }}
-    >
-      <div
-        style={{
-          background: 'var(--bg-card)',
-          borderRadius: '20px',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-card)',
-          padding: '2.5rem 2.25rem',
-          position: 'relative',
-          overflow: 'hidden',
-          transition: 'background-color 0.2s ease, border-color 0.2s ease',
-        }}
-      >
+    <div className={styles.loginContainer}>
+      <div className={styles.loginCard}>
         {/* Top Accent Gradient Bar */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background: 'linear-gradient(90deg, #4f46e5 0%, #06b6d4 50%, #10b981 100%)',
-          }}
-        />
+        <div className={styles.topAccentBar} />
 
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -301,26 +276,11 @@ export default function LoginPage() {
             </div>
 
             {/* 4 Interactive Role Cards Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '0.75rem',
-                marginBottom: '1.5rem',
-              }}
-            >
+            <div className={styles.roleGrid}>
               {/* Docente / Coordinador */}
               <div
                 onClick={() => handleQuickRole(ROLES.coordinator)}
-                style={{
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  background: 'var(--bg-subtle)',
-                  border: '1px solid var(--border)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left',
-                }}
+                className={styles.roleOption}
               >
                 <div
                   style={{
@@ -345,15 +305,7 @@ export default function LoginPage() {
               {/* Estudiante Voluntario */}
               <div
                 onClick={() => handleQuickRole(ROLES.volunteer)}
-                style={{
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  background: 'var(--bg-subtle)',
-                  border: '1px solid var(--border)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left',
-                }}
+                className={styles.roleOption}
               >
                 <div
                   style={{
@@ -380,15 +332,7 @@ export default function LoginPage() {
               {/* Beneficiario Comunitario */}
               <div
                 onClick={() => handleQuickRole(ROLES.attendee)}
-                style={{
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  background: 'var(--bg-subtle)',
-                  border: '1px solid var(--border)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left',
-                }}
+                className={styles.roleOption}
               >
                 <div
                   style={{
@@ -414,15 +358,7 @@ export default function LoginPage() {
               {/* Administrador General */}
               <div
                 onClick={() => handleQuickRole(ROLES.admin)}
-                style={{
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  background: 'var(--bg-subtle)',
-                  border: '1px solid var(--border)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left',
-                }}
+                className={styles.roleOption}
               >
                 <div
                   style={{

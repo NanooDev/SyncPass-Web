@@ -685,3 +685,171 @@
 .btnCloseModal:hover {
   color: var(--text-main);
 }
+
+
+/* === RESPONSIVE MOBILE OPTIMIZATION (Android Compose App Look & Feel) === */
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 0.5rem 0.25rem 3rem 0.25rem;
+  }
+
+  .topBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+  }
+
+  .titleArea h1 {
+    font-size: 1.45rem;
+  }
+
+  .titleArea p {
+    font-size: 0.82rem;
+  }
+
+  .telemetryBadges {
+    gap: 0.35rem;
+  }
+
+  .telemetryPill {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.45rem;
+  }
+
+  /* Role switcher like native Android Jetpack Compose tabs */
+  .roleSegment {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 12px;
+  }
+
+  .roleBtn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.55rem 0.25rem;
+    font-size: 0.76rem;
+    text-align: center;
+    border-radius: 9px;
+  }
+
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .kpiCard {
+    padding: 1rem 0.85rem;
+    border-radius: 14px;
+  }
+
+  .kpiTitle {
+    font-size: 0.72rem;
+  }
+
+  .kpiBadge {
+    display: none;
+  }
+
+  .kpiValue {
+    font-size: 1.65rem;
+  }
+
+  .kpiSub {
+    font-size: 0.72rem;
+  }
+
+  .radarCard {
+    padding: 1rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+  }
+
+  .radarTitle {
+    font-size: 1.05rem;
+  }
+
+  .radarStationsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .radarStation {
+    padding: 0.95rem;
+    border-radius: 12px;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+
+  .searchBox {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .filterTabs {
+    overflow-x: auto;
+    width: 100%;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filterTabBtn {
+    flex-shrink: 0;
+    font-size: 0.76rem;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .projectGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .projectCard {
+    padding: 1.15rem;
+    border-radius: 16px;
+  }
+
+  .scannerHud {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .scannerBox {
+    max-width: 100%;
+    height: 190px;
+  }
+
+  .modalBackdrop {
+    padding: 0.75rem;
+  }
+
+  .modalContent {
+    padding: 1.25rem;
+    border-radius: 18px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .titleArea h1 {
+    font-size: 1.28rem;
+  }
+
+  .roleBtn {
+    font-size: 0.72rem;
+    padding: 0.5rem 0.15rem;
+  }
+}
