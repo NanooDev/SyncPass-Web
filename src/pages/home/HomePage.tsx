@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Link, useLocation } from 'wouter'
+import QRCode from 'qrcode'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { ROLES, type Role } from '../../config/auth.ts'
@@ -18,6 +19,48 @@ export default function HomePage() {
 
   // Simulador de escaneo en la tarjeta 3D interactiva
   const [scannedPass, setScannedPass] = useState(false)
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  // Sintetizador de audio nativo (Web Audio API) para feedback de escaneo
+  const playChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(880, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.12)
+      gain.gain.setValueAtTime(0.12, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.13)
+    } catch {
+      // Ignorar si el navegador bloquea audio sin interacción previa
+    }
+  }
+
+  // Generar código QR real y 100% escaneable por teléfonos
+  useEffect(() => {
+    if (!qrCanvasRef.current) return
+    const payload = `${window.location.origin}/dashboard?verified=true&rut=19.482.901-5&asistente=Mariano+Acevedo&taller=Alfabetizacion+Digital`
+    QRCode.toCanvas(qrCanvasRef.current, payload, {
+      width: 154,
+      margin: 1,
+      color: {
+        dark: '#0f172a',
+        light: '#ffffff',
+      },
+    }).catch(() => {})
+  }, [])
+
+  const handleTogglePass = () => {
+    setScannedPass((prev) => !prev)
+    playChime()
+  }
 
   const handleCognitoLogin = () => {
     if (auth.loginWithCognito) {
@@ -111,12 +154,12 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* HERO RIGHT: Interactive 3D Credential Card (Muzli Design) */}
+        {/* HERO RIGHT: Interactive 3D Credential Card (QR 100% Real Escaneable) */}
         <div className={styles.heroRight}>
           <div
             className={styles.pass3dCard}
-            onClick={() => setScannedPass(!scannedPass)}
-            title="Haz clic para simular la lectura de este Pase QR"
+            onClick={handleTogglePass}
+            title="Pase QR real. Puedes escanearlo con la cámara de tu celular o hacer clic para simular la acreditación."
           >
             <div className={styles.passCardGlow} />
 
@@ -142,20 +185,22 @@ export default function HomePage() {
             </div>
 
             <div className={styles.passQrContainer}>
-              {/* Representación visual de un código QR moderno */}
-              <div className={styles.qrVisual}>
-                {Array.from({ length: 49 }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={(idx * 7 + 13) % 3 === 0 || idx < 9 || idx % 7 === 0 ? styles.qrPixel : styles.qrPixelEmpty}
-                  />
-                ))}
-              </div>
+              {/* Código QR Real 100% Funcional y Escaneable por cualquier cámara de celular */}
+              <canvas
+                ref={qrCanvasRef}
+                style={{
+                  width: '154px',
+                  height: '154px',
+                  borderRadius: '10px',
+                  background: '#ffffff',
+                  display: 'block',
+                }}
+              />
               <div className={styles.passScanSpeed}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
-                <span>{scannedPass ? 'Verificado en 1.4 segundos' : 'Toca la tarjeta para escanear'}</span>
+                <span>{scannedPass ? 'Verificado en 1.2 segundos' : 'QR Real: ¡Escanéalo con tu celular!'}</span>
               </div>
             </div>
 
