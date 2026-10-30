@@ -19,6 +19,10 @@ export default function HomePage() {
 
   // Simulador de escaneo en la tarjeta 3D interactiva
   const [scannedPass, setScannedPass] = useState(false)
+  const [scannedTime, setScannedTime] = useState<string>(() => {
+    const d = new Date()
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  })
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
   // Sintetizador de audio nativo (Web Audio API) para feedback de escaneo
@@ -58,7 +62,14 @@ export default function HomePage() {
   }, [])
 
   const handleTogglePass = () => {
-    setScannedPass((prev) => !prev)
+    setScannedPass((prev) => {
+      const next = !prev
+      if (next) {
+        const d = new Date()
+        setScannedTime(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`)
+      }
+      return next
+    })
     playChime()
   }
 
@@ -89,7 +100,7 @@ export default function HomePage() {
         <div className={styles.heroLeft}>
           <div className={styles.pillBadge}>
             <span className={styles.radarDot} />
-            <span>Duoc UC · Vinculación Comunitaria & Ticdgm</span>
+            <span>Duoc UC · Vinculación Comunitaria</span>
           </div>
 
           <h1 className={styles.heroTitle}>
@@ -169,7 +180,7 @@ export default function HomePage() {
                 <span>SyncPass Credential</span>
               </div>
               <span className={styles.passCardPill}>
-                {scannedPass ? 'Acreditado 15:14 hrs' : 'Pase Activo'}
+                {scannedPass ? `ACREDITADO ${scannedTime} HRS` : 'Pase Activo'}
               </span>
             </div>
 
@@ -206,7 +217,7 @@ export default function HomePage() {
 
             <div className={styles.passCardFooter}>
               <span>UID: 2988-SYNCPASS</span>
-              <span>SHA-256 VALIDATED</span>
+              <span>IDENTIDAD VALIDADA</span>
             </div>
           </div>
         </div>

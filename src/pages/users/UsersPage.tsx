@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import UserCard from '../../components/user-card/UserCard.tsx'
 import { apiGetUsers } from '../../clients/api.ts'
-import { AUTH0_AUDIENCE, BFF_URL, type BffUser } from '../../config/auth.ts'
+import { AUTH0_AUDIENCE, type BffUser } from '../../config/auth.ts'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import styles from './UsersPage.module.css'
 
@@ -101,7 +101,7 @@ export default function UsersPage() {
           }}
         >
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
-            No se pudo cargar: {error} (¿BFF corriendo en {BFF_URL} con `./gradlew bootRun`?).
+            No se pudo cargar la lista de usuarios. Puedes cargar los perfiles locales de prueba:
           </p>
           <div style={{ marginTop: '0.75rem' }}>
             <button
@@ -120,14 +120,25 @@ export default function UsersPage() {
                 cursor: 'pointer',
               }}
             >
-              Cargar Usuarios de Prueba (Roles SyncPass)
+              Cargar Perfiles de Prueba (SyncPass)
             </button>
           </div>
         </div>
       )}
 
       {!error && users === null && (
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Cargando usuarios...</p>
+        <div className={styles.list} aria-label="Vista previa de usuarios">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className={styles.skeletonCard}>
+              <div className={styles.skeletonAvatar} />
+              <div className={styles.skeletonInfo}>
+                <div className={styles.skeletonLineLong} />
+                <div className={styles.skeletonLineShort} />
+              </div>
+              <div className={styles.skeletonBadge} />
+            </div>
+          ))}
+        </div>
       )}
 
       {users && (

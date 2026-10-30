@@ -5,7 +5,7 @@ import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitl
 import { useUserRoles } from '../../hooks/use-roles/useRoles.ts'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { ROLES, type Role } from '../../config/auth.ts'
-import { sendPushNotification, deriveNtfyTopic } from '../../services/ntfy.ts'
+import { sendPushNotification } from '../../services/ntfy.ts'
 import styles from './DashboardPage.module.css'
 
 interface CommunityProject {
@@ -71,10 +71,17 @@ export default function DashboardPage() {
   const [offlineMode, setOfflineMode] = useState<boolean>(false)
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(3)
   const [manualRut, setManualRut] = useState<string>('')
-  const [accreditedList, setAccreditedList] = useState<string[]>([
-    'María González (12.345.678-9) · 15:12 hrs · QR Validado',
-    'Juan Pérez (14.567.890-K) · 15:14 hrs · QR Validado',
-    'Rosa Morales (10.987.654-3) · 15:18 hrs · Registro Manual',
+  const getFormattedRecentTime = (minusMinutes = 0) => {
+    const d = new Date(Date.now() - minusMinutes * 60 * 1000)
+    const hh = String(d.getHours()).padStart(2, '0')
+    const mm = String(d.getMinutes()).padStart(2, '0')
+    return `${hh}:${mm}`
+  }
+
+  const [accreditedList, setAccreditedList] = useState<string[]>(() => [
+    `María González (12.345.678-9) · ${getFormattedRecentTime(6)} hrs · QR Validado`,
+    `Juan Pérez (14.567.890-K) · ${getFormattedRecentTime(4)} hrs · QR Validado`,
+    `Rosa Morales (10.987.654-3) · ${getFormattedRecentTime(1)} hrs · Registro Manual`,
   ])
   const [surveyRating, setSurveyRating] = useState<number>(5)
   const [surveyComment, setSurveyComment] = useState<string>('')
@@ -167,7 +174,7 @@ export default function DashboardPage() {
       }
       saveProjects([newProj, ...projects])
       setSelectedProjectId(newProj.id)
-      setActionNotice(`Iniciativa "${formName.trim()}" creada en el mantenedor CRUD y lista para terreno.`)
+      setActionNotice(`Iniciativa "${formName.trim()}" guardada exitosamente y lista para terreno.`)
       // Notificación push automática a territorio
       sendPushNotification({
         email: pushTargetEmail,
@@ -181,18 +188,12 @@ export default function DashboardPage() {
     setTimeout(() => setActionNotice(''), 3500)
   }
 
-  // Estados de Notificaciones Push ntfy.sh y BFF
+  // Estados de Notificaciones Push
   const [pushTargetEmail, setPushTargetEmail] = useState<string>('voluntario.estudiante@duocuc.cl')
   const [pushTitle, setPushTitle] = useState<string>('SyncPass Alerta Territorial')
   const [pushMessage, setPushMessage] = useState<string>('Nuevo taller asignado en sede comunitaria.')
   const [pushStatus, setPushStatus] = useState<string>('')
   const [pushLoading, setPushLoading] = useState<boolean>(false)
-  const [pushActiveTopic, setPushActiveTopic] = useState<string>('')
-  const [useBffToggle, setUseBffToggle] = useState<boolean>(true)
-
-  useEffect(() => {
-    deriveNtfyTopic(pushTargetEmail).then(setPushActiveTopic)
-  }, [pushTargetEmail])
 
   const handleSendPush = async () => {
     if (!pushMessage.trim()) return
@@ -203,14 +204,13 @@ export default function DashboardPage() {
       title: pushTitle,
       message: pushMessage,
       priority: 'high',
-      useBff: useBffToggle,
+      useBff: true,
     })
     setPushLoading(false)
     if (res.success) {
-      const canal = res.source === 'bff' ? 'BFF Spring Boot /api/notificar' : 'ntfy.sh directo'
-      setPushStatus(`Notificación push emitida exitosamente (${canal}) al tópico ${res.topic}`)
+      setPushStatus('Notificación enviada exitosamente a los equipos en terreno.')
     } else {
-      setPushStatus(`Error al emitir notificación: ${res.error}`)
+      setPushStatus('No se pudo enviar la notificación. Intenta nuevamente.')
     }
   }
 
@@ -301,7 +301,8 @@ export default function DashboardPage() {
   const handleAccreditation = (e: React.FormEvent) => {
     e.preventDefault()
     if (!manualRut.trim()) return
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const d = new Date()
+    const now = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
     const entry = `${manualRut.trim()} · ${now} hrs · Acreditado Manual`
     setAccreditedList([entry, ...accreditedList])
     setManualRut('')
@@ -327,8 +328,9 @@ export default function DashboardPage() {
     playChime()
     const fakeRuts = ['18.921.344-2', '16.482.901-5', '11.233.409-7', '20.109.845-K', '15.672.311-8']
     const randomRut = fakeRuts[Math.floor(Math.random() * fakeRuts.length)]
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    const entry = `Beneficiario (${randomRut}) · ${now} hrs · QR Validado RS256`
+    const d = new Date()
+    const now = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    const entry = `Beneficiario (${randomRut}) · ${now} hrs · QR Validado`
     setAccreditedList([entry, ...accreditedList])
 
     // Actualizar conteo en vivo de quórum del taller
@@ -388,21 +390,18 @@ export default function DashboardPage() {
         <div className={styles.titleArea}>
           <h1>Panel de Operaciones SyncPass</h1>
           <p>
-            Socio Formador: <b>TI Consulting Diego Garces Miranda (Ticdgm)</b> - Duoc UC Plaza Vespucio
+            Plataforma de acreditación y gestión comunitaria en terreno · Duoc UC
           </p>
           <div className={styles.telemetryBadges}>
             <span className={styles.telemetryPill}>
               <span className={styles.liveDot} />
-              <span>AWS EC2 Online</span>
+              <span>Sistema en Línea</span>
             </span>
             <span className={styles.telemetryPill}>
-              <span>API Gateway HTTPS</span>
-            </span>
-            <span className={styles.telemetryPill}>
-              <span>Cognito RS256</span>
+              <span>Acreditación QR Activa</span>
             </span>
             <span className={styles.telemetryPill} style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-              <span>25 Tests Vitest (100%)</span>
+              <span>25 Pruebas Validadas (100%)</span>
             </span>
           </div>
         </div>
@@ -582,7 +581,7 @@ export default function DashboardPage() {
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                <span>+ Nueva Iniciativa (CRUD)</span>
+                <span>Nueva Iniciativa</span>
               </button>
               <button
                 onClick={() => setShowQrModal(true)}
@@ -1284,10 +1283,10 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', margin: 0 }}>
-                  Centro de Emisión de Notificaciones Push (ntfy.sh)
+                  Centro de Notificaciones y Avisos
                 </h3>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.2rem 0 0' }}>
-                  Envío directo de eventos SSE hacia dispositivos Android vinculados.
+                  Envío de avisos instantáneos a voluntarios y docentes en terreno.
                 </p>
               </div>
               <span
@@ -1324,9 +1323,7 @@ export default function DashboardPage() {
                     fontSize: '0.88rem',
                   }}
                 />
-                <div style={{ fontSize: '0.75rem', color: 'var(--brand-indigo)', marginTop: '0.3rem', fontFamily: 'monospace' }}>
-                  Tópico: {pushActiveTopic}
-                </div>
+
               </div>
 
               <div>
@@ -1370,18 +1367,7 @@ export default function DashboardPage() {
               />
             </div>
 
-            <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="checkbox"
-                id="useBffCheck"
-                checked={useBffToggle}
-                onChange={(e) => setUseBffToggle(e.target.checked)}
-                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-              />
-              <label htmlFor="useBffCheck" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                Enrutar a través del BFF Spring Boot (<code>POST /api/notificar</code>) con fallback automático a ntfy.sh
-              </label>
-            </div>
+
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <button
@@ -1401,7 +1387,7 @@ export default function DashboardPage() {
                   transition: 'opacity 0.2s',
                 }}
               >
-                {pushLoading ? 'Emitiendo evento...' : 'Emitir Notificación Push'}
+                {pushLoading ? 'Enviando aviso...' : 'Enviar Notificación'}
               </button>
 
               {pushStatus && (
