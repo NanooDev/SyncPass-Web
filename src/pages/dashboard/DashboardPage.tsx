@@ -80,6 +80,10 @@ export default function DashboardPage() {
   const [actionNotice, setActionNotice] = useState<string>('')
   const [showQrModal, setShowQrModal] = useState<boolean>(false)
 
+  // Filtros y Búsqueda en Vivo (SaaS)
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<'todos' | 'Activo' | 'En curso' | 'Finalizado'>('todos')
+
   // Estados del Mantenedor CRUD de Proyectos Comunitarios
   const [showProjectModal, setShowProjectModal] = useState<boolean>(false)
   const [editingProject, setEditingProject] = useState<CommunityProject | null>(null)
@@ -296,6 +300,14 @@ export default function DashboardPage() {
     setTimeout(() => setActionNotice(''), 4000)
   }
 
+  const filteredProjects = projects.filter((p) => {
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.location.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'todos' || p.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
   const selectedProject =
     projects.find((p) => p.id === selectedProjectId) || projects[0]
 
@@ -469,8 +481,46 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Barra de Búsqueda y Filtros de Talleres (SaaS UI) */}
+          <div className={styles.filterBar}>
+            <div className={styles.searchBox}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-muted)' }}>
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Buscar taller por nombre, comuna o sede..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem' }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className={styles.filterTabs}>
+              {(['todos', 'En curso', 'Activo', 'Finalizado'] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setStatusFilter(st)}
+                  className={`${styles.filterTabBtn} ${statusFilter === st ? styles.activeFilterTab : ''}`}
+                >
+                  {st === 'todos' ? `Todos (${projects.length})` : st}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className={styles.projectGrid}>
-            {projects.map((proj) => {
+            {filteredProjects.map((proj) => {
               const percent = Math.round((proj.attendeesCount / proj.capacity) * 100)
               const isSelected = proj.id === selectedProjectId
               return (

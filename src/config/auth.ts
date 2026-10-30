@@ -14,8 +14,9 @@ export const COGNITO_DOMAIN: string =
   'https://us-east-1rlb8ft9z2.auth.us-east-1.amazoncognito.com'
 
 export const COGNITO_REDIRECT_URI: string =
-  env.VITE_COGNITO_REDIRECT_URI ??
-  (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/')
+  (env.VITE_COGNITO_REDIRECT_URI && env.VITE_COGNITO_REDIRECT_URI.startsWith('http'))
+    ? env.VITE_COGNITO_REDIRECT_URI
+    : (typeof window !== 'undefined' ? window.location.origin + '/' : 'http://localhost:5173/')
 
 // URL de login con flujo seguro Authorization Code Grant (estándar AWS Cognito)
 export const COGNITO_LOGIN_URL = `${COGNITO_DOMAIN}/login?client_id=${COGNITO_CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(
