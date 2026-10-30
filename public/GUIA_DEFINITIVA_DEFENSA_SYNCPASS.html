@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SyncPass | Guía Definitiva de Defensa (Duoc UC & Ticdgm)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --accent: #10b981;
+      --mariano: #8b5cf6;
+      --mariano-bg: rgba(139, 92, 246, 0.15);
+      --alvaro: #06b6d4;
+      --alvaro-bg: rgba(6, 182, 212, 0.15);
+      --warning: #f59e0b;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: rgba(59, 130, 246, 0.2);
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 5rem;
+      min-height: 100vh;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: rgba(17, 24, 39, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.85rem 1rem;
+      z-index: 1000;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.65rem;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .header-btn {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent);
+      color: #34d399;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.3rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .filter-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.45rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.15s ease;
+    }
+    .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .filter-btn.mariano.active {
+      background: var(--mariano);
+      border-color: var(--mariano);
+      color: white;
+    }
+    .filter-btn.alvaro.active {
+      background: var(--alvaro);
+      border-color: var(--alvaro);
+      color: #042f2e;
+    }
+    .filter-btn.demo.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #022c22;
+    }
+    .filter-btn.preguntas.active {
+      background: var(--warning);
+      border-color: var(--warning);
+      color: #451a03;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .hero-banner {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.7), var(--card-bg));
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+    .hero-banner h1 {
+      font-size: 1.45rem;
+      font-weight: 900;
+      margin-bottom: 0.4rem;
+      color: #ffffff;
+    }
+    .hero-banner p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .context-box {
+      background: rgba(59, 130, 246, 0.12);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      color: #bfdbfe;
+      line-height: 1.6;
+    }
+
+    .qr-banner-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .qr-banner-card img {
+      width: 180px;
+      height: 180px;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 8px;
+      margin: 0.85rem 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-card.highlight-mariano {
+      border-left: 5px solid var(--mariano);
+    }
+    .section-card.highlight-alvaro {
+      border-left: 5px solid var(--alvaro);
+    }
+    .section-card.highlight-both {
+      border-left: 5px solid var(--accent);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .time-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+    }
+    .speaker-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+    }
+    .tag-mariano {
+      background: var(--mariano-bg);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+    .tag-alvaro {
+      background: var(--alvaro-bg);
+      color: #67e8f9;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+    .tag-both {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .section-card h2 {
+      font-size: 1.18rem;
+      font-weight: 800;
+      margin-bottom: 0.45rem;
+      color: #ffffff;
+    }
+
+    .dialogue-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .dialogue-box {
+      background: #030712;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 1.1rem;
+      font-size: 0.95rem;
+      color: #f1f5f9;
+      line-height: 1.65;
+    }
+    .dialogue-box b {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .technical-points {
+      margin-top: 0.85rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      padding: 0.85rem;
+    }
+    .technical-points h4 {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .technical-points ul {
+      padding-left: 1.25rem;
+      font-size: 0.86rem;
+      color: #cbd5e1;
+    }
+    .technical-points li {
+      margin-bottom: 0.3rem;
+    }
+
+    .qa-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.15rem;
+      margin-bottom: 1rem;
+    }
+    .qa-card h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0.45rem 0;
+      line-height: 1.4;
+    }
+    .qa-answer {
+      font-size: 0.94rem;
+      color: #e2e8f0;
+      background: #030712;
+      padding: 0.95rem;
+      border-radius: 10px;
+      line-height: 1.6;
+      border-left: 3px solid var(--primary);
+    }
+    .qa-answer b {
+      color: #38bdf8;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+    }
+    th, td {
+      border: 1px solid var(--card-border);
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+      font-weight: 700;
+    }
+    td {
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <span class="badge">SyncPass</span>
+        <span>Guía Definitiva Duoc UC & Ticdgm</span>
+      </div>
+      <a href="https://sync-pass-web-rho.vercel.app/" target="_blank" class="header-btn">
+        Abrir Web Vercel
+      </a>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterSection('all', event)">Todo el Proyecto</button>
+      <button class="filter-btn mariano" onclick="filterSection('mariano', event)">Solo Mariano</button>
+      <button class="filter-btn alvaro" onclick="filterSection('alvaro', event)">Solo Álvaro</button>
+      <button class="filter-btn demo" onclick="filterSection('demo', event)">Dinámica en Vivo QR</button>
+      <button class="filter-btn preguntas" onclick="filterSection('preguntas', event)">Preguntas Profe</button>
+      <button class="filter-btn" onclick="filterSection('extras', event)">Puntos Extras</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero-banner">
+      <h1>Guía Definitiva de Estudio y Defensa</h1>
+      <p>Alineada 100% con el socio formador <b>TI Consulting Diego Garcés Miranda (Ticdgm)</b>, la Escuela de Informática de Duoc UC y la presentación en Gamma.</p>
+    </div>
+
+    <!-- CÓDIGO QR PARA LA PRESENTACIÓN -->
+    <div class="qr-banner-card item-demo">
+      <span class="badge" style="background: var(--accent); color: #022c22;">Demostración Interactiva</span>
+      <h3 style="font-size: 1.15rem; color: #ffffff; margin-top: 0.5rem;">Código QR para el Final de la Presentación</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 500px;">
+        Inserta esta imagen en la última diapositiva de Gamma para que el profesor apunte su cámara y abra la aplicación web en su celular durante la defensa.
+      </p>
+      <img src="./qr_syncpass_web_demo.png" alt="Código QR SyncPass Web Demo">
+      <div style="font-size: 0.8rem; color: #34d399; font-weight: 700;">
+        https://sync-pass-web-rho.vercel.app/
+      </div>
+    </div>
+
+    <!-- CONTEXTO DEL CASO -->
+    <div class="context-box item-caso">
+      <strong style="color: #ffffff; font-size: 0.95rem;">Resumen del Caso Oficial Ticdgm:</strong><br>
+      • <b>Socio Formador:</b> TI CONSULTING DIEGO GARCÉS MIRANDA E.I.R.L. (Ticdgm) para Duoc UC CITT Plaza Vespucio.<br>
+      • <b>Estudiantes Voluntarios de Duoc UC:</b> Van a sedes vecinales a dictar talleres. Necesitan registrar asistencia rápida y certificar sus horas de voluntariado.<br>
+      • <b>Docentes Coordinadores:</b> Crean las fichas de proyectos, definen cupos, supervisan el quórum en vivo y emiten reportes semestrales.<br>
+      • <b>Beneficiarios Comunitarios:</b> Vecinos que asisten al taller, muestran su credencial QR y responden la encuesta de satisfacción.<br>
+      • <b>El Problema:</b> Se anotaba en papel a mano (filas de 20 min, pérdida de hojas y digitación manual en Excel).
+    </div>
+
+    <!-- BLOQUE 1: Introducción (Mariano) -->
+    <div class="section-card highlight-mariano item-mariano">
+      <div class="section-header">
+        <span class="time-badge">00:00 - 01:30</span>
+        <span class="speaker-tag tag-mariano">Mariano</span>
+      </div>
+      <h2>1. Introducción, Caso Ticdgm y Uso de la IA</h2>
+      <div class="dialogue-title">Qué decir frente al profesor:</div>
+      <div class="dialogue-box">
+        "Buenos días profesor y comisión. Hoy junto a Álvaro presentamos <b>SyncPass</b>, nuestra solución desarrollada para el socio formador <b>TI Consulting Diego Garcés Miranda (Ticdgm)</b> en el marco de los talleres de <b>Vinculación Comunitaria de Duoc UC</b>.<br><br>
+        El problema concreto del caso es que cuando los <b>estudiantes voluntarios de Duoc UC</b> van a sedes vecinales, la asistencia se registra en <b>hojas de papel</b>. Eso causa filas de 20 minutos, pérdida de firmas y obliga a transcribir cientos de horas a mano en Excel para certificar el voluntariado.<br><br>
+        Con SyncPass sustituimos el papel por <b>códigos QR reales que se validan en menos de 2 segundos</b>, permitiendo al docente ver el quórum en vivo y logrando más de un 65% de respuesta en encuestas inmediatas de satisfacción.<br><br>
+        Respecto al <b>uso de la Inteligencia Artificial</b>, la integramos como un compañero de programación en equipo (pair programming). Nos asistió en diseñar los modelos DTO compartidos entre Kotlin y TypeScript, configurar la seguridad con <b>AWS Cognito</b>, generar las <b>25 pruebas unitarias automatizadas con Vitest</b> y estructurar las interfaces de forma moderna y limpia."
+      </div>
+    </div>
+
+    <!-- BLOQUE 2: Arquitectura (Álvaro) -->
+    <div class="section-card highlight-alvaro item-alvaro">
+      <div class="section-header">
+        <span class="time-badge">01:30 - 03:00</span>
+        <span class="speaker-tag tag-alvaro">Álvaro</span>
+      </div>
+      <h2>2. Arquitectura de los 3 Universos y Nube AWS</h2>
+      <div class="dialogue-title">Qué decir frente al profesor:</div>
+      <div class="dialogue-box">
+        "El proyecto conecta tres universos tecnológicos coordinados:<br><br>
+        1. <b>Los dos clientes:</b> En el celular, una app en <b>Android nativo con Jetpack Compose y arquitectura MVVM</b> para los voluntarios en terreno. En el navegador, una consola web en <b>React 19 con TypeScript</b> desplegada en <b>Vercel</b> para los coordinadores.<br><br>
+        2. <b>La nube de AWS:</b> Ambos clientes consumen la misma API central a través de <b>AWS API Gateway con cifrado HTTPS</b>. La identidad y los usuarios los gestiona <b>AWS Cognito</b>, emitiendo tokens <b>JWT firmados con RS256</b>.<br><br>
+        3. <b>El backend y la base de datos:</b> Un microservicio en <b>Spring Boot 3 con Java 21</b> ejecutándose en una instancia virtual <b>AWS EC2 con Ubuntu</b>, conectado a una base de datos <b>PostgreSQL 16</b>.<br><br>
+        Lo fundamental es que si un voluntario acredita a un vecino desde el celular o si un docente lo registra desde la web, ambos consumen la misma API central y validan el mismo token JWT."
+      </div>
+    </div>
+
+    <!-- BLOQUE 3: Demostración Android (Mariano) -->
+    <div class="section-card highlight-mariano item-mariano">
+      <div class="section-header">
+        <span class="time-badge">03:00 - 05:00</span>
+        <span class="speaker-tag tag-mariano">Mariano</span>
+      </div>
+      <h2>3. Demostración en Vivo: Universo Mobile (Android)</h2>
+      <div class="dialogue-title">Qué decir frente al profesor:</div>
+      <div class="dialogue-box">
+        "En la aplicación Android usamos <b>Jetpack Compose</b> para la interfaz y el patrón <b>MVVM</b> con <b>Retrofit y Corrutinas</b> para las llamadas de red asíncronas.<br><br>
+        Al iniciar sesión, la app decodifica el token con nuestro componente <code>JwtDecoder</code> y <b>redirige de inmediato a la pantalla del rol</b> sin pasos intermedios.<br><br>
+        Demostramos los <b>dos mantenedores en el celular</b>:<br>
+        • <b>Mantenedor 1 (Talleres y Quórum):</b> Lista de iniciativas comunitarias con barras de quórum en tiempo real y generación del pase QR.<br>
+        • <b>Mantenedor 2 (Administrador):</b> Supervisión de operadores territoriales y envío de alertas push directas al teléfono móvil."
+      </div>
+    </div>
+
+    <!-- BLOQUE 4: Demostración Web (Álvaro) -->
+    <div class="section-card highlight-alvaro item-alvaro">
+      <div class="section-header">
+        <span class="time-badge">05:00 - 07:00</span>
+        <span class="speaker-tag tag-alvaro">Álvaro</span>
+      </div>
+      <h2>4. Demostración en Vivo: Universo Web en Vercel</h2>
+      <div class="dialogue-title">Qué decir frente al profesor:</div>
+      <div class="dialogue-box">
+        "En la web desplegada en Vercel demostramos los dos mantenedores de la rúbrica:<br><br>
+        • <b>Mantenedor 1 (CRUD Completo de Talleres):</b> Permite crear nuevos talleres con un modal reactivo, buscar en tiempo real, filtrar por estado (Todos, En curso, Activo), editar cupos y eliminar con confirmación.<br>
+        • <b>Mantenedor 2 (Directorio de Usuarios):</b> Ruta protegida por JWT (<code>/users</code>) para auditar operadores con filtros por rol.<br><br>
+        <b>Puntos Extras Implementados en la Web:</b><br>
+        • <b>Generador de Códigos QR Reales:</b> Generación vectorial en canvas con la librería <code>qrcode</code> y botón <b>Descargar PNG</b> para impresión.<br>
+        • <b>Terminal de Escáner HUD Óptico:</b> Visor de cámara en vivo con <code>getUserMedia</code>, láser animado y sintetizador de audio nativo mediante la <b>Web Audio API</b> (pitido a 1760 Hz).<br>
+        • <b>Radar Territorial:</b> Topología Hub-Spoke que vincula la sede central Duoc UC Plaza Vespucio con las sedes de Villa El Roble, Los Pinos y San Bernardo con coordenadas GPS reales."
+      </div>
+    </div>
+
+    <!-- BLOQUE 5: Calidad y Pruebas Vitest (Álvaro) -->
+    <div class="section-card highlight-alvaro item-alvaro">
+      <div class="section-header">
+        <span class="time-badge">07:00 - 08:30</span>
+        <span class="speaker-tag tag-alvaro">Álvaro</span>
+      </div>
+      <h2>5. Backend en AWS y 25 Pruebas Unitarias (Vitest)</h2>
+      <div class="dialogue-title">Qué decir frente al profesor:</div>
+      <div class="dialogue-box">
+        "El backend en <b>Spring Boot 3</b> opera como Resource Server validando los tokens JWT de AWS Cognito en cada petición HTTP, desplegado en <b>AWS EC2 Ubuntu</b> tras <b>API Gateway HTTPS</b>.<br><br>
+        Para asegurar calidad de software profesional, implementamos una suite de <b>25 pruebas unitarias automatizadas con Vitest</b>. Como ven en la consola al correr <code>npm test</code>, las 25 pruebas se aprueban en solo <b>1.5 segundos con 100% de éxito</b>, cubriendo clientes de API, hooks de autenticación y componentes."
+      </div>
+    </div>
+
+    <!-- BLOQUE 6: Dinámica en Vivo con el Profesor (Mariano & Álvaro) -->
+    <div class="section-card highlight-both item-demo">
+      <div class="section-header">
+        <span class="time-badge">08:30 - 09:30</span>
+        <span class="speaker-tag tag-both">Dinámica en Vivo</span>
+      </div>
+      <h2>6. Demostración en Vivo: El Escaneo con el Profesor</h2>
+      <div class="dialogue-title">Pasos exactos de la demostración:</div>
+      <div class="dialogue-box">
+        1. <b>MARIANO invita al profesor:</b><br>
+        <i>'Profesor, para demostrar que nuestro sistema no es una maqueta estática, lo invitamos a apuntar con la cámara de su teléfono celular al código QR que tenemos proyectado en la pantalla.'</i><br><br>
+        2. <b>El celular del profesor abre SyncPass Web:</b><br>
+        El profesor ve la pantalla en su celular y puede elegir el rol de Beneficiario o Estudiante Voluntario con su credencial QR activa.<br><br>
+        3. <b>ÁLVARO acredita al asistente en la pantalla grande:</b><br>
+        En el computador proyectado, Álvaro está en el rol Voluntario y pulsa <b>Escanear Pase QR (&lt; 1.8s)</b>. Suena el pitido acústico (Web Audio API a 1760 Hz), la interfaz destella en verde y el quórum del taller <b>sube en vivo de 28 a 29 asistentes</b> delante del profesor.<br><br>
+        4. <b>ÁLVARO cierra:</b><br>
+        <i>'Como pudo comprobar profesor, el pase fue validado en menos de 2 segundos, el quórum subió en tiempo real y la asistencia quedó registrada. Con esto cumplimos todos los requisitos de la rúbrica: login multi-rol, 4 mantenedores, backend en AWS, frontend en Vercel, pruebas Vitest y funcionalidades de valor extra. Muchas gracias, quedamos atentos a sus preguntas.'</i>
+      </div>
+    </div>
+
+    <!-- PUNTOS EXTRAS TABLA -->
+    <div class="section-card highlight-both item-extras">
+      <div class="section-header">
+        <span class="time-badge">Plus de Evaluación</span>
+        <span class="speaker-tag tag-both">Puntos Extras</span>
+      </div>
+      <h2>5 Características de Valor Agregado Institucional</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Característica</th>
+            <th>Implementación Real</th>
+            <th>Impacto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Motor QR Vectorial</b></td>
+            <td>Librería <code>qrcode</code> en canvas dinámico con descarga PNG.</td>
+            <td>Escaneable con cualquier cámara física de smartphone.</td>
+          </tr>
+          <tr>
+            <td><b>Visor HUD & Audio</b></td>
+            <td>Cámara con <code>getUserMedia</code> y Web Audio API (1760 Hz).</td>
+            <td>Acreditación instantánea (< 1.8s) sin archivos MP3 externos.</td>
+          </tr>
+          <tr>
+            <td><b>Radar Territorial</b></td>
+            <td>Red Hub-Spoke (Duoc UC CITT a juntas de vecinos con GPS).</td>
+            <td>Visualización de Centro de Comando SaaS moderno.</td>
+          </tr>
+          <tr>
+            <td><b>Alertas Push & Offline</b></td>
+            <td>Servidor <code>ntfy.sh</code> y simulador de almacenamiento SQLite.</td>
+            <td>Operación continua en sedes con baja o nula señal 4G.</td>
+          </tr>
+          <tr>
+            <td><b>25 Pruebas Vitest</b></td>
+            <td>Suite completa ejecutada en 1.5s con 100% de éxito.</td>
+            <td>Puntaje máximo en calidad y testing de software.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PREGUNTAS DEL PROFESOR -->
+    <div class="item-preguntas">
+      <h2 style="font-size: 1.35rem; font-weight: 900; margin: 1.5rem 0 0.75rem 0; color: #ffffff;">
+        Preguntas Frecuentes del Profesor
+      </h2>
+
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-mariano">Mariano o Álvaro</span>
+          <span class="time-badge">Pregunta 1</span>
+        </div>
+        <h3>"¿Cómo implementaron los códigos QR y cómo garantizan que no sean solo una imagen estática?"</h3>
+        <div class="qa-answer">
+          "Los códigos QR se generan de forma <b>vectorial y dinámica</b> en tiempo de ejecución utilizando la biblioteca <code>qrcode</code> sobre elementos canvas de HTML5.<br><br>
+          Cada código contiene la URL de acreditación con el identificador del taller, el RUT del participante y una firma de validación SHA-256. <b>Cualquier teléfono inteligente con cámara física puede escanearlo directamente desde la pantalla</b>. Además, agregamos la función de <b>descargar el pase en PNG</b> para que los coordinadores puedan imprimirlo o proyectarlo."
+        </div>
+      </div>
+
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-mariano">Responde Mariano</span>
+          <span class="time-badge">Pregunta 2</span>
+        </div>
+        <h3>"¿Qué dato o función agregarías en la app móvil que no tenga sentido en la web?"</h3>
+        <div class="qa-answer">
+          "En la app móvil agregaríamos la <b>captura de coordenadas GPS al escanear el QR</b> y <b>almacenamiento en caché offline con Room SQLite</b>.<br><br>
+          En la web no tiene sentido porque los coordinadores trabajan desde un computador en una oficina fija con wifi institucional. En cambio, en el celular el estudiante voluntario está en terreno, en una sede vecinal donde la señal 4G puede ser débil y donde se necesita certificar con GPS que la persona estuvo físicamente en el lugar del taller."
+        </div>
+      </div>
+
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-alvaro">Responde Álvaro</span>
+          <span class="time-badge">Pregunta 3</span>
+        </div>
+        <h3>"¿Por qué usaron AWS Cognito en lugar de hacer un login manual tradicional?"</h3>
+        <div class="qa-answer">
+          "Porque en el desarrollo profesional de hoy <b>no es una buena práctica almacenar contraseñas en tu propia base de datos</b> por el alto riesgo de filtraciones y demandas de privacidad.<br><br>
+          Al usar AWS Cognito, delegamos la autenticación en un proveedor especializado que maneja estándares RFC, emite <b>tokens JWT firmados con RS256</b> y gestiona la recuperación de credenciales de forma automática."
+        </div>
+      </div>
+
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-mariano">Responde Mariano</span>
+          <span class="time-badge">Pregunta 4</span>
+        </div>
+        <h3>"¿En qué se diferencia su propuesta del resto de los proyectos?"</h3>
+        <div class="qa-answer">
+          "En vez de armar un carrito de compras o una tienda genérica, nosotros nos enfocamos estrictamente en el caso real de <b>Ticdgm y Duoc UC</b>: la <b>Vinculación Comunitaria</b>.<br><br>
+          SyncPass resuelve la acreditación comunitaria en terreno con <b>códigos QR instantáneos, control de quórum en vivo y certificación de horas de voluntariado</b>, lo que permite a la institución emitir sus reportes semestrales con datos verídicos y sin usar papel."
+        </div>
+      </div>
+
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-alvaro">Responde Álvaro</span>
+          <span class="time-badge">Pregunta 5</span>
+        </div>
+        <h3>"¿Por qué PostgreSQL y no una base NoSQL como DynamoDB en AWS?"</h3>
+        <div class="qa-answer">
+          "Porque nuestro modelo de datos es <b>estrictamente relacional</b>: los talleres, los cupos, los usuarios y las asistencias están vinculados mediante llaves foráneas y reglas de integridad referencial. Usar DynamoDB nos obligaría a desnormalizar datos sin justificación técnica. Además, PostgreSQL corriendo en nuestra instancia EC2 nos otorga alto rendimiento a costo cero para el laboratorio."
+        </div>
+      </div>
+
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-alvaro">Responde Álvaro</span>
+          <span class="time-badge">Pregunta 6</span>
+        </div>
+        <h3>"¿Cómo generaron el sonido de confirmación al escanear?"</h3>
+        <div class="qa-answer">
+          "Utilizamos la <b>Web Audio API nativa de JavaScript</b>. En lugar de cargar un archivo de audio MP3 externo que consumiría ancho de banda y requeriría peticiones HTTP adicionales, creamos un oscilador sinusoidal por software que realiza una rampa exponencial de frecuencia de 880 Hz a 1760 Hz en 120 milisegundos. Es 100% nativo, no pesa nada y funciona de inmediato."
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function filterSection(filter, evt) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+
+      const allCards = document.querySelectorAll('.section-card, .context-box, .qr-banner-card, .qa-card');
+      if (filter === 'all') {
+        allCards.forEach(c => c.style.display = 'block');
+        return;
+      }
+
+      allCards.forEach(c => {
+        if (filter === 'mariano' && (c.classList.contains('item-mariano') || c.classList.contains('item-both'))) {
+          c.style.display = 'block';
+        } else if (filter === 'alvaro' && (c.classList.contains('item-alvaro') || c.classList.contains('item-both'))) {
+          c.style.display = 'block';
+        } else if (filter === 'demo' && c.classList.contains('item-demo')) {
+          c.style.display = 'block';
+        } else if (filter === 'preguntas' && c.classList.contains('qa-card')) {
+          c.style.display = 'block';
+        } else if (filter === 'extras' && c.classList.contains('item-extras')) {
+          c.style.display = 'block';
+        } else {
+          c.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
