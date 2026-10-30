@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Modo Micro: Guion de Álvaro | SyncPass</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #121826;
+      --card-border: #1f293d;
+      --alvaro-color: #a78bfa;
+      --alvaro-bg: rgba(167, 139, 250, 0.14);
+      --mariano-color: #38bdf8;
+      --mariano-bg: rgba(56, 189, 248, 0.1);
+      --emerald: #10b981;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 1rem 0.75rem 4rem;
+      max-width: 520px;
+      margin: 0 auto;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 16px;
+      padding: 1.25rem 1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .pill-header {
+      display: inline-block;
+      background: rgba(167, 139, 250, 0.2);
+      color: #c4b5fd;
+      border: 1px solid rgba(167, 139, 250, 0.45);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; }
+    p.lead { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* FILTROS TÁCTILES SUPERIORES */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      position: sticky;
+      top: 0.5rem;
+      z-index: 50;
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 0.35rem;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+    .filter-btn {
+      flex: 1;
+      padding: 0.6rem 0.5rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: var(--alvaro-color);
+      color: #0b0720;
+      box-shadow: 0 2px 8px rgba(167, 139, 250, 0.35);
+    }
+
+    /* TARJETAS DE DIAPOSITIVA */
+    .slide-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.15rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      position: relative;
+    }
+    .slide-card.alvaro-focus {
+      border-left: 4px solid var(--alvaro-color);
+    }
+    .slide-card.mariano-focus {
+      border-left: 4px solid var(--mariano-color);
+      opacity: 0.75;
+    }
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .slide-num {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+    .speaker-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .speaker-alvaro {
+      background: var(--alvaro-bg);
+      color: var(--alvaro-color);
+      border: 1px solid rgba(167, 139, 250, 0.4);
+    }
+    .speaker-mariano {
+      background: var(--mariano-bg);
+      color: var(--mariano-color);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .slide-title-preview {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 0.65rem;
+    }
+    .dialogue-box {
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 0.9rem;
+      margin-top: 0.6rem;
+    }
+    .dialogue-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--alvaro-color);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .dialogue-text {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: #ffffff;
+    }
+    .dialogue-text strong {
+      color: #c4b5fd;
+      font-weight: 700;
+    }
+    .tip-box {
+      background: rgba(167, 139, 250, 0.08);
+      border: 1px dashed rgba(167, 139, 250, 0.3);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.65rem;
+      font-size: 0.8rem;
+      color: #d8b4fe;
+    }
+
+    /* FLASHCARDS DE PREGUNTAS */
+    .qa-section {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--card-border);
+    }
+    .qa-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .qa-q {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fbbf24;
+      margin-bottom: 0.4rem;
+    }
+    .qa-a {
+      font-size: 0.86rem;
+      color: #e2e8f0;
+      line-height: 1.45;
+    }
+    .qa-a strong {
+      color: #a78bfa;
+    }
+
+    /* BARRA INFERIOR DE ACCESO RÁPIDO */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--card-border);
+      padding: 0.6rem 1rem;
+      display: flex;
+      justify-content: space-around;
+      z-index: 100;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .nav-btn {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--card-border);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="pill-header">Lectura Rápida en la Micro</div>
+    <h1>Guion de Álvaro · SyncPass</h1>
+    <p class="lead">Sincronizado paso a paso con las 11 Diapositivas de Gamma</p>
+  </header>
+
+  <!-- FILTROS TÁCTILES -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterSlides('alvaro')">Solo Mis Partes (Álvaro)</button>
+    <button class="filter-btn" onclick="filterSlides('all')">Ver Todo (11 Diapos)</button>
+    <button class="filter-btn" onclick="scrollToQA()">Preguntas Profe</button>
+  </div>
+
+  <!-- DIAPO 1 -->
+  <div class="slide-card mariano-focus" data-speaker="mariano">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 1 DE 11 · PORTADA</span>
+      <span class="speaker-badge speaker-mariano">Habla Mariano (00:00 - 00:30)</span>
+    </div>
+    <div class="slide-title-preview">SYNCPASS: Plataforma de gestión y acreditación digital</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label" style="color: var(--mariano-color);">Resumen de Mariano:</div>
+      <div class="dialogue-text" style="color: #cbd5e1; font-size: 0.88rem;">
+        Mariano da los buenos días a la comisión y presenta el proyecto SyncPass como solución a la toma de asistencia y gestión territorial de los talleres comunitarios de Duoc UC.
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAPO 2 -->
+  <div class="slide-card mariano-focus" data-speaker="mariano">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 2 DE 11 · EL PROBLEMA</span>
+      <span class="speaker-badge speaker-mariano">Habla Mariano (00:30 - 01:10)</span>
+    </div>
+    <div class="slide-title-preview">El problema empieza antes del taller: La asistencia depende del papel</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label" style="color: var(--mariano-color);">Resumen de Mariano:</div>
+      <div class="dialogue-text" style="color: #cbd5e1; font-size: 0.88rem;">
+        Mariano explica el desastre de las hojas de papel en sedes vecinales: filas de 20 minutos, firmas perdidas, transcripción manual a Excel y baja tasa de encuestas.
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAPO 3 -->
+  <div class="slide-card mariano-focus" data-speaker="mariano">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 3 DE 11 · LOS 4 ACTORES</span>
+      <span class="speaker-badge speaker-mariano">Habla Mariano (01:10 - 01:30)</span>
+    </div>
+    <div class="slide-title-preview">SyncPass conecta a los cuatro actores del operativo</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label" style="color: var(--mariano-color);">Resumen de Mariano:</div>
+      <div class="dialogue-text" style="color: #cbd5e1; font-size: 0.88rem;">
+        Mariano presenta los 4 roles del sistema: Docente, Estudiante Voluntario, Beneficiario Comunitario y Administrador.
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAPO 4 -->
+  <div class="slide-card mariano-focus" data-speaker="mariano">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 4 DE 11 · IMPACTO Y QUÓRUM</span>
+      <span class="speaker-badge speaker-mariano">Habla Mariano (01:30 - 02:00)</span>
+    </div>
+    <div class="slide-title-preview">El registro pasa de 45 segundos a menos de 2</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label" style="color: var(--mariano-color);">Resumen de Mariano:</div>
+      <div class="dialogue-text" style="color: #cbd5e1; font-size: 0.88rem;">
+        Mariano destaca la reducción de tiempo (< 2 segundos), quórum en vivo y aumento de respuesta al 65%. Luego te da el pase directo diciendo: <em>"Ahora Álvaro explicará la arquitectura tecnológica..."</em>.
+      </div>
+    </div>
+    <div class="tip-box">
+      <strong>Tu señal de entrada:</strong> En cuanto Mariano diga <em>"Ahora Álvaro explicará..."</em>, tomas la palabra con voz firme.
+    </div>
+  </div>
+
+  <!-- DIAPO 5 -->
+  <div class="slide-card alvaro-focus" data-speaker="alvaro">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 5 DE 11 · ARQUITECTURA CLOUD</span>
+      <span class="speaker-badge speaker-alvaro">Habla Álvaro (02:00 - 03:00)</span>
+    </div>
+    <div class="slide-title-preview">Una API central coordina tres universos tecnológicos</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label">Qué tienes que decir (Tu primer bloque fuerte):</div>
+      <div class="dialogue-text">
+        "Para soportar esta operación en terreno, diseñamos una arquitectura en tres capas desacopladas que consumen <strong>una misma API central</strong>:<br><br>
+        1. <strong>Los dos clientes:</strong> En el celular, una app en <strong>Android nativo con Jetpack Compose</strong> para los voluntarios; en el computador, una consola web en <strong>React 19 desplegada en Vercel</strong> para los coordinadores.<br><br>
+        2. <strong>La nube y seguridad:</strong> Ambos clientes entran por <strong>AWS API Gateway con cifrado HTTPS</strong>. La autenticación federada la gestiona <strong>AWS Cognito</strong>, emitiendo tokens <strong>JWT firmados con RS256</strong>.<br><br>
+        3. <strong>Backend y persistencia:</strong> Un microservicio en <strong>Spring Boot 3 con Java 21</strong> ejecutándose en una máquina virtual <strong>AWS EC2 con Ubuntu</strong>, conectado a una base de datos relacional <strong>PostgreSQL 16</strong>.<br><br>
+        Lo clave es que si un alumno acredita desde Android o un docente registra desde la web, ambos consumen el mismo backend y validan el mismo token JWT."
+      </div>
+    </div>
+    <div class="tip-box">
+      <strong>Tip en la micro:</strong> Grábate la cadena: <em>"React y Android -> API Gateway -> Cognito RS256 -> Spring Boot en EC2 -> PostgreSQL 16"</em>. Si dices esa cadena fluida, el profesor sabe de inmediato que dominas la arquitectura.
+    </div>
+  </div>
+
+  <!-- DIAPO 6 -->
+  <div class="slide-card mariano-focus" data-speaker="mariano">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 6 DE 11 · APP MÓVIL ANDROID</span>
+      <span class="speaker-badge speaker-mariano">Habla Mariano (03:00 - 04:30)</span>
+    </div>
+    <div class="slide-title-preview">La aplicación móvil convierte el terreno en una operación trazable</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label" style="color: var(--mariano-color);">Resumen de Mariano:</div>
+      <div class="dialogue-text" style="color: #cbd5e1; font-size: 0.88rem;">
+        Mariano demuestra la app de Android: patrón MVVM con Corrutinas, JwtDecoder para redirección automática y los 2 mantenedores móviles (Talleres con quórum y Operadores territoriales).
+      </div>
+    </div>
+    <div class="tip-box">
+      <strong>Tu acción aquí:</strong> Dejas abierto el navegador del computador en <strong>https://sync-pass-web-rho.vercel.app/</strong> para entrar de inmediato a tu demostración web.
+    </div>
+  </div>
+
+  <!-- DIAPO 7 -->
+  <div class="slide-card alvaro-focus" data-speaker="alvaro">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 7 DE 11 · CONSOLA WEB EN VERCEL</span>
+      <span class="speaker-badge speaker-alvaro">Habla Álvaro (04:30 - 06:00)</span>
+    </div>
+    <div class="slide-title-preview">La consola web concentra la gestión institucional</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label">Qué tienes que decir (Tu demostración en vivo de la Web):</div>
+      <div class="dialogue-text">
+        "En el navegador tenemos nuestra consola institucional construida en <strong>React 19 con TypeScript</strong> y desplegada en <strong>Vercel</strong>.<br><br>
+        Aquí demostramos los <strong>2 mantenedores web que exige la rúbrica</strong>:<br><br>
+        • <strong>Mantenedor 1 (Gestión de Iniciativas):</strong> Como pueden ver en pantalla, permite crear nuevos talleres con un modal validado, buscar en tiempo real por nombre o sede, filtrar por estado (Todos, En curso, Activo), editar cupos y eliminar con confirmación.<br><br>
+        • <strong>Mantenedor 2 (Directorio de Usuarios):</strong> En la ruta protegida <code>/users</code>, auditamos los perfiles institucionales. Como ven, mientras carga muestra una <strong>vista previa moderna con skeleton loader</strong> y permite filtrar entre Docentes, Voluntarios, Beneficiarios y Administradores según las políticas de acceso RBAC."
+      </div>
+    </div>
+    <div class="tip-box">
+      <strong>Tip en la micro:</strong> Muestra en la pantalla cómo filtras un taller por estado y cómo la lista de usuarios muestra el skeleton loader al cargar. Destaca que está publicado en Vercel con HTTPS.
+    </div>
+  </div>
+
+  <!-- DIAPO 8 -->
+  <div class="slide-card alvaro-focus" data-speaker="alvaro">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 8 DE 11 · PRUEBAS VITEST</span>
+      <span class="speaker-badge speaker-alvaro">Habla Álvaro (06:00 - 06:45)</span>
+    </div>
+    <div class="slide-title-preview">La calidad está respaldada por 25 pruebas automatizadas</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label">Qué tienes que decir (Demostración de Testing):</div>
+      <div class="dialogue-text">
+        "Para respaldar la calidad de software y el estándar que pide Duoc UC, implementamos una suite de <strong>25 pruebas unitarias automatizadas con Vitest</strong>.<br><br>
+        Al ejecutar <code>npm test</code> en la consola, comprobamos que las <strong>25 pruebas en 8 suites se aprueban al 100% en apenas 1.5 segundos</strong>, evaluando serialización de clientes API, validación de tokens JWT, guards de autenticación y componentes visuales."
+      </div>
+    </div>
+    <div class="tip-box">
+      <strong>Tip en la micro:</strong> Si puedes tener la terminal abierta con el comando <code>npm test</code> listo para darle Enter frente al profesor, demuestras que el software está blindado.
+    </div>
+  </div>
+
+  <!-- DIAPO 9 -->
+  <div class="slide-card alvaro-focus" data-speaker="alvaro">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 9 DE 11 · FASE 2 (FIGMA)</span>
+      <span class="speaker-badge speaker-alvaro">Habla Álvaro o Mariano (06:45 - 07:30)</span>
+    </div>
+    <div class="slide-title-preview">La Fase 2 lleva SyncPass del prototipo operativo al terreno real</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label">Qué tienes que decir:</div>
+      <div class="dialogue-text">
+        "En la Fase 2, proyectada en nuestros mockups de Figma para producción masiva, incorporamos dos defensas críticas para terreno:<br><br>
+        1. <strong>Arquitectura Offline-first con Room SQLite:</strong> Almacena las acreditaciones en el almacenamiento local del teléfono si se corta el 4G en la junta vecinal, sincronizando por lotes al recuperar señal.<br><br>
+        2. <strong>Geocerca de 50 metros con GPS:</strong> Valida mediante coordenadas geográficas que el escáner esté operando dentro del radio físico de la sede vecinal, impidiendo cualquier intento de fraude remoto."
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAPO 10 -->
+  <div class="slide-card alvaro-focus" data-speaker="alvaro">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 10 DE 11 · RÚBRICA Y CONCLUSIÓN</span>
+      <span class="speaker-badge speaker-alvaro">Habla Álvaro (07:30 - 08:00)</span>
+    </div>
+    <div class="slide-title-preview">SyncPass cumple la rúbrica y deja una base escalable</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label">Qué tienes que decir (El Check de Rúbrica):</div>
+      <div class="dialogue-text">
+        "En conclusión, SyncPass cumple con todos los puntos evaluados en la pauta:<br>
+        • Login multirol con tokens JWT federados.<br>
+        • 4 mantenedores funcionales: 2 en Android nativo y 2 en la consola web.<br>
+        • Una API central protegida con HTTPS en AWS.<br>
+        • Despliegue productivo en AWS EC2 y Vercel.<br>
+        • 25 pruebas unitarias con 100% de cobertura de integración."
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAPO 11 -->
+  <div class="slide-card alvaro-focus" data-speaker="alvaro">
+    <div class="slide-header">
+      <span class="slide-num">DIAPOSITIVA 11 DE 11 · EL GRAN FINAL</span>
+      <span class="speaker-badge speaker-alvaro">Habla Mariano & Álvaro (08:00 - 09:30)</span>
+    </div>
+    <div class="slide-title-preview">Demostración en Vivo: Prueba SyncPass (Código QR)</div>
+    <div class="dialogue-box">
+      <div class="dialogue-label">La dinámica del cierre en vivo:</div>
+      <div class="dialogue-text">
+        <strong>1. Mariano dice:</strong> <em>"Profesor, lo invitamos a apuntar con la cámara de su celular al código QR que ve en pantalla..."</em><br><br>
+        <strong>2. Tu acción en el computador:</strong> El profesor abre su credencial en el celular. Tú en la consola web vas al rol <strong>Voluntario</strong> y pulsas el botón verde <strong>Escanear Pase QR (&lt; 1.8s)</strong>.<br><br>
+        <strong>3. Resultado:</strong> Suena el pitido de la Web Audio API (1760 Hz), la pantalla destella en verde y la barra del taller sube de <strong>28 a 29 asistentes en directo</strong>.<br><br>
+        <strong>4. Tu frase final de cierre:</strong><br>
+        <em>"Como pudo comprobar profesor, el pase fue validado en menos de 2 segundos, el quórum subió en tiempo real y la asistencia quedó registrada. Con esto demostramos la integración total entre la nube, el celular y la web. Muchas gracias, quedamos atentos a sus preguntas."</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE FLASHCARDS / PREGUNTAS DEL PROFESOR -->
+  <section class="qa-section" id="qaSection">
+    <h2 style="font-size: 1.15rem; color: #fbbf24; margin-bottom: 0.75rem;">Respuestas Técnicas de Álvaro (Para el 7.0)</h2>
+
+    <div class="qa-card">
+      <div class="qa-q">1. "¿Por qué usaron PostgreSQL y no DynamoDB o MongoDB en AWS?"</div>
+      <div class="qa-a">
+        "Porque nuestro modelo de datos es <strong>estrictamente relacional</strong>: los talleres, cupos, asistencias y usuarios tienen relaciones de llaves foráneas e integridad referencial estricta. Una base NoSQL nos obligaría a desnormalizar datos y aumentaría el riesgo de inconsistencia al calcular el quórum en vivo."
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">2. "¿Por qué delegaron la autenticación en AWS Cognito?"</div>
+      <div class="qa-a">
+        "Porque las mejores prácticas de la industria exigen <strong>no almacenar contraseñas en texto plano ni en hashes propios</strong> en la base de datos de la aplicación. Cognito maneja estándares RFC, recuperación de cuentas segura y emite <strong>tokens JWT firmados con RS256</strong> que nuestro backend valida con la clave pública de AWS."
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">3. "¿Cómo generaron el sonido de confirmación al escanear?"</div>
+      <div class="qa-a">
+        "Usamos la <strong>Web Audio API nativa del navegador</strong>. En lugar de cargar archivos MP3 pesados que consumen datos, creamos un oscilador sinusoidal por software con una rampa exponencial de 880 Hz a 1760 Hz en 120 milisegundos. Es 100% nativo, pesa cero kilobytes y suena de forma instantánea."
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-q">4. "¿Qué garantizan las 25 pruebas unitarias con Vitest?"</div>
+      <div class="qa-a">
+        "Garantizan que el cliente HTTP maneje errores de red, que los guards de autenticación bloqueen rutas no autorizadas, que el parseo de tokens JWT sea correcto y que los componentes de React rendericen sin excepciones en menos de 2 segundos."
+      </div>
+    </div>
+  </section>
+
+  <!-- BARRA FLOTANTE INFERIOR -->
+  <div class="bottom-nav">
+    <a href="https://sync-pass-web-rho.vercel.app/" target="_blank" class="nav-btn" style="background: #4f46e5;">Abrir Web SyncPass</a>
+    <a href="#qaSection" class="nav-btn" style="background: #7c3aed;">Ver Preguntas Técnicas</a>
+  </div>
+
+  <script>
+    function filterSlides(type) {
+      const cards = document.querySelectorAll('.slide-card');
+      const buttons = document.querySelectorAll('.filter-btn');
+      
+      buttons.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      cards.forEach(card => {
+        if (type === 'alvaro') {
+          if (card.dataset.speaker === 'alvaro') {
+            card.style.display = 'block';
+            card.style.opacity = '1';
+          } else {
+            card.style.display = 'none';
+          }
+        } else {
+          card.style.display = 'block';
+          card.style.opacity = card.dataset.speaker === 'mariano' ? '0.75' : '1';
+        }
+      });
+    }
+
+    function scrollToQA() {
+      const qa = document.getElementById('qaSection');
+      if (qa) qa.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
