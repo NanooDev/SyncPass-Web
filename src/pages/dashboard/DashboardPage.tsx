@@ -631,7 +631,7 @@ export default function DashboardPage() {
                   onClick={() => setSearchTerm('')}
                   style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem' }}
                 >
-                  ✕
+                  X
                 </button>
               )}
             </div>
@@ -915,7 +915,7 @@ export default function DashboardPage() {
                     <div className={styles.laserBeam} />
                     {!cameraActive && (
                       <div style={{ position: 'absolute', color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center', padding: '1rem', pointerEvents: 'none' }}>
-                        <div style={{ fontSize: '1.6rem', marginBottom: '0.25rem' }}>📷</div>
+                        <div style={{ marginBottom: '0.4rem', color: '#10b981' }}><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
                         Visor óptico en espera.<br />
                         Activa la cámara o pulsa abajo para escanear.
                       </div>
@@ -980,7 +980,7 @@ export default function DashboardPage() {
                         gap: '0.5rem',
                       }}
                     >
-                      <span style={{ color: 'var(--brand-emerald)', fontWeight: 800 }}>✓</span>
+                      <span style={{ color: 'var(--brand-emerald)', fontWeight: 800 }}>[OK]</span>
                       <span>{item}</span>
                     </div>
                   ))}
@@ -1107,7 +1107,7 @@ export default function DashboardPage() {
                     marginBottom: '0.75rem',
                   }}
                 >
-                  ✓
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <h4 style={{ fontSize: '1.05rem', color: 'var(--brand-emerald)', marginBottom: '0.25rem' }}>
                   ¡Muchas gracias por tu valoración!
@@ -1148,7 +1148,7 @@ export default function DashboardPage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {star} ★
+                        {star} pts
                       </button>
                     ))}
                   </div>
@@ -1584,7 +1584,7 @@ export default function DashboardPage() {
                 onClick={() => setShowProjectModal(false)}
                 style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.1rem', cursor: 'pointer' }}
               >
-                ✕
+                X
               </button>
             </div>
 
