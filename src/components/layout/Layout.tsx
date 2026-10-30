@@ -86,6 +86,22 @@ export default function Layout({ children }: { children: ReactNode }) {
                 Usuarios
               </Link>
             )}
+            <a
+              href="/presentacion.html"
+              className={styles.link}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Slides
+            </a>
+            <a
+              href="/guia.html"
+              className={styles.link}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Guía Móvil
+            </a>
           </div>
 
           {/* Botón de Modo Claro / Modo Oscuro */}
