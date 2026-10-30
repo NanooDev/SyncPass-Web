@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SyncPass | Guía de Estudio Móvil</title>
+  <title>SyncPass | Guía de Estudio Oficial (Duoc UC & Ticdgm)</title>
   <style>
     :root {
       --bg: #090d16;
@@ -12,7 +12,6 @@
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --primary: #3b82f6;
-      --primary-hover: #2563eb;
       --accent: #10b981;
       --mariano: #8b5cf6;
       --mariano-bg: rgba(139, 92, 246, 0.15);
@@ -35,7 +34,6 @@
       min-height: 100vh;
     }
 
-    /* Header Fijo para Móvil */
     header {
       position: sticky;
       top: 0;
@@ -53,7 +51,7 @@
     }
     .brand {
       font-weight: 800;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -65,11 +63,6 @@
       border-radius: 8px;
       font-size: 0.75rem;
       font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-    .header-actions {
-      display: flex;
-      gap: 0.5rem;
     }
     .header-btn {
       background: rgba(16, 185, 129, 0.15);
@@ -84,15 +77,8 @@
       align-items: center;
       gap: 0.35rem;
       cursor: pointer;
-      touch-action: manipulation;
-    }
-    .header-btn:active {
-      transform: scale(0.96);
-      background: var(--accent);
-      color: #064e3b;
     }
 
-    /* Selector de Filtro de Orador con scroll táctil */
     .filter-bar {
       display: flex;
       gap: 0.5rem;
@@ -116,12 +102,6 @@
       cursor: pointer;
       touch-action: manipulation;
       transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-    .filter-btn:active {
-      transform: scale(0.95);
     }
     .filter-btn.active {
       background: var(--primary);
@@ -144,7 +124,6 @@
       color: #451a03;
     }
 
-    /* Contenido */
     main {
       padding: 1rem;
       max-width: 800px;
@@ -159,39 +138,33 @@
       margin-bottom: 1.25rem;
     }
     .hero-banner h1 {
-      font-size: 1.45rem;
+      font-size: 1.4rem;
       font-weight: 900;
       margin-bottom: 0.35rem;
       color: #ffffff;
     }
     .hero-banner p {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: var(--text-muted);
       line-height: 1.5;
     }
 
-    /* Tip de Exposición */
-    .tip-box {
-      background: rgba(59, 130, 246, 0.1);
+    .context-pill {
+      background: rgba(59, 130, 246, 0.15);
       border-left: 4px solid var(--primary);
       padding: 0.85rem;
       border-radius: 8px;
       margin-bottom: 1.25rem;
-      font-size: 0.85rem;
+      font-size: 0.86rem;
       color: #bfdbfe;
     }
-    .tip-box strong {
-      color: #ffffff;
-    }
 
-    /* Tarjetas de Sección */
     .section-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 1.25rem;
       margin-bottom: 1.25rem;
-      transition: all 0.2s ease;
     }
     .section-card.highlight-mariano {
       border-left: 5px solid var(--mariano);
@@ -241,9 +214,9 @@
     }
 
     .section-card h2 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 800;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       color: #ffffff;
     }
 
@@ -251,9 +224,8 @@
       font-size: 0.75rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
       color: var(--text-muted);
-      margin-top: 0.75rem;
+      margin-top: 0.65rem;
       margin-bottom: 0.35rem;
     }
 
@@ -262,7 +234,7 @@
       border: 1px solid #1e293b;
       border-radius: 12px;
       padding: 1rem;
-      font-size: 0.96rem;
+      font-size: 0.95rem;
       color: #f1f5f9;
       line-height: 1.65;
     }
@@ -270,37 +242,29 @@
       color: #38bdf8;
       font-weight: 700;
     }
-    .dialogue-box mark {
-      background: rgba(16, 185, 129, 0.25);
-      color: #a7f3d0;
-      padding: 0.1rem 0.35rem;
-      border-radius: 4px;
-      font-weight: 600;
-    }
 
     .technical-points {
-      margin-top: 0.85rem;
+      margin-top: 0.75rem;
       background: rgba(255, 255, 255, 0.02);
       border-radius: 10px;
       padding: 0.75rem;
     }
     .technical-points h4 {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 800;
       color: var(--accent);
       text-transform: uppercase;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
     .technical-points ul {
       padding-left: 1.2rem;
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       color: #cbd5e1;
     }
     .technical-points li {
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.25rem;
     }
 
-    /* Tarjetas de Preguntas */
     .qa-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -309,18 +273,18 @@
       margin-bottom: 1rem;
     }
     .qa-card h3 {
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 800;
       color: #ffffff;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
+      margin-top: 0.45rem;
+      margin-bottom: 0.45rem;
       line-height: 1.4;
     }
     .qa-answer {
-      font-size: 0.95rem;
+      font-size: 0.94rem;
       color: #e2e8f0;
       background: #030712;
-      padding: 1rem;
+      padding: 0.95rem;
       border-radius: 10px;
       line-height: 1.6;
       border-left: 3px solid var(--primary);
@@ -329,33 +293,7 @@
       color: #38bdf8;
     }
 
-    /* Glosario Rápido */
-    .glossary-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 1.1rem;
-      margin-bottom: 1rem;
-    }
-    .glossary-item {
-      padding: 0.75rem 0;
-      border-bottom: 1px solid #1e293b;
-    }
-    .glossary-item:last-child {
-      border-bottom: none;
-    }
-    .glossary-term {
-      font-weight: 800;
-      color: #38bdf8;
-      font-size: 0.95rem;
-    }
-    .glossary-meaning {
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      margin-top: 0.2rem;
-    }
-
-    /* Barra Inferior Fija para Móvil (Safe Area + Touch Friendly) */
+    /* Barra Inferior Fija para Móvil */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -364,12 +302,11 @@
       background: rgba(15, 23, 42, 0.97);
       backdrop-filter: blur(16px);
       border-top: 1px solid var(--card-border);
-      padding: 0.6rem 0.75rem calc(0.6rem + env(safe-area-inset-bottom, 0px)) 0.75rem;
+      padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom, 0px)) 1rem;
       display: flex;
       justify-content: space-around;
       align-items: center;
       z-index: 1000;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
     .nav-item {
       flex: 1;
@@ -385,14 +322,8 @@
       min-height: 48px;
       border-radius: 10px;
       cursor: pointer;
-      touch-action: manipulation;
-      transition: all 0.15s ease;
       background: transparent;
       border: none;
-    }
-    .nav-item:active {
-      transform: scale(0.95);
-      background: rgba(255, 255, 255, 0.05);
     }
     .nav-item.active {
       color: var(--primary);
@@ -400,70 +331,71 @@
     .nav-item svg {
       width: 22px;
       height: 22px;
-      stroke-width: 2;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header Fijo con Filtros de Orador -->
   <header>
     <div class="header-top">
       <div class="brand">
         <span class="badge">SyncPass</span>
-        <span>Guía de Exposición</span>
+        <span>Guía Duoc UC & Ticdgm</span>
       </div>
-      <div class="header-actions">
-        <a href="./presentacion.html" class="header-btn" onclick="goToSlides(event)">
-          Slides →
-        </a>
-      </div>
+      <a href="./presentacion.html" class="header-btn" onclick="goToSlides(event)">
+        Ver Slides →
+      </a>
     </div>
 
-    <!-- Barra de Filtros Rápidos -->
     <div class="filter-bar">
       <button class="filter-btn active" onclick="filterSpeaker('all', event)">Todo el Proyecto</button>
       <button class="filter-btn mariano" onclick="filterSpeaker('mariano', event)">Solo Mariano</button>
       <button class="filter-btn alvaro" onclick="filterSpeaker('alvaro', event)">Solo Álvaro</button>
       <button class="filter-btn preguntas" onclick="filterSpeaker('preguntas', event)">Preguntas Profe</button>
-      <button class="filter-btn" onclick="filterSpeaker('glosario', event)">Glosario Técnico</button>
+      <button class="filter-btn" onclick="filterSpeaker('caso', event)">El Caso (Ticdgm)</button>
     </div>
   </header>
 
-  <!-- Contenido Principal -->
   <main>
     <div class="hero-banner">
       <h1>Defensa Final: Full Stack 2 y Móvil</h1>
-      <p>Palabras naturales y claras para hablar con seguridad, con los términos técnicos exactos que la rúbrica de Duoc UC exige.</p>
+      <p>Alineada 100% con el caso del socio formador <b>TI Consulting Diego Garcés Miranda (Ticdgm)</b> y la Escuela de Informática de Duoc UC.</p>
     </div>
 
-    <div class="tip-box">
-      <strong>Consejo para la presentación:</strong> Hablen con calma y con sus propias palabras. No traten de memorizar párrafos gigantes; quédense con la idea central y nombren siempre las tecnologías en negrita.
+    <!-- SECCIÓN CONTEXTO DEL CASO -->
+    <div class="context-pill item-caso">
+      <strong style="color: #ffffff;">¿Para quién es realmente SyncPass según el caso oficial?</strong><br>
+      • <b>Socio Formador:</b> TI CONSULTING DIEGO GARCÉS MIRANDA E.I.R.L. (Ticdgm) para Duoc UC CITT Plaza Vespucio.<br>
+      • <b>Los Estudiantes Voluntarios de Duoc UC:</b> Van a las sedes vecinales y colegios a dictar los talleres. Necesitan registrar asistencia rápida y certificar sus horas de voluntariado.<br>
+      • <b>Los Docentes Coordinadores:</b> Crean los proyectos, fijan cupos, ven el quórum en vivo y emiten reportes.<br>
+      • <b>Los Beneficiarios Comunitarios:</b> Vecinos que asisten al taller, marcan con su QR en 2 segundos y responden la encuesta rápida.<br>
+      • <b>El Problema:</b> Se anotaba en papel a mano (filas de 20 min, pérdida de firmas y digitación manual en Excel).
     </div>
 
-    <!-- BLOQUE 1: Introducción y Problema (Mariano) -->
+    <!-- BLOQUE 1: Introducción, Caso y Uso de la IA (Mariano) -->
     <div class="section-card highlight-mariano item-mariano">
       <div class="section-header">
         <span class="time-badge">00:00 - 01:30</span>
         <span class="speaker-tag tag-mariano">Mariano</span>
       </div>
-      <h2>1. Introducción, Qué Problema Resolvemos y Cómo Usamos la IA</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositivas 1, 2 y 3 de la presentación.</p>
+      <h2>1. Introducción, Caso Ticdgm y Uso de la IA</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositivas 1 a 5 de la presentación.</p>
 
       <div class="dialogue-title">Qué decir frente al profesor:</div>
       <div class="dialogue-box">
-        "Buenos días profesor. Hoy junto a Álvaro presentamos <b>SyncPass</b>, nuestra solución de asistencia y gestión para los talleres comunitarios de <b>Vinculación con el Medio de Duoc UC</b>.<br><br>
-        El problema real que resolvemos es que en las juntas de vecinos la asistencia se sigue anotando a mano en <b>hojas de papel</b>. Eso genera desorden, se pierden datos y los coordinadores no tienen idea del quórum real hasta días después.<br><br>
-        Con SyncPass cambiamos eso por <b>códigos QR rápidos que se validan en menos de 2 segundos</b>, calculando el quórum en vivo.<br><br>
-        Sobre la <b>Inteligencia Artificial</b>: la usamos como apoyo de programación en equipo (pair programming). No le pedimos que hiciera el código sola, sino que la ocupamos para resolver la conexión segura con <b>AWS Cognito</b>, armar las <b>25 pruebas unitarias con Vitest</b> y diseñar las pantallas para que fueran ordenadas y profesionales."
+        "Buenos días profesor. Hoy junto a Álvaro presentamos <b>SyncPass</b>, nuestra solución desarrollada para el socio formador <b>TI Consulting Diego Garcés Miranda (Ticdgm)</b> para los proyectos de <b>Vinculación Comunitaria de Duoc UC</b>.<br><br>
+        El problema real del caso es que cuando los <b>estudiantes voluntarios de Duoc UC</b> van a terreno a dictar talleres, la asistencia de los beneficiarios se anota a mano en <b>hojas de papel</b>. Eso genera filas de 20 minutos, pérdida de hojas y obliga a transcribir cientos de horas a mano en Excel para justificar las horas de voluntariado.<br><br>
+        Con SyncPass cambiamos eso por <b>pases con códigos QR que se escanean en menos de 2 segundos</b>, calculando el quórum en vivo y subiendo la respuesta a encuestas sobre el 65%.<br><br>
+        Sobre la <b>Inteligencia Artificial</b>: la usamos como apoyo de programación en equipo (pair programming). Nos ayudó a definir los modelos DTO compartidos entre Kotlin y TypeScript, a resolver la conexión segura con <b>AWS Cognito</b>, y a armar las <b>25 pruebas unitarias con Vitest</b>."
       </div>
 
       <div class="technical-points">
-        <h4>Palabras técnicas clave que deben sonar:</h4>
+        <h4>Puntos técnicos clave a mencionar:</h4>
         <ul>
-          <li><b>Vinculación con el Medio Duoc UC</b> (contexto de aplicación).</li>
-          <li><b>Pases QR instantáneos</b> (reemplazo de hojas de papel).</li>
-          <li><b>Pair programming con IA</b> (asistencia técnica, no copy-paste).</li>
+          <li><b>Caso oficial Ticdgm y Duoc UC</b> (Vinculación Comunitaria).</li>
+          <li><b>Estudiantes Voluntarios y Docentes</b> (horas de voluntariado y quórum).</li>
+          <li><b>Acreditación QR en 2 segundos</b> (reemplazo del papel al 100%).</li>
+          <li><b>Pair programming con IA</b> (asistencia en Cognito y Vitest).</li>
         </ul>
       </div>
     </div>
@@ -475,21 +407,21 @@
         <span class="speaker-tag tag-alvaro">Álvaro</span>
       </div>
       <h2>2. Arquitectura de los 3 Universos</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 4 de la presentación.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 6 de la presentación.</p>
 
       <div class="dialogue-title">Qué decir frente al profesor:</div>
       <div class="dialogue-box">
-        "El proyecto está dividido en tres universos conectados pero independientes:<br><br>
-        1. <b>Las aplicaciones cliente:</b> Por un lado tenemos la app móvil en <b>Android nativo con Jetpack Compose y MVVM</b>, y por otro la aplicación web en <b>React 19 con TypeScript</b> que tenemos desplegada en <b>Vercel</b>.<br><br>
-        2. <b>La nube de AWS:</b> Ambos clientes consumen exactamente la misma API a través de <b>AWS API Gateway con HTTPS</b>. La seguridad y los usuarios los maneja <b>AWS Cognito</b>, que emite tokens <b>JWT</b>.<br><br>
-        3. <b>El backend y la base de datos:</b> Tenemos un servidor en <b>Spring Boot 3 con Java 21</b> corriendo en una máquina virtual <b>AWS EC2 con Ubuntu</b>, conectado a una base de datos <b>PostgreSQL</b>.<br><br>
-        Lo importante aquí es que si entras desde el teléfono o desde la web, entras con la misma cuenta y el <b>JWT</b> se valida en el mismo backend central."
+        "El sistema conecta tres universos tecnológicos:<br><br>
+        1. <b>Las dos aplicaciones cliente:</b> Por un lado la aplicación móvil en <b>Android nativo con Jetpack Compose y MVVM</b> para los monitores en terreno, y por otro la consola web en <b>React 19 con TypeScript</b> desplegada en <b>Vercel</b> para los coordinadores.<br><br>
+        2. <b>La nube de AWS:</b> Ambos clientes se conectan a través de <b>AWS API Gateway con HTTPS</b>. La identidad la gestiona <b>AWS Cognito</b> con tokens <b>JWT</b>.<br><br>
+        3. <b>El backend y la base de datos:</b> Tenemos un microservicio en <b>Spring Boot 3 con Java 21</b> corriendo en una máquina virtual <b>AWS EC2 Ubuntu</b>, conectado a una base de datos <b>PostgreSQL 16</b>.<br><br>
+        Lo fundamental es que tanto el celular como la web consumen la misma API central y validan el mismo token JWT."
       </div>
 
       <div class="technical-points">
-        <h4>Palabras técnicas clave que deben sonar:</h4>
+        <h4>Puntos técnicos clave a mencionar:</h4>
         <ul>
-          <li><b>Jetpack Compose y MVVM</b> en Android.</li>
+          <li><b>Jetpack Compose y MVVM</b> en Android nativo.</li>
           <li><b>React 19 + TypeScript en Vercel</b> en Web.</li>
           <li><b>AWS EC2 + API Gateway HTTPS + Cognito con JWT</b> en Backend.</li>
           <li><b>Misma API compartida</b> para ambas plataformas.</li>
@@ -504,25 +436,15 @@
         <span class="speaker-tag tag-mariano">Mariano</span>
       </div>
       <h2>3. Demostración en Vivo: Universo Mobile (Android)</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 5. Mostrar la app en el celular o Android Studio.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 7. Mostrar la app en el celular o Android Studio.</p>
 
       <div class="dialogue-title">Qué decir frente al profesor:</div>
       <div class="dialogue-box">
-        "En la aplicación Android usamos <b>Jetpack Compose</b> para diseñar la interfaz y la arquitectura <b>MVVM</b> con <b>Retrofit y Corrutinas</b> para las llamadas de red.<br><br>
-        Cuando el usuario inicia sesión, la app toma el token <b>JWT</b>, lo lee con nuestro componente <code>JwtDecoder</code> y <b>lo redirige de inmediato a la pantalla según su rol</b> (Docente, Estudiante o Administrador) sin pedir confirmaciones intermedias.<br><br>
-        Cumpliendo con la rúbrica, tenemos <b>dos mantenedores en el celular</b>:<br>
-        • <b>Mantenedor 1 (Talleres y Quórum):</b> Muestra la lista de talleres territoriales con su barra de quórum en vivo y permite generar el <b>código QR</b> para que la gente marque asistencia.<br>
-        • <b>Mantenedor 2 (Administrador):</b> Permite ver el estado de los operadores territoriales y enviar <b>alertas push</b> directo al teléfono."
-      </div>
-
-      <div class="technical-points">
-        <h4>Palabras técnicas clave que deben sonar:</h4>
-        <ul>
-          <li><b>Jetpack Compose</b> (interfaz moderna de Android).</li>
-          <li><b>MVVM, Retrofit y Corrutinas</b> (arquitectura y llamadas a la API).</li>
-          <li><b>Redirección reactiva por JWT</b> (cada rol ve su pantalla directa).</li>
-          <li><b>2 Mantenedores en móvil:</b> Talleres/Quórum y Administración/Alertas.</li>
-        </ul>
+        "En la aplicación Android usamos <b>Jetpack Compose</b> para la interfaz y <b>MVVM</b> con <b>Retrofit y Corrutinas</b> para las llamadas de red.<br><br>
+        Al iniciar sesión, nuestro componente <code>JwtDecoder</code> decodifica el token y <b>redirige de inmediato a la pantalla del rol</b> (Docente, Estudiante Voluntario o Admin) sin pasos intermedios.<br><br>
+        Tenemos los <b>dos mantenedores en el celular</b>:<br>
+        • <b>Mantenedor 1 (Talleres y Quórum):</b> Muestra la lista de talleres territoriales con su barra de quórum en vivo y permite generar y escanear el <b>código QR</b> de acreditación.<br>
+        • <b>Mantenedor 2 (Administrador):</b> Permite supervisar los operadores del sistema y enviar <b>alertas push</b> en tiempo real directo al celular."
       </div>
     </div>
 
@@ -533,66 +455,46 @@
         <span class="speaker-tag tag-alvaro">Álvaro</span>
       </div>
       <h2>4. Demostración en Vivo: Universo Web (React + Vercel)</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 6. Mostrar la página abierta en Vercel.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 8. Mostrar la página abierta en Vercel.</p>
 
       <div class="dialogue-title">Qué decir frente al profesor:</div>
       <div class="dialogue-box">
-        "Pasando al frontend web, la página está desplegada en producción en <b>Vercel</b>. Al iniciar sesión con <b>AWS Cognito</b>, el sistema reconoce quién eres y te da la bienvenida con selector de roles.<br><br>
-        Aquí cumplimos con los <b>dos mantenedores del front</b>:<br>
-        • <b>Mantenedor 1 (CRUD de Talleres):</b> Es un mantenedor completo donde podemos <b>crear</b> un nuevo taller con un modal, <b>buscar</b> en tiempo real con la barra superior, <b>filtrar</b> por pestañas (Todos, En curso, Activo), <b>editar</b> cupos y <b>eliminar</b> talleres.<br>
-        • <b>Mantenedor 2 (Gestión de Usuarios):</b> En la ruta protegida <code>/users</code> listamos a los docentes y voluntarios con filtros por rol.<br><br>
-        Además, la interfaz cuenta con soporte completo para <b>modo claro y modo oscuro</b> con un clic."
-      </div>
-
-      <div class="technical-points">
-        <h4>Palabras técnicas clave que deben sonar:</h4>
-        <ul>
-          <li><b>CRUD interactivo</b> (Crear, Listar con buscador, Editar y Borrar).</li>
-          <li><b>Ruta protegida por JWT:</b> <code>/users</code> para gestión de usuarios.</li>
-          <li><b>Despliegue activo en Vercel</b> con modo claro y oscuro.</li>
-        </ul>
+        "En el frontend web desplegado en <b>Vercel</b>, al autenticarnos con <b>AWS Cognito</b>, entramos a la consola institucional donde cumplimos con los <b>dos mantenedores del front</b>:<br><br>
+        • <b>Mantenedor 1 (CRUD de Talleres):</b> Un mantenedor completo donde podemos <b>crear</b> un nuevo taller con un modal, <b>buscar</b> en tiempo real con la barra superior, <b>filtrar</b> por estado (Todos, En curso, Activo), <b>editar</b> cupos y <b>eliminar</b> talleres.<br>
+        • <b>Mantenedor 2 (Gestión de Usuarios):</b> En la ruta protegida <code>/users</code> auditamos a los docentes y alumnos registrados con filtros por rol.<br><br>
+        Todo con soporte para <b>modo claro y modo oscuro</b> con un solo clic."
       </div>
     </div>
 
-    <!-- BLOQUE 5: Backend, Cloud y Testing (Álvaro) -->
+    <!-- BLOQUE 5: Calidad y Pruebas Unitarias (Álvaro) -->
     <div class="section-card highlight-alvaro item-alvaro">
       <div class="section-header">
         <span class="time-badge">07:00 - 08:30</span>
         <span class="speaker-tag tag-alvaro">Álvaro</span>
       </div>
-      <h2>5. Backend en AWS y 25 Pruebas Unitarias Automatizadas</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositivas 7 y 8. Mostrar terminal con npm test.</p>
+      <h2>5. 25 Pruebas Unitarias Automatizadas (Vitest)</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositiva 9. Mostrar la terminal ejecutando npm test.</p>
 
       <div class="dialogue-title">Qué decir frente al profesor:</div>
       <div class="dialogue-box">
-        "El backend en <b>Spring Boot</b> funciona como Resource Server y valida las firmas de los tokens <b>JWT</b> emitidos por AWS Cognito.<br><br>
-        Como valor agregado que suma puntos a la nota final, implementamos una suite de <b>25 pruebas unitarias automatizadas con Vitest</b>.<br><br>
-        Estas pruebas validan los clientes de la API, el manejo de errores HTTP y los componentes visuales. Si corremos <code>npm test</code> en la consola, pueden ver que las <b>25 pruebas pasan en solo 1.6 segundos con 100% de éxito</b>."
-      </div>
-
-      <div class="technical-points">
-        <h4>Palabras técnicas clave que deben sonar:</h4>
-        <ul>
-          <li><b>Spring Boot Resource Server</b> (valida JWT).</li>
-          <li><b>Vitest</b> (framework de testing moderno y ultra rápido).</li>
-          <li><b>25 pruebas unitarias pasando</b> en 1.6 segundos.</li>
-        </ul>
+        "Como valor agregado que suma puntos a la nota, implementamos una suite de <b>25 pruebas unitarias automatizadas con Vitest</b>.<br><br>
+        Estas pruebas validan las peticiones a la API REST, la protección de rutas con JWT y los componentes visuales. Si corremos <code>npm test</code> en la consola, pueden ver que las <b>25 pruebas se aprueban en solo 1.6 segundos con 100% de éxito</b>."
       </div>
     </div>
 
-    <!-- BLOQUE 6: Mockups y Cierre (Mariano & Álvaro) -->
+    <!-- BLOQUE 6: Mockups Figma Fase 2 y Cierre (Mariano & Álvaro) -->
     <div class="section-card highlight-both item-both">
       <div class="section-header">
         <span class="time-badge">08:30 - 09:30</span>
         <span class="speaker-tag tag-both">Mariano & Álvaro</span>
       </div>
-      <h2>6. Mockups en Figma y Cierre</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositivas 9 y 10 de la presentación.</p>
+      <h2>6. Mockups en Figma (Fase 2) y Cierre</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Diapositivas 10 y 11.</p>
 
       <div class="dialogue-title">Qué decir frente al profesor:</div>
       <div class="dialogue-box">
-        <b style="color: #c4b5fd;">Mariano:</b> "Para cumplir con la proyección de funcionalidades de la siguiente fase, dejamos listos los mockups en <b>Figma</b>. Pensamos en dos mejoras clave para terreno: <b>sincronización offline con Room SQLite</b> en Android para cuando no haya cobertura 4G en la sede vecinal, y validación por <b>geocercas GPS</b> para asegurar que el escaneo ocurra en el lugar del taller."<br><br>
-        <b style="color: #67e8f9;">Álvaro:</b> "En resumen profesor, cumplimos con todos los requisitos pedidos: login con roles, 4 mantenedores (2 en el celular y 2 en la web consumiendo la misma API), backend en AWS, frontend en Vercel, 25 pruebas unitarias y los mockups en Figma. Muchas gracias, quedamos atentos a sus preguntas."
+        <b style="color: #c4b5fd;">Mariano:</b> "Para cumplir con la proyección de funcionalidades que exige el caso de Ticdgm, diseñamos los mockups en <b>Figma</b> con dos soluciones clave para terreno: <b>modo offline con Room SQLite</b> en Android para sedes sin cobertura 4G, y validación por <b>geocercas GPS</b> para certificar presencia física en el lugar del taller."<br><br>
+        <b style="color: #67e8f9;">Álvaro:</b> "En resumen profesor, cumplimos con todos los requisitos: login multi-rol con JWT, 4 mantenedores (2 en celular y 2 en web consumiendo la misma API), backend en AWS, frontend en Vercel, 25 pruebas unitarias y mockups en Figma. Muchas gracias, quedamos atentos a sus preguntas."
       </div>
     </div>
 
@@ -601,153 +503,73 @@
       <h2 style="font-size: 1.35rem; font-weight: 900; margin-bottom: 0.5rem; color: #ffffff;">
         Preguntas Clave del Profesor
       </h2>
-      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-        Respuestas directas y fáciles de memorizar para responder con seguridad.
-      </p>
 
-      <!-- P1 -->
       <div class="qa-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="speaker-tag tag-mariano">Responde Mariano</span>
-          <span class="time-badge">Pregunta Típica 1</span>
+          <span class="time-badge">Pregunta 1</span>
         </div>
         <h3>"¿Qué dato o función agregarías en la app móvil que no tenga sentido en la web?"</h3>
         <div class="qa-answer">
           "Profesor, en la app móvil agregaríamos la <b>ubicación por GPS al escanear el QR</b> y <b>almacenamiento en caché offline con Room SQLite</b>.<br><br>
-          En la web no tiene sentido porque los coordinadores trabajan desde un computador en una oficina fija con wifi. En cambio, en el celular estás en terreno, en una junta de vecinos donde la señal móvil puede fallar y donde necesitas certificar con GPS que la persona realmente estuvo en el lugar físico del taller."
+          En la web no tiene sentido porque los docentes coordinadores trabajan desde un computador en una oficina fija con wifi. En cambio, en el celular el estudiante voluntario está en terreno, en una sede vecinal donde la señal 4G puede fallar y donde se necesita validar con GPS que la persona estuvo físicamente en el taller."
         </div>
       </div>
 
-      <!-- P2 -->
       <div class="qa-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="speaker-tag tag-alvaro">Responde Álvaro</span>
-          <span class="time-badge">Pregunta Típica 2</span>
+          <span class="time-badge">Pregunta 2</span>
         </div>
-        <h3>"¿Por qué usaron AWS Cognito en lugar de hacer un login manual tradicional?"</h3>
+        <h3>"¿Por qué usaron AWS Cognito en lugar de un login manual tradicional?"</h3>
         <div class="qa-answer">
-          "Porque en el desarrollo profesional de hoy <b>no es una buena práctica guardar contraseñas en tu propia base de datos</b> por el alto riesgo de filtraciones.<br><br>
-          Al usar AWS Cognito, delegamos la seguridad en un proveedor especializado que maneja los estándares de la industria, nos entrega <b>tokens JWT firmados</b> y gestiona la recuperación de contraseñas de forma automática."
+          "Porque en la industria real no es una buena práctica almacenar contraseñas en tu propia base de datos por el alto riesgo de filtraciones. Al usar AWS Cognito, delegamos la autenticación en un proveedor especializado que maneja los estándares de la industria, nos entrega <b>tokens JWT firmados</b> y gestiona la recuperación de contraseñas de forma automática."
         </div>
       </div>
 
-      <!-- P3 -->
       <div class="qa-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="speaker-tag tag-mariano">Responde Mariano</span>
-          <span class="time-badge">Pregunta Típica 3</span>
+          <span class="time-badge">Pregunta 3</span>
         </div>
-        <h3>"¿En qué se diferencia su propuesta del resto de los proyectos?"</h3>
+        <h3>"¿En qué se diferencia su propuesta de otros proyectos?"</h3>
         <div class="qa-answer">
-          "En vez de hacer un carrito de compras o una tienda genérica, nosotros nos enfocamos en una necesidad real de Duoc UC: la <b>Vinculación con el Medio</b>.<br><br>
-          SyncPass resuelve la acreditación comunitaria en terreno con <b>códigos QR rápidos y control de quórum en tiempo real</b>, lo que permite a la institución medir el impacto social de sus talleres con datos reales y sin planillas de papel."
+          "Nos enfocamos estrictamente en el caso real de <b>Ticdgm y Duoc UC</b>: resolver la Vinculación Comunitaria. En vez de una tienda o ecommerce genérico, SyncPass digitaliza la acreditación con <b>códigos QR rápidos, control de quórum en tiempo real y certificación de horas de voluntariado de los estudiantes</b> para los informes semestrales de la institución."
         </div>
       </div>
 
-      <!-- P4 -->
       <div class="qa-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="speaker-tag tag-alvaro">Responde Álvaro</span>
-          <span class="time-badge">Pregunta Típica 4</span>
+          <span class="time-badge">Pregunta 4</span>
         </div>
         <h3>"¿Por qué PostgreSQL y no una base NoSQL como DynamoDB en AWS?"</h3>
         <div class="qa-answer">
-          "Porque nuestros datos son <b>estrictamente relacionales</b>: los talleres, los cupos, los usuarios y las asistencias se conectan con llaves foráneas y reglas de integridad. Usar DynamoDB nos obligaría a desnormalizar datos sin necesidad. Además, PostgreSQL corriendo en nuestra máquina EC2 nos da rendimiento nativo a costo cero para el laboratorio."
-        </div>
-      </div>
-    </div>
-
-    <!-- SECCIÓN GLOSARIO TÉCNICO -->
-    <div class="item-glosario" style="margin-top: 2rem;">
-      <h2 style="font-size: 1.35rem; font-weight: 900; margin-bottom: 0.5rem; color: #ffffff;">
-        Glosario: Para Hablar Técnico Sin Enredarse
-      </h2>
-      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-        Qué significa cada palabra y cómo explicarla en una sola frase sencilla.
-      </p>
-
-      <div class="glossary-card">
-        <div class="glossary-item">
-          <div class="glossary-term">Jetpack Compose</div>
-          <div class="glossary-meaning">La librería moderna de Google para hacer pantallas en Android usando código Kotlin directo, sin archivos XML antiguos.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">MVVM (Modelo - Vista - VistaModelo)</div>
-          <div class="glossary-meaning">El patrón de diseño que separa lo visual (la vista) de la lógica de datos (el ViewModel) para que el código sea limpio y testeable.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">Retrofit y Corrutinas</div>
-          <div class="glossary-meaning">Retrofit hace las peticiones a la API web y las Corrutinas hacen que la aplicación no se quede pegada mientras espera la respuesta.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">Room / SQLite</div>
-          <div class="glossary-meaning">La base de datos interna que vive dentro del teléfono celular para guardar datos cuando no hay conexión a internet.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">JWT (JSON Web Token)</div>
-          <div class="glossary-meaning">Un carnet digital seguro y firmado que viaja en cada petición para comprobar quién eres y qué rol tienes (Admin, Docente, Alumno).</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">AWS EC2</div>
-          <div class="glossary-meaning">Un servidor virtual en la nube de Amazon donde dejamos corriendo nuestro backend de Spring Boot con Java.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">AWS API Gateway</div>
-          <div class="glossary-meaning">La puerta de entrada segura con HTTPS que recibe los llamados de la app y la web y los redirige hacia el servidor.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">AWS Cognito</div>
-          <div class="glossary-meaning">El servicio de Amazon que administra las cuentas de usuario, las contraseñas y el inicio de sesión seguro.</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">CRUD</div>
-          <div class="glossary-meaning">Las cuatro funciones esenciales de cualquier mantenedor: Crear, Listar (Read), Modificar (Update) y Borrar (Delete).</div>
-        </div>
-        <div class="glossary-item">
-          <div class="glossary-term">Vitest</div>
-          <div class="glossary-meaning">El framework con el que creamos las 25 pruebas automáticas para asegurar que ningún botón o llamada a la API falle.</div>
+          "Porque nuestros datos son <b>estrictamente relacionales</b>: los talleres, los cupos, los usuarios y las asistencias se conectan mediante llaves foráneas y reglas de integridad. Usar DynamoDB nos obligaría a desnormalizar datos sin necesidad. Además, PostgreSQL corriendo en nuestra máquina EC2 nos dio excelente rendimiento a costo cero para el laboratorio."
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Barra Inferior Fija para Móvil (Safe Area + Touch Friendly) -->
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="goToGuide(event)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
       <span>Guía Móvil</span>
     </button>
     <button class="nav-item" onclick="goToSlides(event)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
       </svg>
       <span>Slides</span>
-    </button>
-    <button class="nav-item" onclick="goToHome(event)">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-      <span>SyncPass Web</span>
     </button>
   </nav>
 
   <script>
-    // Navegación segura y a prueba de fallos para celular
     function goToSlides(e) {
       if (e) e.preventDefault();
       window.location.href = './presentacion.html';
-    }
-
-    function goToHome(e) {
-      if (e) e.preventDefault();
-      // Si estamos en Vercel o localhost, volver a la raíz
-      if (window.location.origin && window.location.origin.startsWith('http')) {
-        window.location.href = window.location.origin + '/';
-      } else {
-        window.location.href = './';
-      }
     }
 
     function goToGuide(e) {
@@ -755,7 +577,6 @@
       window.location.href = './guia.html';
     }
 
-    // Filtro interactivo de orador y secciones
     function filterSpeaker(speaker, evt) {
       const buttons = document.querySelectorAll('.filter-bar .filter-btn');
       buttons.forEach(b => b.classList.remove('active'));
@@ -767,21 +588,21 @@
       const alvaroItems = document.querySelectorAll('.item-alvaro');
       const bothItems = document.querySelectorAll('.item-both');
       const preguntasItem = document.querySelector('.item-preguntas');
-      const glosarioItem = document.querySelector('.item-glosario');
+      const casoItem = document.querySelector('.item-caso');
 
       if (speaker === 'mariano') {
         marianoItems.forEach(el => el.style.display = 'block');
         bothItems.forEach(el => el.style.display = 'block');
         alvaroItems.forEach(el => el.style.display = 'none');
         if (preguntasItem) preguntasItem.style.display = 'block';
-        if (glosarioItem) glosarioItem.style.display = 'none';
+        if (casoItem) casoItem.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (speaker === 'alvaro') {
         alvaroItems.forEach(el => el.style.display = 'block');
         bothItems.forEach(el => el.style.display = 'block');
         marianoItems.forEach(el => el.style.display = 'none');
         if (preguntasItem) preguntasItem.style.display = 'block';
-        if (glosarioItem) glosarioItem.style.display = 'none';
+        if (casoItem) casoItem.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (speaker === 'preguntas') {
         marianoItems.forEach(el => el.style.display = 'none');
@@ -791,22 +612,22 @@
           preguntasItem.style.display = 'block';
           preguntasItem.scrollIntoView({ behavior: 'smooth' });
         }
-        if (glosarioItem) glosarioItem.style.display = 'none';
-      } else if (speaker === 'glosario') {
+        if (casoItem) casoItem.style.display = 'none';
+      } else if (speaker === 'caso') {
         marianoItems.forEach(el => el.style.display = 'none');
         alvaroItems.forEach(el => el.style.display = 'none');
         bothItems.forEach(el => el.style.display = 'none');
         if (preguntasItem) preguntasItem.style.display = 'none';
-        if (glosarioItem) {
-          glosarioItem.style.display = 'block';
-          glosarioItem.scrollIntoView({ behavior: 'smooth' });
+        if (casoItem) {
+          casoItem.style.display = 'block';
+          casoItem.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
         marianoItems.forEach(el => el.style.display = 'block');
         alvaroItems.forEach(el => el.style.display = 'block');
         bothItems.forEach(el => el.style.display = 'block');
         if (preguntasItem) preguntasItem.style.display = 'block';
-        if (glosarioItem) glosarioItem.style.display = 'block';
+        if (casoItem) casoItem.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
