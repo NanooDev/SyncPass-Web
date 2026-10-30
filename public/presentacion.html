@@ -669,33 +669,41 @@
     </div>
 
     <!-- SLIDE 8: Demostración 2 - Web (Frontend) -->
-    <div class="slide" data-notes="<b>ÁLVARO:</b> 'En la web desplegada en Vercel demostramos los otros dos mantenedores pedidos por la rúbrica: el <b>CRUD completo de Talleres</b> con modal para crear, buscador en tiempo real, filtros por estado, edición de cupos y borrado; y el <b>Mantenedor de Usuarios</b> en la ruta protegida /users. Además, la plataforma incluye soporte nativo para modo claro y modo oscuro con un clic.'">
+    <div class="slide" data-notes="<b>ÁLVARO:</b> 'En la web desplegada en Vercel demostramos los dos mantenedores de la rúbrica: el <b>CRUD de Talleres</b> y el <b>Mantenedor de Usuarios</b>. Y además, profesor, implementamos <b>puntos extras de alto valor</b>: generador de <b>códigos QR reales y vectoriales</b> que usted puede escanear ahora mismo con la cámara de su celular, botón de <b>Descarga PNG</b> de alta resolución, un <b>visor de escáner HUD con cámara y sonido sintetizado por Web Audio API</b>, y un <b>Radar Territorial</b> con coordenadas GPS.'">
       <div class="slide-meta">
         <span class="tag">Demostración en Vivo 2</span>
         <span class="speaker-pill speaker-alvaro">Orador: Álvaro</span>
       </div>
-      <h2>Universo Web: React 19 en Vercel</h2>
+      <h2>Universo Web: React 19 en Vercel y Puntos Extras</h2>
       <p class="lead">
-        Plataforma web en producción con 2 mantenedores CRUD interactivos y modo claro/oscuro.
+        Plataforma web en producción con 2 mantenedores CRUD interactivos, códigos QR reales, escáner HUD y radar territorial.
       </p>
-      <div class="grid-2">
+      <div class="grid-3">
         <div class="card highlight">
           <div class="card-icon">W1</div>
-          <h3>Mantenedor 1: CRUD Interactivo de Talleres</h3>
+          <h3>Mantenedor 1: CRUD Talleres</h3>
           <ul>
-            <li><strong>Crear:</strong> Modal reactivo para registrar nuevos proyectos y talleres.</li>
-            <li><strong>Listar:</strong> Tarjetas con buscador instantáneo y pestañas de filtro.</li>
-            <li><strong>Editar:</strong> Modificación de cupos máximos y dirección de la sede.</li>
-            <li><strong>Eliminar:</strong> Borrado con confirmación y refresco inmediato.</li>
+            <li><strong>Crear:</strong> Modal reactivo para registrar nuevos talleres.</li>
+            <li><strong>Buscar y Filtrar:</strong> Búsqueda en vivo y pestañas de estado.</li>
+            <li><strong>Editar y Eliminar:</strong> Cupos dinámicos y borrado con confirmación.</li>
           </ul>
         </div>
         <div class="card highlight">
           <div class="card-icon">W2</div>
-          <h3>Mantenedor 2: Gestión de Usuarios y Permisos</h3>
+          <h3>Mantenedor 2: Directorio Usuarios</h3>
           <ul>
-            <li>Ruta protegida por JWT (<code>/users</code>) para consultar la lista institucional.</li>
-            <li>Filtrado por rol (Docente, Estudiante Voluntario, Beneficiario, Admin).</li>
-            <li>Control de acceso basado en tokens y auditoría de estado.</li>
+            <li>Ruta protegida por JWT (<code>/users</code>) para auditar operadores.</li>
+            <li>Filtrado por 4 roles (Docente, Voluntario, Beneficiario, Admin).</li>
+            <li>Segregación estricta de permisos según token de AWS Cognito.</li>
+          </ul>
+        </div>
+        <div class="card highlight" style="border-color: rgba(16, 185, 129, 0.5);">
+          <div class="card-icon" style="color: #34d399; background: rgba(16, 185, 129, 0.15);">PLUS</div>
+          <h3>Puntos Extras de Valor</h3>
+          <ul>
+            <li><strong>Códigos QR Reales:</strong> Renderizado dinámico en canvas 100% escaneable con cámara física de celular y descarga PNG.</li>
+            <li><strong>Escáner HUD & Audio:</strong> Visor de cámara con láser y Web Audio API (1760 Hz).</li>
+            <li><strong>Radar Territorial:</strong> Red Duoc UC CITT a juntas vecinales con GPS.</li>
           </ul>
         </div>
       </div>
@@ -771,7 +779,7 @@
     </div>
 
     <!-- SLIDE 11: Cumplimiento de Rúbrica y Cierre -->
-    <div class="slide" data-notes="<b>MARIANO:</b> 'En conclusión profesor, SyncPass resuelve con éxito el desafío planteado por Ticdgm para Duoc UC.'<br><br><b>ÁLVARO:</b> 'Cumplimos con todos los requisitos pedidos: login multi-rol, 4 mantenedores (2 en Android y 2 en Web consumiendo la misma API), backend en AWS, frontend en Vercel, 25 pruebas unitarias y mockups en Figma. Muchas gracias, quedamos atentos a sus preguntas.'">
+    <div class="slide" data-notes="<b>MARIANO:</b> 'En conclusión profesor, SyncPass resuelve con éxito el desafío planteado por Ticdgm para Duoc UC.'<br><br><b>ÁLVARO:</b> 'Cumplimos con todos los requisitos pedidos: login multi-rol, 4 mantenedores (2 en Android y 2 en Web consumiendo la misma API), backend en AWS y frontend en Vercel. Y sumamos valor extra con códigos QR reales escaneables con el celular, escáner HUD con audio, radar territorial y 25 pruebas unitarias con Vitest. Muchas gracias, quedamos atentos a sus preguntas.'">
       <div class="slide-meta">
         <span class="tag">Cierre y Conclusiones</span>
         <span class="speaker-pill speaker-both">Mariano & Álvaro</span>
@@ -783,19 +791,19 @@
       <div class="grid-4">
         <div class="card highlight">
           <h3>100% Funcional</h3>
-          <p>Login multi-rol y consumo real de endpoints protegidos por JWT.</p>
+          <p>Login multi-rol con AWS Cognito y consumo de endpoints protegidos por JWT RS256.</p>
         </div>
         <div class="card highlight">
           <h3>4 Mantenedores</h3>
-          <p>2 en el celular y 2 en la web consumiendo la misma API central.</p>
+          <p>2 en el celular (Jetpack Compose) y 2 en la web (React 19) consumiendo la misma API.</p>
         </div>
         <div class="card highlight">
-          <h3>Desplegado</h3>
-          <p>Web activa en Vercel y Backend activo en AWS EC2 + API Gateway.</p>
+          <h3>Nube Real</h3>
+          <p>Frontend activo en Vercel y Backend activo en AWS EC2 Ubuntu + API Gateway HTTPS.</p>
         </div>
-        <div class="card highlight">
-          <h3>Calidad Extra</h3>
-          <p>25 pruebas unitarias Vitest y mockups para evolución en Figma.</p>
+        <div class="card highlight" style="border-color: rgba(16, 185, 129, 0.5);">
+          <h3 style="color: #34d399;">Puntos Extras</h3>
+          <p>QR reales escaneables en vivo, cámara HUD con Web Audio API, radar GPS y 25 pruebas Vitest.</p>
         </div>
       </div>
     </div>

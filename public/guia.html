@@ -462,7 +462,33 @@
         "En el frontend web desplegado en <b>Vercel</b>, al autenticarnos con <b>AWS Cognito</b>, entramos a la consola institucional donde cumplimos con los <b>dos mantenedores del front</b>:<br><br>
         • <b>Mantenedor 1 (CRUD de Talleres):</b> Un mantenedor completo donde podemos <b>crear</b> un nuevo taller con un modal, <b>buscar</b> en tiempo real con la barra superior, <b>filtrar</b> por estado (Todos, En curso, Activo), <b>editar</b> cupos y <b>eliminar</b> talleres.<br>
         • <b>Mantenedor 2 (Gestión de Usuarios):</b> En la ruta protegida <code>/users</code> auditamos a los docentes y alumnos registrados con filtros por rol.<br><br>
-        Todo con soporte para <b>modo claro y modo oscuro</b> con un solo clic."
+        <b>Puntos Extras Implementados (Valor Agregado):</b><br>
+        • <b>Códigos QR Reales y Dinámicos:</b> Usamos la librería <code>qrcode</code> con renderizado vectorial en canvas. No son imágenes fijas: si usted apunta ahora mismo la cámara de su celular al monitor, el QR se escanea al instante con RUT y firma SHA-256. Además, incluimos el botón <b>Descargar PNG</b> para que el docente pueda imprimir el pase del taller.<br>
+        • <b>Terminal HUD Óptico con Cámara y Sonido:</b> En el perfil de voluntario activamos la cámara física con <code>getUserMedia</code>, retícula con láser animado y un sintetizador de audio nativo con la <b>Web Audio API</b> (pitido a 1760 Hz) que valida en menos de 1.8 segundos y sube el quórum en vivo.<br>
+        • <b>Radar Territorial:</b> Mapeamos la red entre la sede Duoc UC Plaza Vespucio y los operativos comunitarios (Villa El Roble, Los Pinos, San Bernardo) con coordenadas GPS reales.<br>
+        • Soporte completo de <b>modo claro y modo oscuro</b> con un solo clic."
+      </div>
+    </div>
+
+    <!-- SECCIÓN PUNTOS EXTRAS: Valor Agregado Institucional -->
+    <div class="section-card highlight-both item-both">
+      <div class="section-header">
+        <span class="time-badge">Plus de Evaluación</span>
+        <span class="speaker-tag tag-both">Puntos Extras</span>
+      </div>
+      <h2>Características Extras que Suman Puntos a la Nota</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+        Funcionalidades que van más allá de la rúbrica básica y demuestran dominio técnico completo:
+      </p>
+
+      <div class="technical-points" style="margin-top: 0;">
+        <ul>
+          <li><b>1. Motor de Códigos QR Reales:</b> Generación en canvas HTML5 dinámico con la librería <code>qrcode</code>, firma SHA-256, escaneo real desde cámaras físicas de smartphones y botón de descarga en PNG en alta resolución.</li>
+          <li><b>2. Escáner HUD Óptico y Web Audio API:</b> Visor de cámara en vivo con <code>getUserMedia</code>, retícula táctica, láser verde y sintetizador nativo de audio a 1760 Hz para feedback acústico instantáneo.</li>
+          <li><b>3. Radar Territorial de Operativos:</b> Visualización topológica Hub-Spoke (Duoc UC CITT a sedes vecinales) con georreferenciación GPS y cálculo dinámico de quórum.</li>
+          <li><b>4. Telemetría en Tiempo Real y Push:</b> Integración con el protocolo de alertas push de <code>ntfy.sh</code> y simulación de almacenamiento offline SQLite para sedes sin cobertura 4G.</li>
+          <li><b>5. 25 Pruebas Unitarias Automatizadas:</b> Suite completa con Vitest ejecutada en 1.5 segundos con 100% de aprobación para asegurar la máxima nota en calidad de software.</li>
+        </ul>
       </div>
     </div>
 
@@ -546,6 +572,17 @@
         <h3>"¿Por qué PostgreSQL y no una base NoSQL como DynamoDB en AWS?"</h3>
         <div class="qa-answer">
           "Porque nuestros datos son <b>estrictamente relacionales</b>: los talleres, los cupos, los usuarios y las asistencias se conectan mediante llaves foráneas y reglas de integridad. Usar DynamoDB nos obligaría a desnormalizar datos sin necesidad. Además, PostgreSQL corriendo en nuestra máquina EC2 nos dio excelente rendimiento a costo cero para el laboratorio."
+        </div>
+      </div>
+      <div class="qa-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="speaker-tag tag-mariano">Responde Mariano o Álvaro</span>
+          <span class="time-badge">Pregunta 5 (Puntos Extras)</span>
+        </div>
+        <h3>"¿Cómo implementaron los códigos QR y cómo garantizan que no sean solo una imagen estática?"</h3>
+        <div class="qa-answer">
+          "Profesor, los códigos QR se generan de forma <b>dinámica y vectorial en tiempo real</b> usando la librería <code>qrcode</code> sobre elementos canvas de HTML5.<br><br>
+          Cada código contiene el identificador único del taller, el RUT del participante y una firma de validación. <b>Cualquier celular con cámara física puede escanearlo directamente de la pantalla</b> y abrir el enlace de acreditación. Además, agregamos la función de <b>descargar la credencial en PNG</b> para que los coordinadores puedan imprimirla o proyectarla en la junta de vecinos."
         </div>
       </div>
     </div>
