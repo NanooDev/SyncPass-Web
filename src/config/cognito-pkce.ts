@@ -69,17 +69,18 @@ export async function exchangeCodeForTokens(
     client_id: clientId,
     code,
     redirect_uri: redirectUri,
-    code_verifier: verifier,
   })
 
-  if (clientSecret) {
-    params.append('client_secret', clientSecret)
+  // Solo incluir code_verifier si está presente (para no romper logins sin PKCE)
+  if (verifier && verifier.trim().length > 0) {
+    params.append('code_verifier', verifier.trim())
   }
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded',
   }
 
+  // Estándar RFC 6749 y AWS Cognito: autenticar cliente confidencial mediante Basic Auth
   if (clientSecret) {
     headers['Authorization'] = `Basic ${btoa(`${clientId}:${clientSecret}`)}`
   }
