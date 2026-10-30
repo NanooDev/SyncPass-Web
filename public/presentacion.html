@@ -40,7 +40,7 @@
     /* Header */
     header {
       height: 64px;
-      padding: 0 1.5rem;
+      padding: 0 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -60,10 +60,10 @@
     .brand-badge {
       background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
-      padding: 0.2rem 0.6rem;
+      padding: 0.25rem 0.65rem;
       border-radius: 8px;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 800;
     }
     .slide-counter {
       font-size: 0.95rem;
@@ -72,21 +72,22 @@
     }
     .header-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.45rem;
       align-items: center;
     }
     button.btn-nav {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text);
-      padding: 0.45rem 0.9rem;
+      padding: 0.5rem 0.85rem;
       border-radius: 10px;
       cursor: pointer;
       font-weight: 700;
       font-size: 0.85rem;
       transition: all 0.15s ease;
+      touch-action: manipulation;
     }
-    button.btn-nav:hover {
+    button.btn-nav:hover, button.btn-nav:active {
       background: var(--primary);
       border-color: var(--primary);
       color: white;
@@ -106,6 +107,14 @@
       border-radius: 8px;
       border: 1px solid rgba(16, 185, 129, 0.3);
       background: rgba(16, 185, 129, 0.1);
+      cursor: pointer;
+      touch-action: manipulation;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-link:active {
+      background: var(--accent);
+      color: #022c22;
     }
 
     /* Progress bar */
@@ -136,7 +145,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      padding: 2.5rem 3.5rem;
+      padding: 2.25rem 3.5rem;
       display: flex;
       flex-direction: column;
       opacity: 0;
@@ -152,127 +161,127 @@
       transform: translateX(0);
     }
 
-    /* Meta & Badges */
+    /* Slide Typography */
     .slide-meta {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
     }
     .tag {
-      font-size: 0.8rem;
-      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--primary-light);
-      background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.35);
-      padding: 0.3rem 0.8rem;
-      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent-light);
+      background: rgba(16, 185, 129, 0.12);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
     .speaker-pill {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 800;
-      padding: 0.3rem 0.85rem;
+      padding: 0.25rem 0.65rem;
       border-radius: 9999px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
     .speaker-mariano {
       background: rgba(139, 92, 246, 0.2);
-      border: 1px solid rgba(139, 92, 246, 0.5);
       color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.4);
     }
     .speaker-alvaro {
       background: rgba(6, 182, 212, 0.2);
-      border: 1px solid rgba(6, 182, 212, 0.5);
       color: #67e8f9;
+      border: 1px solid rgba(6, 182, 212, 0.4);
     }
     .speaker-both {
       background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.5);
       color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
     }
 
-    /* Tipografía */
     h1 {
-      font-size: 3rem;
-      font-weight: 900;
-      letter-spacing: -0.035em;
-      line-height: 1.15;
-      margin-bottom: 1rem;
-      color: #ffffff;
-    }
-    h2 {
-      font-size: 2.5rem;
+      font-size: 2.85rem;
       font-weight: 900;
       letter-spacing: -0.03em;
-      line-height: 1.2;
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.65rem;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.65rem;
       color: #ffffff;
+      line-height: 1.2;
     }
     p.lead {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       color: var(--text-muted);
-      line-height: 1.6;
-      max-width: 1000px;
       margin-bottom: 1.75rem;
+      max-width: 950px;
+      line-height: 1.5;
     }
 
-    /* Grillas */
+    /* Grids */
     .grid-2 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;
-      flex: 1;
+      margin-bottom: 1.5rem;
     }
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.35rem;
-      flex: 1;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
     }
     .grid-4 {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1.15rem;
-      flex: 1;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
     }
 
+    /* Cards */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 1.75rem;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
       position: relative;
     }
     .card.highlight {
-      border-color: rgba(99, 102, 241, 0.6);
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.8), var(--card-bg));
+      border-color: rgba(59, 130, 246, 0.5);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, var(--card-bg) 100%);
     }
     .card-icon {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
-      background: rgba(59, 130, 246, 0.2);
+      background: rgba(59, 130, 246, 0.15);
       color: var(--primary-light);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 900;
-      font-size: 1.3rem;
+      font-weight: 800;
+      font-size: 1.2rem;
       margin-bottom: 1rem;
     }
     .card h3 {
       font-size: 1.35rem;
       font-weight: 800;
-      margin-bottom: 0.65rem;
       color: #ffffff;
-      letter-spacing: -0.02em;
+      margin-bottom: 0.65rem;
     }
     .card p {
       font-size: 1.05rem;
@@ -280,25 +289,17 @@
       line-height: 1.55;
     }
     .card ul {
-      list-style: none;
-      margin-top: 0.85rem;
+      margin-top: 0.75rem;
+      padding-left: 1.25rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
     }
     .card ul li {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-      position: relative;
-      padding-left: 1.35rem;
-      line-height: 1.5;
+      margin-bottom: 0.4rem;
     }
-    .card ul li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      color: var(--accent-light);
-      font-size: 1.25rem;
-      font-weight: bold;
-      top: -2px;
+    .card ul li strong {
+      color: #ffffff;
     }
 
     /* Speaker Notes Drawer */
@@ -308,12 +309,12 @@
       left: 0;
       right: 0;
       background: #020617;
-      border-top: 3px solid var(--primary);
+      border-top: 2px solid var(--primary);
       padding: 1.25rem 2rem;
-      transform: translateY(100%);
-      transition: transform 0.25s ease;
       z-index: 200;
-      box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.85);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
       max-height: 50vh;
       overflow-y: auto;
     }
@@ -324,37 +325,40 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.65rem;
+      margin-bottom: 0.75rem;
     }
     .speaker-notes-title {
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 800;
-      color: var(--accent-light);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 1px;
+      color: var(--primary-light);
     }
     .speaker-notes-text {
-      font-size: 1.05rem;
+      font-size: 1.15rem;
+      line-height: 1.7;
       color: #f1f5f9;
-      line-height: 1.6;
+    }
+    .speaker-notes-text b {
+      color: #38bdf8;
     }
 
     /* Footer */
     footer {
-      height: 52px;
+      height: 46px;
       padding: 0 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-top: 1px solid var(--card-border);
       background: rgba(15, 23, 42, 0.95);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--text-dim);
       flex-shrink: 0;
     }
     .keyboard-hints {
       display: flex;
-      gap: 1.25rem;
+      gap: 1rem;
     }
     kbd {
       background: #1e293b;
@@ -366,15 +370,15 @@
       color: #ffffff;
     }
 
-    /* RESPONSIVE MÓVIL (Smartphones y Pantallas Pequeñas) */
+    /* RESPONSIVE MÓVIL */
     @media (max-width: 768px) {
       body {
         height: auto;
         min-height: 100vh;
       }
       header {
-        padding: 0 1rem;
-        height: 56px;
+        padding: 0 0.85rem;
+        height: 58px;
       }
       .brand span:nth-child(2) {
         display: none;
@@ -392,7 +396,7 @@
         font-size: 2.1rem;
       }
       h2 {
-        font-size: 1.75rem;
+        font-size: 1.65rem;
       }
       p.lead {
         font-size: 1.05rem;
@@ -406,28 +410,16 @@
         padding: 1.25rem;
       }
       .card h3 {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
       }
-      .card p, .card ul li {
-        font-size: 0.95rem;
+      .card p, .card ul {
+        font-size: 0.98rem;
       }
-      footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 150;
-        padding: 0 1rem;
-        height: 52px;
-      }
-      .keyboard-hints {
+      footer .keyboard-hints {
         display: none;
       }
-      .speaker-notes-drawer {
-        padding: 1rem 1.25rem;
-      }
       .speaker-notes-text {
-        font-size: 0.95rem;
+        font-size: 1rem;
       }
     }
   </style>
@@ -442,7 +434,8 @@
     </div>
     <div class="slide-counter" id="slideCounter">1 / 10</div>
     <div class="header-actions">
-      <a href="/guia.html" class="btn-link">Guía Estudio</a>
+      <a href="./guia.html" class="btn-link" onclick="goToGuide(event)">Guía</a>
+      <a href="./" class="btn-link" onclick="goToHome(event)">Web</a>
       <button class="btn-nav" id="btnNotes" onclick="toggleNotes()">Guión (N)</button>
       <button class="btn-nav" id="btnPrev" onclick="prevSlide()">←</button>
       <button class="btn-nav btn-accent" id="btnNext" onclick="nextSlide()">→</button>
@@ -458,231 +451,231 @@
   <main>
 
     <!-- SLIDE 1: Portada -->
-    <div class="slide active" data-notes="MARIANO: 'Buenos días profesor. Hoy junto a Álvaro presentamos SyncPass, nuestra solución integral de vinculación territorial y acreditación comunitaria diseñada para Duoc UC.' | ÁLVARO: 'SyncPass conecta tres universos de ingeniería: la aplicación móvil en Android con Jetpack Compose, el frontend web en React 19 desplegado en Vercel, y la API backend en Spring Boot 3 desplegada en la nube de AWS con Cognito.'">
+    <div class="slide active" data-notes="<b>MARIANO:</b> 'Buenos días profesor. Hoy junto a Álvaro presentamos <b>SyncPass</b>, nuestra solución de asistencia y gestión comunitaria diseñada para los talleres de <b>Vinculación con el Medio de Duoc UC</b>.'<br><br><b>ÁLVARO:</b> 'SyncPass une tres universos: la aplicación móvil en <b>Android nativo con Jetpack Compose</b>, la web en <b>React 19 con TypeScript</b> en Vercel, y la API en <b>Spring Boot con AWS EC2 y Cognito</b>.'">
       <div class="slide-meta">
         <span class="tag">Presentación de Proyecto · 8 Minutos</span>
         <span class="speaker-pill speaker-both">Mariano & Álvaro</span>
       </div>
       <h1>SyncPass</h1>
       <p class="lead">
-        Ecosistema Full Stack de Acreditación Territorial y Gestión de Talleres Comunitarios con Arquitectura Multi-Rol en la Nube de AWS.
+        Plataforma Full Stack de Gestión de Talleres Comunitarios y Asistencia en Tiempo Real con Roles en la Nube de AWS.
       </p>
       <div class="grid-3">
         <div class="card highlight">
           <div class="card-icon">1</div>
           <h3>Universo Mobile</h3>
-          <p>Android nativo en Kotlin con Jetpack Compose y arquitectura MVVM. Redirección reactiva por roles mediante decodificación de JWT.</p>
+          <p>Android nativo en Kotlin con <strong>Jetpack Compose y MVVM</strong>. Redirección automática según el rol al leer el token JWT.</p>
         </div>
         <div class="card highlight">
           <div class="card-icon">2</div>
           <h3>Universo Web</h3>
-          <p>Single Page Application en React 19 + TypeScript + Vite, desplegada en Vercel con mantenedores CRUD interactivos y 25 pruebas unitarias.</p>
+          <p>Single Page Application en <strong>React 19 + TypeScript</strong> en Vercel con mantenedores CRUD interactivos y 25 pruebas unitarias.</p>
         </div>
         <div class="card highlight">
           <div class="card-icon">3</div>
           <h3>Universo Cloud AWS</h3>
-          <p>Backend Spring Boot 3 en AWS EC2 Ubuntu, enrutado por AWS API Gateway HTTPS y securizado con identidades federadas en AWS Cognito.</p>
+          <p>Backend en <strong>Spring Boot 3 en AWS EC2</strong> con API Gateway HTTPS y login seguro con <strong>AWS Cognito</strong>.</p>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 2: Problema y Propuesta de Valor -->
-    <div class="slide" data-notes="MARIANO: '¿Qué problema resuelve SyncPass? En los operativos territoriales y talleres de vinculación con el medio, el registro de asistencia se hace típicamente en hojas de papel o formularios dispersos. Esto provoca demoras, pérdida de datos y nula visibilidad en tiempo real para los coordinadores docentes. SyncPass digitaliza el proceso con pases QR de alta velocidad (1.8 segundos por vecino), quórum en vivo y una estructura desacoplada lista para operar con y sin internet.'">
+    <div class="slide" data-notes="<b>MARIANO:</b> 'El problema que detectamos es que en los talleres de las sedes comunitarias la asistencia se anota en <b>hojas de papel</b>. Esto genera desorden, se pierden firmas y los coordinadores no saben cuánta gente fue hasta días después. Con SyncPass cambiamos eso por <b>pases con códigos QR que se escanean en menos de 2 segundos</b>, calculando el quórum en vivo.'">
       <div class="slide-meta">
-        <span class="tag">Contexto y Propuesta de Valor</span>
+        <span class="tag">Problema y Solución</span>
         <span class="speaker-pill speaker-mariano">Orador: Mariano</span>
       </div>
-      <h2>El Problema Territorial y la Solución SyncPass</h2>
+      <h2>El Problema Real y la Solución SyncPass</h2>
       <p class="lead">
-        Modernización de la gobernanza comunitaria mediante trazabilidad criptográfica y supervisión de quórum en terreno en tiempo real.
+        Digitalización de la asistencia comunitaria con códigos QR rápidos y control de quórum en tiempo real.
       </p>
       <div class="grid-2">
         <div class="card">
           <div class="card-icon" style="color: #ef4444; background: rgba(239, 68, 68, 0.15);">✕</div>
-          <h3>El Desafío Territorial</h3>
+          <h3>El Problema en Terreno</h3>
           <ul>
-            <li>Registro manual en planillas físicas con riesgo de inconsistencias y pérdida de información.</li>
-            <li>Incertidumbre de coordinadores docentes sobre asistencia y quórum efectivo de talleres.</li>
-            <li>Cuatro perfiles con necesidades operativas distintas: docentes, voluntarios, vecinos y administradores.</li>
-            <li>Conexión móvil inestable en sedes comunitarias y juntas de vecinos.</li>
+            <li>Registro manual en hojas de papel con riesgo de pérdida de datos.</li>
+            <li>Incertidumbre sobre cuántos alumnos y vecinos asistieron al taller.</li>
+            <li>Cuatro roles con necesidades distintas: docentes, alumnos, vecinos y admin.</li>
+            <li>Señal 4G inestable en juntas de vecinos y sedes comunitarias.</li>
           </ul>
         </div>
         <div class="card highlight">
           <div class="card-icon" style="color: var(--accent-light); background: rgba(16, 185, 129, 0.15);">✓</div>
           <h3>La Solución SyncPass</h3>
           <ul>
-            <li>Generación y escaneo instantáneo de credenciales QR por taller y beneficiario.</li>
-            <li>Segregación estricta de privilegios por roles (RBAC) resuelta a nivel de token JWT.</li>
-            <li>Consola web institucional para coordinadores y dirección de carrera.</li>
-            <li>Arquitectura desacoplada lista para sincronización offline-first y base central.</li>
+            <li><strong>Código QR instantáneo:</strong> Acreditación en menos de 2 segundos.</li>
+            <li><strong>Roles claros:</strong> Cada usuario ve solo lo que le corresponde por JWT.</li>
+            <li><strong>Plataforma Web:</strong> Panel de control para coordinadores y directores.</li>
+            <li><strong>Preparado para offline:</strong> Diseñado para funcionar sin internet con caché local.</li>
           </ul>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 3: El Rol de la Inteligencia Artificial -->
-    <div class="slide" data-notes="MARIANO: 'Un requisito clave que usted nos pidió fue explicar cómo usamos la Inteligencia Artificial. No la usamos para generar código ciego o hacer un copy-paste sin criterio. La usamos como un copiloto senior de ingeniería de software para pair programming: nos asistió en el levantamiento técnico de los contratos DTO, en la resolución de problemas de bajo nivel (como el cálculo del SecretHash HMAC-SHA256 exigido por Cognito), en la generación de 25 pruebas unitarias y en la refinación de tokens de diseño para lograr un aspecto profesional de software real.'">
+    <div class="slide" data-notes="<b>MARIANO:</b> 'Un punto clave de la rúbrica fue explicar cómo usamos la Inteligencia Artificial. No la usamos para generar código ciego ni hacer copy-paste. La usamos como un compañero de programación senior (pair programming) para resolver la conexión segura con <b>AWS Cognito</b>, generar las <b>25 pruebas unitarias con Vitest</b> y diseñar las pantallas con tokens de diseño limpios y profesionales.'">
       <div class="slide-meta">
-        <span class="tag">Metodología de Ingeniería</span>
+        <span class="tag">Metodología de Desarrollo</span>
         <span class="speaker-pill speaker-mariano">Orador: Mariano</span>
       </div>
-      <h2>El Rol de la Inteligencia Artificial</h2>
+      <h2>Cómo Usamos la Inteligencia Artificial</h2>
       <p class="lead">
-        La IA como copiloto senior de soporte arquitectónico para maximizar la velocidad de desarrollo sin delegar las decisiones de diseño.
+        La IA como copiloto de pair programming para resolver configuraciones complejas y asegurar calidad de código.
       </p>
       <div class="grid-3">
         <div class="card">
           <div class="card-icon">1</div>
-          <h3>Levantamiento & Contratos</h3>
-          <p>Diseño de contratos de API y DTOs consistentes entre Kotlin y TypeScript, garantizando que el backend y los frontends hablen el mismo lenguaje técnico.</p>
+          <h3>Contratos de API</h3>
+          <p>Diseño coordinado de modelos DTO entre Kotlin y TypeScript para que el celular y la web compartan la misma estructura de datos.</p>
         </div>
         <div class="card">
           <div class="card-icon">2</div>
-          <h3>Debugging Criptográfico</h3>
-          <p>Resolución del flujo PKCE y firma de hash HMAC-SHA256 para la interacción con el Identity Provider de AWS Cognito sin vulnerar secretos.</p>
+          <h3>Conexión con AWS Cognito</h3>
+          <p>Resolución del flujo seguro de autenticación PKCE y cabeceras de autorización para conectar la web con el pool de usuarios de Amazon.</p>
         </div>
         <div class="card">
           <div class="card-icon">3</div>
-          <h3>Testing & UI Profesional</h3>
-          <p>Creación de una suite de 25 pruebas automatizadas en Vitest y estandarización de componentes modulares con CSS tokens para modo claro y oscuro.</p>
+          <h3>Pruebas y Diseño</h3>
+          <p>Creación de una suite de 25 pruebas unitarias con Vitest y organización de estilos en CSS Modules con soporte para modo claro y oscuro.</p>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 4: Arquitectura General de los 3 Universos -->
-    <div class="slide" data-notes="ÁLVARO: 'Aquí presentamos la arquitectura integral del sistema. Se compone de tres universos desacoplados: en la izquierda, los dos frontends clientes: Android nativo y Web React. Ambos clientes consumen la misma API a través de AWS API Gateway HTTPS. En el backend, Spring Boot valida el JWT emitido por AWS Cognito y persiste las transacciones en PostgreSQL. Esta arquitectura asegura que tanto en el celular como en la web, el usuario se autentica contra el mismo directorio central.'">
+    <div class="slide" data-notes="<b>ÁLVARO:</b> 'Aquí mostramos la arquitectura de tres universos: por un lado las dos aplicaciones cliente: <b>Android nativo con Jetpack Compose</b> y <b>Web React en Vercel</b>. Ambas consumen la misma API a través de <b>AWS API Gateway con HTTPS</b>. En el backend, <b>Spring Boot</b> valida el token JWT emitido por <b>AWS Cognito</b> y guarda los datos en <b>PostgreSQL</b>. Ambos clientes usan el mismo directorio de usuarios.'">
       <div class="slide-meta">
-        <span class="tag">Topología del Sistema</span>
+        <span class="tag">Arquitectura del Sistema</span>
         <span class="speaker-pill speaker-alvaro">Orador: Álvaro</span>
       </div>
       <h2>Arquitectura de los 3 Universos</h2>
       <p class="lead">
-        Desacoplamiento total entre capas de presentación móvil y web, compuerta API unificada y servicios de identidad en la nube.
+        Tres capas conectadas: App móvil en Android, Web en React y Backend en Spring Boot con AWS.
       </p>
       <div class="grid-3">
         <div class="card">
           <h3>1. Clientes Frontend</h3>
           <ul>
-            <li><strong>Android Nativo:</strong> Jetpack Compose, MVVM, Retrofit y Corrutinas de Kotlin.</li>
-            <li><strong>Web SPA:</strong> React 19, TypeScript, Vite, CSS Modules y Wouter Routing.</li>
-            <li><strong>Decodificación Local:</strong> Decodificación de claims JWT para navegación condicional.</li>
+            <li><strong>Android Nativo:</strong> Jetpack Compose, MVVM, Retrofit y Corrutinas.</li>
+            <li><strong>Web SPA:</strong> React 19, TypeScript, Vite y CSS Modules.</li>
+            <li><strong>Navegación por Roles:</strong> Redirección directa según el token JWT.</li>
           </ul>
         </div>
         <div class="card highlight">
-          <h3>2. Capa Cloud & Gateway</h3>
+          <h3>2. Capa Cloud de AWS</h3>
           <ul>
-            <li><strong>AWS API Gateway:</strong> Endpoint público HTTPS (`5xvspck6jb`) con enrutamiento proxy.</li>
-            <li><strong>AWS Cognito User Pool:</strong> Directorio institucional, emisión de JWT firmados con RS256.</li>
-            <li><strong>AWS EC2:</strong> Servidor Ubuntu con systemd `syncpass-api` y Nginx reverse proxy.</li>
+            <li><strong>AWS API Gateway:</strong> Punto de entrada único HTTPS con CORS.</li>
+            <li><strong>AWS Cognito:</strong> Directorio seguro de usuarios y emisión de JWT.</li>
+            <li><strong>AWS EC2:</strong> Servidor Ubuntu corriendo el microservicio Spring Boot.</li>
           </ul>
         </div>
         <div class="card">
-          <h3>3. Capa de Datos & Dominio</h3>
+          <h3>3. Backend y Datos</h3>
           <ul>
-            <li><strong>Spring Security:</strong> Resource Server con validación criptográfica JWKS pública.</li>
-            <li><strong>Spring Data JPA:</strong> Repositorios relacionales con Hibernate y DTOs seguros.</li>
-            <li><strong>PostgreSQL 16:</strong> Base de datos relacional para usuarios, roles y auditoría.</li>
+            <li><strong>Spring Boot 3:</strong> Java 21 con Spring Security Resource Server.</li>
+            <li><strong>Spring Data JPA:</strong> Repositorios relacionales con Hibernate.</li>
+            <li><strong>PostgreSQL:</strong> Base de datos relacional para talleres y usuarios.</li>
           </ul>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 5: Demostración 1 - Mobile (Android) -->
-    <div class="slide" data-notes="MARIANO: 'Iniciamos la demostración práctica con la aplicación móvil Android. Usamos Jetpack Compose y arquitectura MVVM. Al iniciar sesión, la app consulta la API, decodifica el token mediante JwtDecoder y, según el rol, navega de forma directa a la pantalla respectiva sin pedir confirmaciones intermedias. Tenemos dos mantenedores en móvil: el Mantenedor de Talleres con cálculo de quórum y generación de código QR para Docentes, y el Mantenedor de Gobernanza y Usuarios con envío de alertas push para Administradores.'">
+    <div class="slide" data-notes="<b>MARIANO:</b> 'Pasamos a la app móvil en Android nativo. Al iniciar sesión, la app lee el token JWT y manda al usuario directo a su pantalla según su rol, sin pasos intermedios.<br><br>Tenemos <b>dos mantenedores en el celular</b>:<br>• <b>Mantenedor 1 (Talleres y Quórum):</b> Muestra la lista de talleres, el cálculo de quórum en vivo y el código QR de asistencia.<br>• <b>Mantenedor 2 (Administrador):</b> Para supervisar las cuentas y enviar alertas push directo al teléfono.'">
       <div class="slide-meta">
         <span class="tag">Demostración en Vivo 1</span>
         <span class="speaker-pill speaker-mariano">Orador: Mariano</span>
       </div>
-      <h2>Universo Mobile: Android Jetpack Compose</h2>
+      <h2>Universo Mobile: Android con Jetpack Compose</h2>
       <p class="lead">
         Arquitectura MVVM con navegación reactiva por roles y 2 mantenedores operativos en el dispositivo.
       </p>
       <div class="grid-2">
         <div class="card highlight">
           <div class="card-icon">M1</div>
-          <h3>Mantenedor 1: Talleres y Quórum Territorial</h3>
+          <h3>Mantenedor 1: Talleres y Quórum en Vivo</h3>
           <ul>
-            <li>Supervisión de iniciativas activas con barras de quórum calculadas en tiempo real.</li>
-            <li>Generación del código QR criptográfico para que los vecinos acrediten su ingreso.</li>
-            <li>Exportación y trazabilidad de asistencia por evento comunitario.</li>
+            <li>Lista de talleres comunitarios con barras de quórum actualizadas.</li>
+            <li>Generación del <strong>código QR</strong> para que los vecinos marquen su asistencia.</li>
+            <li>Detalle de asistencia y cupos disponibles por evento.</li>
           </ul>
         </div>
         <div class="card highlight">
           <div class="card-icon">M2</div>
-          <h3>Mantenedor 2: Gobernanza y Auditoría (Admin)</h3>
+          <h3>Mantenedor 2: Administración y Alertas Push</h3>
           <ul>
-            <li>Directorio institucional de operadores del sistema (Docente, Voluntario, Beneficiario).</li>
-            <li>Integración con sistema de notificaciones push directas hacia el teléfono móvil.</li>
-            <li>Métricas en tiempo real de proyectos, talleres y tasas de satisfacción ciudadana.</li>
+            <li>Directorio de operadores territoriales (Docente, Voluntario, Alumno).</li>
+            <li>Envío de <strong>alertas push en tiempo real</strong> directo al celular.</li>
+            <li>Monitoreo de estado de cuenta y roles del sistema.</li>
           </ul>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 6: Demostración 2 - Web (Frontend) -->
-    <div class="slide" data-notes="ÁLVARO: 'Continuamos con el Universo Web. La aplicación está desplegada en producción en Vercel con integración continua. En la pantalla principal, al autenticarnos con Cognito, el sistema recibe al usuario y le permite seleccionar su perfil operativo. Contamos con 2 mantenedores completos: el CRUD interactivo de Talleres Comunitarios con barra de búsqueda en tiempo real y tabs de estado, y el Mantenedor de Usuarios protegido por JWT en la ruta /users. El diseño cuenta con soporte completo para modo claro y oscuro con navbar sólida.'">
+    <div class="slide" data-notes="<b>ÁLVARO:</b> 'En la web desplegada en Vercel, al iniciar sesión con AWS Cognito entramos al panel donde mostramos los <b>dos mantenedores del front</b>:<br>• <b>Mantenedor 1 (CRUD de Talleres):</b> Permite crear un taller con un modal, buscar en tiempo real, filtrar por estado (Todos, En curso, Activo), editar cupos y eliminarlo.<br>• <b>Mantenedor 2 (Usuarios):</b> En la ruta protegida /users mostramos el directorio institucional.<br><br>Todo con modo claro y oscuro con un solo clic.'">
       <div class="slide-meta">
         <span class="tag">Demostración en Vivo 2</span>
         <span class="speaker-pill speaker-alvaro">Orador: Álvaro</span>
       </div>
       <h2>Universo Web: React 19 + TypeScript en Vercel</h2>
       <p class="lead">
-        Single Page Application con diseño profesional, mantenedores CRUD interactivos y modo claro/oscuro.
+        Single Page Application con diseño moderno, mantenedores CRUD interactivos y modo claro/oscuro.
       </p>
       <div class="grid-2">
         <div class="card highlight">
           <div class="card-icon">W1</div>
-          <h3>Mantenedor 1: CRUD de Iniciativas Territoriales</h3>
+          <h3>Mantenedor 1: CRUD Interactivo de Talleres</h3>
           <ul>
-            <li><strong>Crear:</strong> Modal reactivo para registrar nuevos proyectos comunitarios.</li>
-            <li><strong>Listar:</strong> Tarjetas con barra de búsqueda instantánea y filtros por estado.</li>
-            <li><strong>Editar:</strong> Actualización de cupos máximos y localización de la sede.</li>
-            <li><strong>Eliminar:</strong> Remoción con confirmación y refresco inmediato del estado.</li>
+            <li><strong>Crear:</strong> Modal rápido para registrar un nuevo taller comunitario.</li>
+            <li><strong>Listar:</strong> Tarjetas con buscador instantáneo y pestañas de filtro.</li>
+            <li><strong>Editar:</strong> Modificación de cupos máximos y dirección de la sede.</li>
+            <li><strong>Eliminar:</strong> Borrado con confirmación y refresco inmediato.</li>
           </ul>
         </div>
         <div class="card highlight">
           <div class="card-icon">W2</div>
           <h3>Mantenedor 2: Gestión de Usuarios y Permisos</h3>
           <ul>
-            <li>Ruta protegida por JWT (`/users`) para consultar el directorio institucional.</li>
+            <li>Ruta protegida por JWT (<code>/users</code>) para consultar la lista de usuarios.</li>
             <li>Filtrado por rol (Docente, Voluntario, Beneficiario, Admin).</li>
-            <li>Auditoría de estado de cuentas y control de accesos RBAC.</li>
+            <li>Control de acceso seguro basado en tokens.</li>
           </ul>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 7: Calidad y Pruebas Automatizadas (Vitest) -->
-    <div class="slide" data-notes="ÁLVARO: 'Como valor agregado de calidad de ingeniería, implementamos una suite completa de 25 pruebas unitarias automatizadas con Vitest. Evaluamos clientes de API, servicios de notificación push, componentes UI y hooks de autenticación. Ejecutamos `npm test` en vivo: los 8 archivos de prueba y las 25 pruebas pasan en 1.62 segundos con 100% de efectividad.'">
+    <div class="slide" data-notes="<b>ÁLVARO:</b> 'Como valor extra que suma puntos a la nota, implementamos <b>25 pruebas unitarias automatizadas con Vitest</b>. Evaluamos las llamadas a la API, los componentes visuales y la seguridad. Si corremos <code>npm test</code> en la consola, pueden ver que las 25 pruebas pasan en solo <b>1.6 segundos con 100% de éxito</b>.'">
       <div class="slide-meta">
-        <span class="tag">Garantía de Calidad</span>
+        <span class="tag">Calidad de Software</span>
         <span class="speaker-pill speaker-alvaro">Orador: Álvaro</span>
       </div>
       <h2>Pruebas Unitarias Automatizadas (Vitest)</h2>
       <p class="lead">
-        Suite de pruebas de ejecución ultra-rápida (1.62 segundos) con 100% de efectividad en componentes y clientes de red.
+        Suite de 25 pruebas de ejecución rápida (1.6 segundos) que aseguran que ningún botón o llamada a la API falle.
       </p>
       <div class="grid-3">
         <div class="card">
           <h3>Clientes y Servicios</h3>
-          <p>Validación de endpoints REST, serialización de requests de autenticación y manejo de errores HTTP controlados.</p>
+          <p>Pruebas de peticiones HTTP a la API, control de tokens de autenticación y manejo de errores controlados.</p>
           <ul>
-            <li>`api.test.ts` (4 pruebas)</li>
-            <li>`ntfy.test.ts` (7 pruebas)</li>
+            <li><code>api.test.ts</code> (4 pruebas)</li>
+            <li><code>ntfy.test.ts</code> (7 pruebas)</li>
           </ul>
         </div>
         <div class="card">
           <h3>Componentes y Hooks</h3>
-          <p>Pruebas con React Testing Library que simulan interacción de usuario, renderizado condicional y ciclo de vida.</p>
+          <p>Pruebas de renderizado de tarjetas, formularios, protección de rutas y ciclo de vida de React.</p>
           <ul>
-            <li>`RequireAuth.test.tsx` (4 pruebas)</li>
-            <li>`UserCard.test.tsx` (4 pruebas)</li>
-            <li>`useDocumentTitle.test.ts` (2 pruebas)</li>
+            <li><code>RequireAuth.test.tsx</code> (4 pruebas)</li>
+            <li><code>UserCard.test.tsx</code> (4 pruebas)</li>
+            <li><code>useDocumentTitle.test.ts</code> (2 pruebas)</li>
           </ul>
         </div>
         <div class="card highlight">
           <h3>Resultado en Vivo</h3>
-          <p>Ejecutado con `npm test`: <strong>25 pasadas de 25 pruebas</strong> en 8 suites sin ninguna advertencia.</p>
+          <p>Ejecutado con <code>npm test</code>: <strong>25 pruebas pasadas de 25</strong> en 8 suites sin errores.</p>
           <div style="background: var(--code-bg); padding: 0.85rem; border-radius: 12px; font-family: monospace; font-size: 0.95rem; color: var(--accent-light); margin-top: 0.75rem; border: 1px solid var(--card-border);">
             Test Files: 8 passed (8)<br>
             Tests: 25 passed (25)<br>
@@ -693,81 +686,81 @@
     </div>
 
     <!-- SLIDE 8: Universo Backend y Cloud AWS -->
-    <div class="slide" data-notes="ÁLVARO: 'En el backend optamos por Spring Boot con Java 21 desplegado en una instancia EC2 de AWS Ubuntu. Delante del servidor configuramos AWS API Gateway con HTTPS. Para la autenticación utilizamos AWS Cognito. ¿Por qué Cognito y no login manual? Porque en la industria moderna no es una buena práctica almacenar contraseñas en bases locales debido al riesgo de filtraciones. Cognito nos brinda cumplimiento normativo, tokens JWT RS256 verificables con claves JWKS públicas y rotación automática.'">
+    <div class="slide" data-notes="<b>ÁLVARO:</b> 'En el backend usamos <b>Spring Boot con Java en una máquina EC2 de AWS</b> en Ubuntu, detrás de <b>AWS API Gateway con HTTPS</b>. Para la autenticación elegimos <b>AWS Cognito</b> porque en la industria no se guardan contraseñas en bases de datos locales por riesgo de filtraciones. Cognito nos entrega tokens JWT firmados de forma segura.'">
       <div class="slide-meta">
         <span class="tag">Infraestructura y Nube</span>
         <span class="speaker-pill speaker-alvaro">Orador: Álvaro</span>
       </div>
-      <h2>Universo Backend y Cloud AWS</h2>
+      <h2>Backend y Servicios Cloud de AWS</h2>
       <p class="lead">
-        Arquitectura de servicios protegida con estándares de la industria (OAuth 2.0 / OpenID Connect).
+        Servicios en la nube de AWS protegidos con HTTPS y autenticación profesional con AWS Cognito.
       </p>
       <div class="grid-3">
         <div class="card">
           <div class="card-icon">EC2</div>
           <h3>AWS EC2 Ubuntu</h3>
           <ul>
-            <li>Servicio systemd `syncpass-api` con reinicio automático.</li>
-            <li>Swapfile de 2 GB configurado para soportar compilaciones eficientes.</li>
-            <li>Spring Boot 3 con Spring Security y Resource Server JWT.</li>
+            <li>Servicio systemd <code>syncpass-api</code> con reinicio automático.</li>
+            <li>Swapfile de 2 GB para soportar compilaciones fluidas.</li>
+            <li>Spring Boot 3 con Spring Security y validación de JWT.</li>
           </ul>
         </div>
         <div class="card">
           <div class="card-icon">API</div>
           <h3>AWS API Gateway</h3>
           <ul>
-            <li>Punto de entrada HTTPS (`5xvspck6jb.execute-api.us-east-1.amazonaws.com`).</li>
-            <li>Protección perimetral y desacoplamiento de la IP pública del servidor.</li>
-            <li>CORS configurado para permitir consumos desde Vercel y Android.</li>
+            <li>Punto de entrada seguro HTTPS hacia el backend.</li>
+            <li>Protección perimetral y desacoplamiento de la IP del servidor.</li>
+            <li>CORS configurado para recibir llamadas desde Vercel y Android.</li>
           </ul>
         </div>
         <div class="card highlight">
           <div class="card-icon">IDP</div>
-          <h3>AWS Cognito User Pool</h3>
+          <h3>AWS Cognito</h3>
           <ul>
-            <li>Pool `us-east-1_RlB8Ft9Z2` con validación de teléfono y correo.</li>
-            <li>Firma digital RS256 con claves JWKS públicas verificables.</li>
-            <li>Reducción a cero del riesgo de filtración de contraseñas locales.</li>
+            <li>User Pool con verificación segura de cuentas.</li>
+            <li>Emisión de tokens JWT firmados digitalmente.</li>
+            <li>Cero riesgo de filtración de contraseñas locales.</li>
           </ul>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 9: Mockups y Roadmap en Figma -->
-    <div class="slide" data-notes="MARIANO: 'Para cumplir con el requerimiento del profesor sobre las funcionalidades proyectadas para la siguiente fase, diseñamos mockups completos en Figma: sincronización offline en terreno con base de datos Room SQLite, validación de geocercas GPS para confirmar que el voluntario y beneficiario estén físicamente en la junta de vecinos, y tableros de analítica de impacto para directores de carrera.'">
+    <div class="slide" data-notes="<b>MARIANO:</b> 'Para cumplir con la proyección de funcionalidades que nos pidió el profesor, diseñamos mockups completos en <b>Figma</b>: pensamos en <b>sincronización offline con Room SQLite</b> en Android para cuando no haya señal 4G en la sede vecinal, y validación por <b>geocercas GPS</b> para asegurar que el escaneo ocurra en el lugar del taller.'">
       <div class="slide-meta">
         <span class="tag">Visión de Producto y Roadmap</span>
         <span class="speaker-pill speaker-mariano">Orador: Mariano</span>
       </div>
-      <h2>Mockups y Próximas Funcionalidades (Figma)</h2>
+      <h2>Mockups y Próximas Funciones (Figma)</h2>
       <p class="lead">
-        Demostración del diseño de experiencia de usuario y arquitectura proyectada para la fase 2.
+        Diseño en Figma de las funcionalidades proyectadas para la siguiente etapa de desarrollo.
       </p>
       <div class="grid-3">
         <div class="card">
-          <h3>1. Sincronización Offline</h3>
-          <p>Módulo con Room SQLite en Android para almacenar acreditaciones en sedes comunitarias sin cobertura y sincronizar automáticamente al recuperar conexión.</p>
+          <h3>1. Modo Sin Internet (Offline)</h3>
+          <p>Módulo con Room SQLite en Android para guardar asistencias sin internet y sincronizarlas automáticamente cuando vuelva la señal.</p>
         </div>
         <div class="card">
-          <h3>2. Geocercas de Seguridad</h3>
-          <p>Validación de que el escaneo QR del beneficiario ocurra dentro de un radio de 50 metros de la junta de vecinos asignada.</p>
+          <h3>2. Geocercas con GPS</h3>
+          <p>Validación de que el escaneo del código QR ocurra dentro del radio de 50 metros de la junta de vecinos asignada.</p>
         </div>
         <div class="card">
-          <h3>3. Dashboard de Analítica</h3>
-          <p>Visualización para directores de carrera sobre el impacto territorial, quórum acumulado y horas de voluntariado acreditadas.</p>
+          <h3>3. Tablero de Estadísticas</h3>
+          <p>Pantalla para directores de carrera sobre el impacto territorial, quórum acumulado y horas de voluntariado de Duoc UC.</p>
         </div>
       </div>
     </div>
 
     <!-- SLIDE 10: Conclusiones y Defensa -->
-    <div class="slide" data-notes="MARIANO: 'En conclusión, SyncPass demuestra que los tres universos de software se integran bajo una arquitectura limpia, profesional y desplegada en la nube real.' | ÁLVARO: 'Cumplimos con todos los requisitos obligatorios: login con JWT, 4 mantenedores funcionales (2 en móvil y 2 en web), despliegue cloud en AWS y Vercel, y pruebas unitarias automatizadas con 100% de éxito. Quedamos a su disposición para cualquier pregunta.'">
+    <div class="slide" data-notes="<b>MARIANO:</b> 'En resumen profesor, SyncPass demuestra que el teléfono y la web se integran bajo una arquitectura real y profesional.'<br><br><b>ÁLVARO:</b> 'Cumplimos con todos los requisitos pedidos: login con roles, 4 mantenedores (2 en celular y 2 en web), backend en AWS, frontend en Vercel, 25 pruebas unitarias y los mockups en Figma. Muchas gracias, quedamos atentos a sus preguntas.'">
       <div class="slide-meta">
         <span class="tag">Cierre de Presentación</span>
         <span class="speaker-pill speaker-both">Mariano & Álvaro</span>
       </div>
       <h2>Conclusiones y Cumplimiento de Rúbrica</h2>
       <p class="lead">
-        SyncPass entrega un producto robusto, documentado, probado y desplegado en producción.
+        SyncPass entrega un producto completo, probado y desplegado en producción en la nube.
       </p>
       <div class="grid-4">
         <div class="card highlight">
@@ -776,15 +769,15 @@
         </div>
         <div class="card highlight">
           <h3>4 Mantenedores</h3>
-          <p>2 en aplicación móvil y 2 en aplicación web operando sobre la misma API.</p>
+          <p>2 en el celular y 2 en la web consumiendo la misma API central.</p>
         </div>
         <div class="card highlight">
           <h3>Desplegado</h3>
-          <p>Frontend activo en Vercel y Backend activo en AWS EC2 + API Gateway.</p>
+          <p>Web activa en Vercel y Backend activo en AWS EC2 + API Gateway.</p>
         </div>
         <div class="card highlight">
           <h3>Calidad Extra</h3>
-          <p>25 pruebas automatizadas Vitest y mockups para evolución del producto.</p>
+          <p>25 pruebas unitarias con Vitest y mockups completos en Figma.</p>
         </div>
       </div>
     </div>
@@ -795,7 +788,7 @@
   <div class="speaker-notes-drawer" id="notesDrawer">
     <div class="speaker-notes-header">
       <span class="speaker-notes-title">Guión del Orador</span>
-      <button class="btn-nav" style="padding: 0.25rem 0.65rem; font-size: 0.8rem;" onclick="toggleNotes()">Cerrar</button>
+      <button class="btn-nav" style="padding: 0.35rem 0.75rem; font-size: 0.82rem;" onclick="toggleNotes()">Cerrar</button>
     </div>
     <div class="speaker-notes-text" id="notesText"></div>
   </div>
@@ -818,6 +811,20 @@
     const notesDrawer = document.getElementById('notesDrawer');
     const notesText = document.getElementById('notesText');
     let currentSlide = 0;
+
+    function goToGuide(e) {
+      if (e) e.preventDefault();
+      window.location.href = './guia.html';
+    }
+
+    function goToHome(e) {
+      if (e) e.preventDefault();
+      if (window.location.origin && window.location.origin.startsWith('http')) {
+        window.location.href = window.location.origin + '/';
+      } else {
+        window.location.href = './';
+      }
+    }
 
     function updateSlide() {
       slides.forEach((s, idx) => {
@@ -879,9 +886,9 @@
     function handleSwipe() {
       const diff = touchEndX - touchStartX;
       if (diff < -50) {
-        nextSlide(); // Deslizar hacia la izquierda -> Siguiente
+        nextSlide();
       } else if (diff > 50) {
-        prevSlide(); // Deslizar hacia la derecha -> Anterior
+        prevSlide();
       }
     }
 
