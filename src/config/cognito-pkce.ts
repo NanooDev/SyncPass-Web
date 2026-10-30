@@ -41,6 +41,7 @@ export async function startCognitoLogin(
 ): Promise<void> {
   const verifier = generateRandomString(64)
   sessionStorage.setItem('cognito_code_verifier', verifier)
+  try { localStorage.setItem('cognito_code_verifier', verifier) } catch {}
   const challenge = await generateCodeChallenge(verifier)
 
   const params = new URLSearchParams({
@@ -61,6 +62,7 @@ export async function exchangeCodeForTokens(
   redirectUri: string,
   code: string,
   verifier: string,
+  clientSecret?: string,
 ): Promise<{ id_token: string; access_token: string }> {
   const params = new URLSearchParams({
     grant_type: 'authorization_code',
@@ -70,11 +72,21 @@ export async function exchangeCodeForTokens(
     code_verifier: verifier,
   })
 
+  if (clientSecret) {
+    params.append('client_secret', clientSecret)
+  }
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  }
+
+  if (clientSecret) {
+    headers['Authorization'] = `Basic ${btoa(`${clientId}:${clientSecret}`)}`
+  }
+
   const res = await fetch(`${domain}/oauth2/token`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers,
     body: params.toString(),
   })
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import {
   COGNITO_CLIENT_ID,
+  COGNITO_CLIENT_SECRET,
   COGNITO_DOMAIN,
   COGNITO_LOGOUT_URL,
   COGNITO_REDIRECT_URI,
@@ -115,7 +116,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ) {
       const searchParams = new URLSearchParams(window.location.search)
       const code = searchParams.get('code')
-      const verifier = sessionStorage.getItem('cognito_code_verifier') || ''
+      const verifier =
+        sessionStorage.getItem('cognito_code_verifier') ||
+        localStorage.getItem('cognito_code_verifier') ||
+        ''
 
       if (code) {
         exchangeCodeForTokens(
@@ -124,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           COGNITO_REDIRECT_URI,
           code,
           verifier,
+          COGNITO_CLIENT_SECRET,
         )
           .then((tokens) => {
             const payload = parseJwtPayload(tokens.id_token)
