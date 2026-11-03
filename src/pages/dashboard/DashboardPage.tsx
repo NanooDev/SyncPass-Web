@@ -21,7 +21,7 @@ interface CommunityProject {
 
 const INITIAL_PROJECTS: CommunityProject[] = [
   {
-    id: 'p1',
+    id: 'T-101',
     name: 'Alfabetización Digital para Adultos Mayores',
     location: 'Junta de Vecinos N°14 Villa El Roble',
     date: 'Hoy, 15:00 hrs',
@@ -31,7 +31,7 @@ const INITIAL_PROJECTS: CommunityProject[] = [
     coordinatorName: 'Prof. Mariano Acevedo',
   },
   {
-    id: 'p2',
+    id: 'T-102',
     name: 'Taller de Huertos Comunitarios Sostenibles',
     location: 'Sede Vecinal Los Pinos',
     date: 'Mañana, 10:30 hrs',
@@ -41,7 +41,7 @@ const INITIAL_PROJECTS: CommunityProject[] = [
     coordinatorName: 'Prof. Mariano Acevedo',
   },
   {
-    id: 'p3',
+    id: 'T-103',
     name: 'Primeros Auxilios y Prevención Barrial',
     location: 'Colegio Polivalente San Bernardo',
     date: '24 Oct, 16:00 hrs',
@@ -66,8 +66,9 @@ export default function DashboardPage() {
       return INITIAL_PROJECTS
     }
   })
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('p1')
-  const selectedProject = projects.find((p) => p.id === selectedProjectId) || projects[0]
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('T-101')
+  const selectedProject = projects.find((p) => p.id === selectedProjectId) || projects[0] || INITIAL_PROJECTS[0]
+  const [isSyncingApi, setIsSyncingApi] = useState<boolean>(false)
   const [offlineMode, setOfflineMode] = useState<boolean>(false)
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(3)
   const [manualRut, setManualRut] = useState<string>('')
@@ -111,6 +112,34 @@ export default function DashboardPage() {
     }
   }
 
+  const fetchTalleresFromApi = async (showNotice = false) => {
+    setIsSyncingApi(true)
+    try {
+      const res = await fetch('/api/talleres', {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (Array.isArray(json.datos) && json.datos.length > 0) {
+          saveProjects(json.datos)
+          if (showNotice) {
+            setActionNotice('Talleres sincronizados desde la base de datos (/api/talleres).')
+            setTimeout(() => setActionNotice(''), 3500)
+          }
+        }
+      }
+    } catch {
+      // Mantener caché local si no hay red
+    } finally {
+      setIsSyncingApi(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTalleresFromApi(false)
+  }, [])
+
   const openCreateModal = () => {
     setEditingProject(null)
     setFormName('')
@@ -132,38 +161,57 @@ export default function DashboardPage() {
     setShowProjectModal(true)
   }
 
-  const handleDeleteProject = (projId: string, projName: string, e: React.MouseEvent) => {
+  const handleDeleteProject = async (projId: string, projName: string, e: React.MouseEvent) => {
     e.stopPropagation()
     if (window.confirm(`¿Confirmas eliminar la iniciativa territorial "${projName}"?`)) {
       const updated = projects.filter((p) => p.id !== projId)
       saveProjects(updated)
-      setActionNotice(`Iniciativa "${projName}" eliminada correctamente del mantenedor.`)
+      try {
+        await fetch(`/api/talleres?id=${encodeURIComponent(projId)}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        })
+      } catch {
+        // ignore
+      }
+      setActionNotice(`Iniciativa "${projName}" eliminada de la base de datos.`)
       setTimeout(() => setActionNotice(''), 3500)
     }
   }
 
-  const handleSaveProject = (e: React.FormEvent) => {
+  const handleSaveProject = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formName.trim() || !formLocation.trim()) return
 
     if (editingProject) {
-      const updated = projects.map((p) =>
-        p.id === editingProject.id
-          ? {
-              ...p,
-              name: formName.trim(),
-              location: formLocation.trim(),
-              date: formDate.trim(),
-              capacity: formCapacity,
-              status: formStatus,
-            }
-          : p
-      )
+      const updatedItem: CommunityProject = {
+        ...editingProject,
+        name: formName.trim(),
+        location: formLocation.trim(),
+        date: formDate.trim(),
+        capacity: formCapacity,
+        status: formStatus,
+      }
+      const updated = projects.map((p) => (p.id === editingProject.id ? updatedItem : p))
       saveProjects(updated)
-      setActionNotice(`Iniciativa "${formName.trim()}" actualizada exitosamente en el mantenedor.`)
+      setShowProjectModal(false)
+      try {
+        const res = await fetch('/api/talleres', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedItem),
+        })
+        if (res.ok) {
+          const json = await res.json()
+          if (Array.isArray(json.talleres)) saveProjects(json.talleres)
+        }
+      } catch {
+        // ignore
+      }
+      setActionNotice(`Iniciativa "${formName.trim()}" actualizada en la base de datos.`)
     } else {
       const newProj: CommunityProject = {
-        id: `p-${Date.now()}`,
+        id: `T-${Date.now().toString().slice(-4)}`,
         name: formName.trim(),
         location: formLocation.trim(),
         date: formDate.trim(),
@@ -174,17 +222,22 @@ export default function DashboardPage() {
       }
       saveProjects([newProj, ...projects])
       setSelectedProjectId(newProj.id)
-      setActionNotice(`Iniciativa "${formName.trim()}" guardada exitosamente y lista para terreno.`)
-      // Notificación push automática a territorio
-      sendPushNotification({
-        email: pushTargetEmail,
-        title: 'Nueva Iniciativa SyncPass',
-        message: `Se ha creado el taller: ${formName.trim()} en ${formLocation.trim()}`,
-        priority: 'high',
-        useBff: false,
-      }).catch(() => {})
+      setShowProjectModal(false)
+      try {
+        const res = await fetch('/api/talleres', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newProj),
+        })
+        if (res.ok) {
+          const json = await res.json()
+          if (Array.isArray(json.talleres)) saveProjects(json.talleres)
+        }
+      } catch {
+        // ignore
+      }
+      setActionNotice(`Iniciativa "${formName.trim()}" guardada en la base de datos y sincronizada con la App Móvil.`)
     }
-    setShowProjectModal(false)
     setTimeout(() => setActionNotice(''), 3500)
   }
 
@@ -560,6 +613,31 @@ export default function DashboardPage() {
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>Supervisión de cupos, quórum y acreditación en terreno</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => fetchTalleresFromApi(true)}
+                disabled={isSyncingApi}
+                style={{
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border)',
+                  padding: '0.6rem 0.95rem',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '0.83rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  cursor: 'pointer',
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                  <path d="M16 16h5v5" />
+                </svg>
+                <span>{isSyncingApi ? 'Sincronizando...' : 'Actualizar Talleres'}</span>
+              </button>
               <button
                 onClick={openCreateModal}
                 style={{
