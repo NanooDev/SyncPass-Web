@@ -1,14 +1,20 @@
 server:
   port: 8080
 
+# Configuración Supabase PostgreSQL y REST API
+supabase:
+  url: ${SUPABASE_URL:https://nxbsqkpnkawbkdksmnym.supabase.co}
+  jdbc-url: ${SUPABASE_JDBC_URL:jdbc:postgresql://db.nxbsqkpnkawbkdksmnym.supabase.co:5432/postgres}
+
 # Todo sobreescribible por env: AUTH0_ISSUER, AUTH0_JWK_SET_URI, AUTH0_AUDIENCE, AUTH0_ROLES_CLAIM
 auth0:
-  issuer: ${AUTH0_ISSUER:https://dev-qd6i88udlr5yzjtv.us.auth0.com/}
-  jwk-set-uri: ${AUTH0_JWK_SET_URI:https://dev-qd6i88udlr5yzjtv.us.auth0.com/.well-known/jwks.json}
+  issuer: ${AUTH0_ISSUER:https://cognito-idp.us-east-1.amazonaws.com/us-east-1_RlB8Ft9Z2}
+  jwk-set-uri: ${AUTH0_JWK_SET_URI:https://cognito-idp.us-east-1.amazonaws.com/us-east-1_RlB8Ft9Z2/.well-known/jwks.json}
   audience: ${AUTH0_AUDIENCE:https://sync-pass-api}
-  roles-claim: ${AUTH0_ROLES_CLAIM:https://sync-pass/roles}
+  roles-claim: ${AUTH0_ROLES_CLAIM:cognito:groups}
 
 cors:
   allowed-origins:
+    - https://sync-pass-web-rho.vercel.app
     - https://citt-sync-pass-front.vercel.app
     - http://localhost:5173
