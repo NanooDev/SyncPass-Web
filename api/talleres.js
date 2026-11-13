@@ -1,120 +1,85 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import crypto from 'node:crypto'
 
-const TMP_FILE = path.join(process.env.TEMP || '/tmp', 'syncpass_talleres_db_v3.json')
-const CLOUD_STORE_URL = 'https://ntfy.sh/syncpass_cloud_db_talleres_v3'
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nxbsqkpnkawbkdksmnym.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
 
-const INITIAL_TALLERES = [
-  {
-    id: 'T-101',
-    name: 'Alfabetización Digital para Adultos Mayores',
-    location: 'Junta de Vecinos N°14 Villa El Roble',
-    date: 'Hoy, 15:00 hrs',
-    attendeesCount: 28,
-    capacity: 40,
-    status: 'En curso',
+const DEFAULT_PROYECTO_ID = '00000000-0000-0000-0001-000000000001'
+const DEFAULT_COORDINADOR_ID = '00000000-0000-0000-0000-000000000002'
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    ...extra,
+  }
+}
+
+function mapStatusFromDb(estado) {
+  switch (String(estado || '').toLowerCase()) {
+    case 'en_curso':
+      return 'En curso'
+    case 'finalizado':
+    case 'cancelado':
+      return 'Finalizado'
+    default:
+      return 'Activo'
+  }
+}
+
+function mapStatusToDb(status) {
+  switch (String(status || '').toLowerCase()) {
+    case 'en curso':
+    case 'en_curso':
+      return 'en_curso'
+    case 'finalizado':
+    case 'completado':
+      return 'finalizado'
+    case 'cancelado':
+      return 'cancelado'
+    default:
+      return 'programado'
+  }
+}
+
+function formatDateDisplay(isoStr) {
+  if (!isoStr) return 'Hoy, 15:00 hrs'
+  try {
+    const d = new Date(isoStr)
+    if (Number.isNaN(d.getTime())) return String(isoStr)
+    const dd = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })
+    const hh = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false })
+    return `${dd}, ${hh} hrs`
+  } catch {
+    return String(isoStr)
+  }
+}
+
+function mapRowToFrontend(row) {
+  const id = row.id_evento
+  return {
+    id,
+    name: row.nombre_actividad || 'Taller Territorial',
+    location: [row.recinto, row.direccion].filter(Boolean).join(' · ') || 'Sede Comunitaria',
+    date: formatDateDisplay(row.fecha_hora_programada),
+    attendeesCount: 0,
+    capacity: Number(row.cupos_maximos || 30),
+    status: mapStatusFromDb(row.estado),
     coordinatorName: 'Prof. Mariano Acevedo',
-    qrCode: 'SYNCPASS-EVENT-T101-ELROBLE',
-  },
-  {
-    id: 'T-102',
-    name: 'Taller de Huertos Comunitarios Sostenibles',
-    location: 'Sede Vecinal Los Pinos',
-    date: 'Mañana, 10:30 hrs',
-    attendeesCount: 15,
-    capacity: 25,
-    status: 'Activo',
-    coordinatorName: 'Prof. Mariano Acevedo',
-    qrCode: 'SYNCPASS-EVENT-T102-LOSPINOS',
-  },
-  {
-    id: 'T-103',
-    name: 'Primeros Auxilios y Prevención Barrial',
-    location: 'Colegio Polivalente San Bernardo',
-    date: '24 Oct, 16:00 hrs',
-    attendeesCount: 35,
-    capacity: 35,
-    status: 'Finalizado',
-    coordinatorName: 'Prof. Álvaro León',
-    qrCode: 'SYNCPASS-EVENT-T103-SANBERNARDO',
-  },
-]
-
-function readLocalCache() {
-  try {
-    if (fs.existsSync(TMP_FILE)) {
-      const raw = fs.readFileSync(TMP_FILE, 'utf8')
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
-    }
-  } catch {
-    // ignore
-  }
-  return null
-}
-
-function writeLocalCache(items) {
-  try {
-    fs.writeFileSync(TMP_FILE, JSON.stringify(items, null, 2), 'utf8')
-  } catch {
-    // ignore
+    qrCode: row.qr_evento || `SYNCPASS-EVENT-${id.slice(0, 8).toUpperCase()}`,
   }
 }
 
-async function loadTalleresFromCloud() {
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 3500)
-    const res = await fetch(`${CLOUD_STORE_URL}/json?poll=1&since=48h`, {
-      signal: controller.signal,
-    })
-    clearTimeout(timer)
-    if (res.ok) {
-      const text = await res.text()
-      const lines = text
-        .split('\n')
-        .map((l) => l.trim())
-        .filter(Boolean)
-      for (let i = lines.length - 1; i >= 0; i--) {
-        try {
-          const event = JSON.parse(lines[i])
-          if (event.event === 'message' && event.message) {
-            const payload = JSON.parse(event.message)
-            if (payload && payload.type === 'talleres_snapshot' && Array.isArray(payload.items)) {
-              writeLocalCache(payload.items)
-              return payload.items
-            }
-          }
-        } catch {
-          // continue searching previous snapshot
-        }
-      }
-    }
-  } catch {
-    // fallback to local cache
+async function fetchAllFromSupabase() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/evento_taller?select=*&order=created_at.desc`,
+    { headers: supabaseHeaders() }
+  )
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Supabase GET evento_taller (${res.status}): ${errText}`)
   }
-  return readLocalCache() || INITIAL_TALLERES
-}
-
-async function saveTalleresToCloud(items) {
-  writeLocalCache(items)
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 3500)
-    await fetch(CLOUD_STORE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({
-        type: 'talleres_snapshot',
-        updatedAt: new Date().toISOString(),
-        items,
-      }),
-      signal: controller.signal,
-    })
-    clearTimeout(timer)
-  } catch {
-    // local cache already updated
-  }
+  const rows = await res.json()
+  return Array.isArray(rows) ? rows.map(mapRowToFrontend) : []
 }
 
 export default async function handler(req, res) {
@@ -128,13 +93,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const currentList = await loadTalleresFromCloud()
-
     if (req.method === 'GET') {
+      const talleres = await fetchAllFromSupabase()
       res.status(200).json({
         exito: true,
-        mensaje: 'Listado de talleres obtenido desde la base de datos',
-        datos: currentList,
+        mensaje: 'Listado de talleres obtenido desde PostgreSQL (Supabase)',
+        datos: talleres,
       })
       return
     }
@@ -142,36 +106,50 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
 
     if (req.method === 'POST') {
-      const id = body.id || `T-${Date.now().toString().slice(-4)}`
-      const name = (body.name || body.nombre || 'Nuevo Taller Territorial').trim()
-      const location = (body.location || body.lugar || 'Sede Comunitaria Duoc UC').trim()
-      const date = (body.date || body.fechaHora || 'Hoy, 15:00 hrs').trim()
-      const capacity = Number(body.capacity ?? body.cuposMaximos ?? 30)
-      const attendeesCount = Number(body.attendeesCount ?? body.cuposOcupados ?? 0)
-      const status = body.status || body.estado || 'Activo'
-      const coordinatorName = body.coordinatorName || 'Prof. Mariano Acevedo'
-      const qrCode = body.qrCode || body.codigoQr || `SYNCPASS-EVENT-${id}`
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const id_evento = uuidRegex.test(String(body.id || '')) ? body.id : crypto.randomUUID()
+      const nombre_actividad = String(body.name || body.nombre || 'Nuevo Taller Territorial').trim()
+      const recinto = String(body.location || body.lugar || 'Sede Comunitaria Duoc UC').trim()
+      const cupos_maximos = Math.max(1, Number(body.capacity ?? body.cuposMaximos ?? 30))
+      const estado = mapStatusToDb(body.status || body.estado || 'Activo')
+      const qr_evento = body.qrCode || body.codigoQr || `EVT-${id_evento.slice(0, 8).toUpperCase()}`
 
-      const nuevoTaller = {
-        id,
-        name,
-        location,
-        date,
-        attendeesCount,
-        capacity,
-        status,
-        coordinatorName,
-        qrCode,
+      const insertPayload = {
+        id_evento,
+        id_proyecto: DEFAULT_PROYECTO_ID,
+        id_coordinador: DEFAULT_COORDINADOR_ID,
+        nombre_actividad,
+        fecha_hora_programada: new Date().toISOString(),
+        cupos_maximos,
+        recinto,
+        direccion: recinto,
+        qr_evento,
+        estado,
       }
 
-      const updated = [nuevoTaller, ...currentList.filter((t) => t.id !== id)]
-      await saveTalleresToCloud(updated)
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/evento_taller`, {
+        method: 'POST',
+        headers: supabaseHeaders({ Prefer: 'return=representation' }),
+        body: JSON.stringify(insertPayload),
+      })
+
+      if (!insertRes.ok) {
+        const errText = await insertRes.text()
+        throw new Error(`Supabase POST evento_taller (${insertRes.status}): ${errText}`)
+      }
+
+      const insertedRows = await insertRes.json()
+      const created = Array.isArray(insertedRows) && insertedRows[0]
+        ? mapRowToFrontend(insertedRows[0])
+        : mapRowToFrontend(insertPayload)
+
+      const talleres = await fetchAllFromSupabase()
 
       res.status(201).json({
         exito: true,
-        mensaje: 'Taller registrado exitosamente en la base de datos',
-        datos: nuevoTaller,
-        talleres: updated,
+        mensaje: 'Taller registrado exitosamente en PostgreSQL (Supabase)',
+        datos: created,
+        talleres,
       })
       return
     }
@@ -183,30 +161,44 @@ export default async function handler(req, res) {
         return
       }
 
-      let updatedItem = null
-      const updated = currentList.map((item) => {
-        if (item.id === targetId) {
-          updatedItem = {
-            ...item,
-            name: (body.name ?? body.nombre ?? item.name).trim(),
-            location: (body.location ?? body.lugar ?? item.location).trim(),
-            date: (body.date ?? body.fechaHora ?? item.date).trim(),
-            capacity: Number(body.capacity ?? body.cuposMaximos ?? item.capacity),
-            attendeesCount: Number(body.attendeesCount ?? body.cuposOcupados ?? item.attendeesCount),
-            status: body.status ?? body.estado ?? item.status,
-            coordinatorName: body.coordinatorName ?? item.coordinatorName,
-          }
-          return updatedItem
-        }
-        return item
-      })
+      const patchPayload = {}
+      if (body.name || body.nombre) patchPayload.nombre_actividad = String(body.name || body.nombre).trim()
+      if (body.location || body.lugar) {
+        const loc = String(body.location || body.lugar).trim()
+        patchPayload.recinto = loc
+        patchPayload.direccion = loc
+      }
+      if (body.capacity !== undefined || body.cuposMaximos !== undefined) {
+        patchPayload.cupos_maximos = Math.max(1, Number(body.capacity ?? body.cuposMaximos))
+      }
+      if (body.status || body.estado) {
+        patchPayload.estado = mapStatusToDb(body.status || body.estado)
+      }
+      patchPayload.updated_at = new Date().toISOString()
 
-      await saveTalleresToCloud(updated)
+      const patchRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/evento_taller?id_evento=eq.${encodeURIComponent(targetId)}`,
+        {
+          method: 'PATCH',
+          headers: supabaseHeaders({ Prefer: 'return=representation' }),
+          body: JSON.stringify(patchPayload),
+        }
+      )
+
+      if (!patchRes.ok) {
+        const errText = await patchRes.text()
+        throw new Error(`Supabase PATCH evento_taller (${patchRes.status}): ${errText}`)
+      }
+
+      const updatedRows = await patchRes.json()
+      const updatedItem = Array.isArray(updatedRows) && updatedRows[0] ? mapRowToFrontend(updatedRows[0]) : null
+      const talleres = await fetchAllFromSupabase()
+
       res.status(200).json({
         exito: true,
-        mensaje: 'Taller actualizado en la base de datos',
+        mensaje: 'Taller actualizado en PostgreSQL (Supabase)',
         datos: updatedItem,
-        talleres: updated,
+        talleres,
       })
       return
     }
@@ -218,13 +210,25 @@ export default async function handler(req, res) {
         return
       }
 
-      const updated = currentList.filter((item) => item.id !== targetId)
-      await saveTalleresToCloud(updated)
+      const delRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/evento_taller?id_evento=eq.${encodeURIComponent(targetId)}`,
+        {
+          method: 'DELETE',
+          headers: supabaseHeaders(),
+        }
+      )
+
+      if (!delRes.ok) {
+        const errText = await delRes.text()
+        throw new Error(`Supabase DELETE evento_taller (${delRes.status}): ${errText}`)
+      }
+
+      const talleres = await fetchAllFromSupabase()
 
       res.status(200).json({
         exito: true,
-        mensaje: 'Taller eliminado de la base de datos',
-        talleres: updated,
+        mensaje: 'Taller eliminado de PostgreSQL (Supabase)',
+        talleres,
       })
       return
     }

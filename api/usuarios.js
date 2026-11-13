@@ -1,119 +1,65 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import crypto from 'node:crypto'
 
-const TMP_FILE = path.join(process.env.TEMP || '/tmp', 'syncpass_usuarios_db_v3.json')
-const CLOUD_STORE_URL = 'https://ntfy.sh/syncpass_cloud_db_usuarios_v3'
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nxbsqkpnkawbkdksmnym.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
 
-const INITIAL_USUARIOS = [
-  {
-    id: 'usr-1',
-    nombre: 'Administrador SyncPass',
-    email: 'admin.syncpass@duocuc.cl',
-    role: 'admin',
-    roles: ['admin'],
-    activo: true,
-  },
-  {
-    id: 'usr-2',
-    nombre: 'Prof. Mariano Acevedo',
-    email: 'docente.coordinador@duocuc.cl',
-    role: 'coordinator',
-    roles: ['coordinator'],
-    activo: true,
-  },
-  {
-    id: 'usr-3',
-    nombre: 'Álvaro León (Voluntario)',
-    email: 'voluntario.estudiante@duocuc.cl',
-    role: 'volunteer',
-    roles: ['volunteer'],
-    activo: true,
-  },
-  {
-    id: 'usr-4',
-    nombre: 'María González (Vecina)',
-    email: 'maria.gonzalez@comunidad.cl',
-    role: 'attendee',
-    roles: ['attendee'],
-    activo: true,
-  },
-]
-
-function readLocalCache() {
-  try {
-    if (fs.existsSync(TMP_FILE)) {
-      const raw = fs.readFileSync(TMP_FILE, 'utf8')
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
-    }
-  } catch {
-    // ignore
-  }
-  return null
-}
-
-function writeLocalCache(items) {
-  try {
-    fs.writeFileSync(TMP_FILE, JSON.stringify(items, null, 2), 'utf8')
-  } catch {
-    // ignore
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    ...extra,
   }
 }
 
-async function loadUsuariosFromCloud() {
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 3500)
-    const res = await fetch(`${CLOUD_STORE_URL}/json?poll=1&since=48h`, {
-      signal: controller.signal,
-    })
-    clearTimeout(timer)
-    if (res.ok) {
-      const text = await res.text()
-      const lines = text
-        .split('\n')
-        .map((l) => l.trim())
-        .filter(Boolean)
-      for (let i = lines.length - 1; i >= 0; i--) {
-        try {
-          const event = JSON.parse(lines[i])
-          if (event.event === 'message' && event.message) {
-            const payload = JSON.parse(event.message)
-            if (payload && payload.type === 'usuarios_snapshot' && Array.isArray(payload.items)) {
-              writeLocalCache(payload.items)
-              return payload.items
-            }
-          }
-        } catch {
-          // continue
-        }
-      }
-    }
-  } catch {
-    // fallback
+function mapRoleFromDb(rol) {
+  switch (String(rol || '').toLowerCase()) {
+    case 'administrador':
+    case 'admin':
+      return 'admin'
+    case 'docente':
+    case 'coordinator':
+      return 'coordinator'
+    default:
+      return 'volunteer'
   }
-  return readLocalCache() || INITIAL_USUARIOS
 }
 
-async function saveUsuariosToCloud(items) {
-  writeLocalCache(items)
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 3500)
-    await fetch(CLOUD_STORE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({
-        type: 'usuarios_snapshot',
-        updatedAt: new Date().toISOString(),
-        items,
-      }),
-      signal: controller.signal,
-    })
-    clearTimeout(timer)
-  } catch {
-    // ignore
+function mapRoleToDb(role) {
+  switch (String(role || '').toLowerCase()) {
+    case 'admin':
+    case 'administrador':
+      return 'administrador'
+    case 'coordinator':
+    case 'docente':
+      return 'docente'
+    default:
+      return 'estudiante_voluntario'
   }
+}
+
+function mapRowToFrontend(row) {
+  const role = mapRoleFromDb(row.rol)
+  return {
+    id: row.id_usuario,
+    nombre: row.nombre,
+    email: row.correo,
+    role,
+    roles: [role],
+    activo: row.activo !== false,
+  }
+}
+
+async function fetchAllUsersFromSupabase() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/usuario?select=*&order=created_at.desc`,
+    { headers: supabaseHeaders() }
+  )
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Supabase GET usuario (${res.status}): ${errText}`)
+  }
+  const rows = await res.json()
+  return Array.isArray(rows) ? rows.map(mapRowToFrontend) : []
 }
 
 export default async function handler(req, res) {
@@ -127,13 +73,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const currentList = await loadUsuariosFromCloud()
-
     if (req.method === 'GET') {
+      const usuarios = await fetchAllUsersFromSupabase()
       res.status(200).json({
         exito: true,
-        mensaje: 'Usuarios obtenidos desde la base de datos',
-        datos: currentList,
+        mensaje: 'Usuarios obtenidos desde PostgreSQL (Supabase)',
+        datos: usuarios,
       })
       return
     }
@@ -141,56 +86,105 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
 
     if (req.method === 'POST') {
-      const id = body.id || `usr-${Date.now().toString().slice(-4)}`
-      const email = (body.email || '').trim().toLowerCase()
-      const nombre = (body.nombre || body.name || email.split('@')[0] || 'Usuario SyncPass').trim()
-      const role = body.role || (Array.isArray(body.roles) ? body.roles[0] : 'volunteer') || 'volunteer'
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const id_usuario = uuidRegex.test(String(body.id || '')) ? body.id : crypto.randomUUID()
+      const correo = String(body.email || body.correo || '').trim().toLowerCase()
+      const nombre = String(body.nombre || body.name || correo.split('@')[0] || 'Usuario SyncPass').trim()
+      const rol = mapRoleToDb(body.role || (Array.isArray(body.roles) ? body.roles[0] : 'volunteer'))
 
-      const nuevoUsuario = {
-        id,
-        nombre,
-        email,
-        role,
-        roles: [role],
-        activo: true,
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/usuario`, {
+        method: 'POST',
+        headers: supabaseHeaders({ Prefer: 'return=representation' }),
+        body: JSON.stringify({
+          id_usuario,
+          nombre,
+          correo,
+          rol,
+          activo: true,
+        }),
+      })
+
+      if (!insertRes.ok) {
+        const errText = await insertRes.text()
+        throw new Error(`Supabase POST usuario (${insertRes.status}): ${errText}`)
       }
 
-      const updated = [nuevoUsuario, ...currentList.filter((u) => u.email.toLowerCase() !== email)]
-      await saveUsuariosToCloud(updated)
+      const insertedRows = await insertRes.json()
+      const created = Array.isArray(insertedRows) && insertedRows[0]
+        ? mapRowToFrontend(insertedRows[0])
+        : null
+      const usuarios = await fetchAllUsersFromSupabase()
 
       res.status(201).json({
         exito: true,
-        mensaje: 'Usuario registrado exitosamente en la base de datos y Cognito',
-        datos: nuevoUsuario,
-        usuarios: updated,
+        mensaje: 'Usuario registrado exitosamente en PostgreSQL (Supabase)',
+        datos: created,
+        usuarios,
       })
       return
     }
 
     if (req.method === 'PATCH') {
       const targetId = body.id || req.query?.id
+      if (!targetId) {
+        res.status(400).json({ exito: false, mensaje: 'Se requiere el ID del usuario' })
+        return
+      }
       const activo = body.activo !== undefined ? Boolean(body.activo) : true
-      const updated = currentList.map((u) => (u.id === targetId ? { ...u, activo } : u))
-      await saveUsuariosToCloud(updated)
+
+      const patchRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/usuario?id_usuario=eq.${encodeURIComponent(targetId)}`,
+        {
+          method: 'PATCH',
+          headers: supabaseHeaders({ Prefer: 'return=representation' }),
+          body: JSON.stringify({ activo, updated_at: new Date().toISOString() }),
+        }
+      )
+
+      if (!patchRes.ok) {
+        const errText = await patchRes.text()
+        throw new Error(`Supabase PATCH usuario (${patchRes.status}): ${errText}`)
+      }
+
+      const updatedRows = await patchRes.json()
+      const updatedUser = Array.isArray(updatedRows) && updatedRows[0] ? mapRowToFrontend(updatedRows[0]) : null
+      const usuarios = await fetchAllUsersFromSupabase()
 
       res.status(200).json({
         exito: true,
-        mensaje: activo ? 'Usuario reactivado en la base de datos' : 'Usuario dado de baja en la base de datos',
-        datos: updated.find((u) => u.id === targetId),
-        usuarios: updated,
+        mensaje: activo ? 'Usuario reactivado en Supabase' : 'Usuario dado de baja en Supabase',
+        datos: updatedUser,
+        usuarios,
       })
       return
     }
 
     if (req.method === 'DELETE') {
       const targetId = req.query?.id || body?.id
-      const updated = currentList.filter((u) => u.id !== targetId)
-      await saveUsuariosToCloud(updated)
+      if (!targetId) {
+        res.status(400).json({ exito: false, mensaje: 'Se requiere el ID del usuario' })
+        return
+      }
+
+      const delRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/usuario?id_usuario=eq.${encodeURIComponent(targetId)}`,
+        {
+          method: 'DELETE',
+          headers: supabaseHeaders(),
+        }
+      )
+
+      if (!delRes.ok) {
+        const errText = await delRes.text()
+        throw new Error(`Supabase DELETE usuario (${delRes.status}): ${errText}`)
+      }
+
+      const usuarios = await fetchAllUsersFromSupabase()
 
       res.status(200).json({
         exito: true,
-        mensaje: 'Usuario eliminado de la base de datos',
-        usuarios: updated,
+        mensaje: 'Usuario eliminado de PostgreSQL (Supabase)',
+        usuarios,
       })
       return
     }
