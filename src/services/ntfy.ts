@@ -11,10 +11,6 @@ export const TOPIC_HASH_LENGTH = 20
 
 /**
  * Deriva el topico secreto de ntfy a partir del email del usuario.
- * Algoritmo identico al del cliente Android y la especificacion del profesor:
- * 1. Normaliza email: trim().toLowerCase()
- * 2. Hash SHA-256
- * 3. Prefijo 'app_vibe_' + primeros 20 caracteres hexadecimales
  */
 export async function deriveNtfyTopic(email: string): Promise<string> {
   const normalized = email.trim().toLowerCase()
@@ -72,30 +68,6 @@ export async function sendPushNotification(payload: PushNotificationPayload): Pr
   const email = payload.email || ''
   const topic = payload.topic || (email ? await deriveNtfyTopic(email) : `${TOPIC_PREFIX}default`)
 
-  // 1. Envío a través del endpoint REST del servidor (/api/notificar)
-  try {
-    const apiRes = await fetch('/api/notificar', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        topic,
-        message: payload.message,
-        title: payload.title,
-        tags: payload.tags?.join(','),
-        priority: payload.priority || 'high',
-      }),
-    })
-
-    if (apiRes.ok) {
-      return { success: true, topic, source: 'bff' }
-    }
-  } catch {
-    // Si la ruta local no responde, intentar BFF externo
-  }
-
   if (payload.useBff && email) {
     try {
       const bffResponse = await fetch(`${BFF_URL}/api/notificar`, {
@@ -116,14 +88,57 @@ export async function sendPushNotification(payload: PushNotificationPayload): Pr
         return { success: true, topic, source: 'bff' }
       }
     } catch {
-      // ignore
+      // Fallback a ruta serverless local /api/notificar si BFF externo no responde
+      try {
+        const apiRes = await fetch('/api/notificar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            topic,
+            message: payload.message,
+            title: payload.title,
+            priority: payload.priority || 'high',
+          }),
+        })
+        if (apiRes.ok) {
+          return { success: true, topic, source: 'bff' }
+        }
+      } catch {
+        // continuar al envio directo ntfy.sh
+      }
     }
   }
 
-  return {
-    success: false,
-    topic,
-    error: 'Servicio de notificaciones no disponible',
+  try {
+    const headers: Record<string, string> = {
+      Title: payload.title,
+      Priority: payload.priority || 'default',
+    }
+    if (payload.tags && payload.tags.length > 0) {
+      headers.Tags = payload.tags.join(',')
+    }
+
+    const res = await fetch(`${NTFY_BASE_URL}/${topic}`, {
+      method: 'POST',
+      headers,
+      body: payload.message,
+    })
+
+    if (res.ok) {
+      return { success: true, topic, source: 'ntfy_direct' }
+    }
+    return {
+      success: false,
+      topic,
+      error: `Error HTTP ${res.status}`,
+    }
+  } catch (err) {
+    return {
+      success: false,
+      topic,
+      error: err instanceof Error ? err.message : 'Servicio de notificaciones no disponible',
+    }
   }
 }
 

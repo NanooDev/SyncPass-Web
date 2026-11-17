@@ -100,21 +100,21 @@ export default function HomePage() {
         <div className={styles.heroLeft}>
           <div className={styles.pillBadge}>
             <span className={styles.radarDot} />
-            <span>Duoc UC · Vinculación Comunitaria</span>
+            <span>Duoc UC · Vinculación con el Medio</span>
           </div>
 
           <h1 className={styles.heroTitle}>
-            Acreditación Territorial en{' '}
-            <span className={styles.heroGradient}>Menos de 2 Segundos</span>
+            Tus talleres en sede,{' '}
+            <span className={styles.heroGradient}>sin planillas de papel ni filas</span>
           </h1>
 
           <p className={styles.heroDescription}>
-            SyncPass sustituye las planillas en papel por pases QR instantáneos en terreno. Diseñado para que docentes coordinadores y estudiantes voluntarios de Duoc UC gestionen quórum en vivo y certifiquen horas de voluntariado.
+            Desde juntas de vecinos en Maipú y Lo Espejo hasta recintos sin cobertura móvil: pasa lista con código QR o RUT en dos segundos, guarda todo en el teléfono y sincroniza cuando vuelva la señal.
           </p>
 
           <div className={styles.actions}>
             <Link href="/dashboard" className={styles.primaryBtn}>
-              <span>Ir al Dashboard</span>
+              <span>Abrir Panel de Sede</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 12h14" />
                 <path d="m12 5 7 7-7 7" />
@@ -128,39 +128,39 @@ export default function HomePage() {
                   <polyline points="10 17 15 12 10 7" />
                   <line x1="15" y1="12" x2="3" y2="12" />
                 </svg>
-                <span>Acceso AWS Cognito</span>
+                <span>Ingresar con cuenta Duoc</span>
               </button>
             )}
           </div>
 
-          {/* Cinta de Métricas de Alto Impacto (Gamma & Muzli Style) */}
+          {/* Indicadores de Operación en Terreno */}
           <div className={styles.metricsRibbon}>
             <div className={styles.metricItem}>
               <div className={styles.metricValue} style={{ color: '#10b981' }}>
-                &lt; 1.8s
+                &lt; 2 seg
               </div>
-              <div className={styles.metricLabel}>Acreditación QR</div>
+              <div className={styles.metricLabel}>Ingreso por vecino</div>
             </div>
 
             <div className={styles.metricItem}>
               <div className={styles.metricValue} style={{ color: '#38bdf8' }}>
-                65%+
+                3 sedes
               </div>
-              <div className={styles.metricLabel}>Tasa de Encuestas</div>
+              <div className={styles.metricLabel}>Maipú · Lo Espejo · San Bernardo</div>
             </div>
 
             <div className={styles.metricItem}>
               <div className={styles.metricValue} style={{ color: '#818cf8' }}>
-                100%
+                Sin señal
               </div>
-              <div className={styles.metricLabel}>Modo Offline-First</div>
+              <div className={styles.metricLabel}>Guarda en el teléfono</div>
             </div>
 
             <div className={styles.metricItem}>
               <div className={styles.metricValue} style={{ color: '#f59e0b' }}>
-                25 / 25
+                Acta CSV
               </div>
-              <div className={styles.metricLabel}>Pruebas Vitest</div>
+              <div className={styles.metricLabel}>Lista al cerrar jornada</div>
             </div>
           </div>
         </div>
@@ -366,7 +366,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* 3 Modern Feature Cards (Muzli Style) */}
+      {/* 3 Tarjetas de Valor en Terreno */}
       <section className={styles.featureGrid}>
         <article className={styles.featureCard}>
           <div className={styles.iconWrapper} style={{ background: 'var(--brand-indigo-light)', color: 'var(--brand-indigo)' }}>
@@ -375,10 +375,10 @@ export default function HomePage() {
             </svg>
           </div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-            Arquitectura Offline-First
+            Funciona aunque no haya señal en la sede
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-            Preparado para operar en sedes vecinales con nula o baja señal 4G. Almacena en la base local SQLite de Android y sincroniza por lotes al reconectar.
+            Si en la junta de vecinos se cae el internet, cada asistencia queda guardada en la memoria del teléfono y se sube en un toque cuando recuperas conexión.
           </p>
         </article>
 
@@ -389,10 +389,10 @@ export default function HomePage() {
             </svg>
           </div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-            Identidad Federada AWS Cognito
+            Pase QR y respaldo rápido por RUT
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-            Autenticación segura con tokens JWT firmados con RS256. Elimina la necesidad de almacenar contraseñas locales por riesgo de filtraciones.
+            Los vecinos ingresan mostrando su código QR desde el celular o credencial impresa; y si alguien la olvidó, el voluntario lo registra por RUT en segundos.
           </p>
         </article>
 
@@ -405,10 +405,10 @@ export default function HomePage() {
             </svg>
           </div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-            Telemetría en Tiempo Real
+            Acta CSV y encuesta al terminar la jornada
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-            Monitoreo continuo de asistencia para docentes e integración con notificaciones push directas hacia los teléfonos móviles de los estudiantes.
+            Al finalizar el taller, los asistentes valoran la actividad desde su teléfono y el docente descarga la nómina completa en CSV lista para su informe.
           </p>
         </article>
       </section>

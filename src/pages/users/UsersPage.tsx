@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { type BffUser } from '../../config/auth.ts'
+import { useAuth0 } from '@auth0/auth0-react'
+import { AUTH0_AUDIENCE, type BffUser } from '../../config/auth.ts'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import styles from './UsersPage.module.css'
 
@@ -17,14 +18,16 @@ const DEMO_USERS: ExtendedUser[] = [
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
-  coordinator: 'Docente / Coordinador',
+  coordinator: 'Docente Coordinador',
   volunteer: 'Estudiante Voluntario',
-  attendee: 'Beneficiario Comunitario',
+  attendee: 'Vecino / Beneficiario',
 }
 
 export default function UsersPage() {
-  useDocumentTitle('Usuarios | Sync Pass')
+  useDocumentTitle('Equipo y Usuarios | Sync Pass')
+  const { getAccessTokenSilently, loginWithRedirect } = useAuth0()
   const [users, setUsers] = useState<ExtendedUser[] | null>(null)
+  const [error, setError] = useState<string>('')
   const [notice, setNotice] = useState<string>('')
   const [showModal, setShowModal] = useState<boolean>(false)
   const [formNombre, setFormNombre] = useState<string>('')
@@ -32,30 +35,61 @@ export default function UsersPage() {
   const [formRole, setFormRole] = useState<string>('volunteer')
 
   const fetchUsuarios = async (showFeedback = false) => {
+    setError('')
+    let token = ''
     try {
+      if (getAccessTokenSilently) {
+        token =
+          (await getAccessTokenSilently({
+            authorizationParams: { audience: AUTH0_AUDIENCE },
+          })) || ''
+      }
+    } catch (err) {
+      const code = (err as { error?: string })?.error
+      if ((code === 'consent_required' || code === 'login_required') && loginWithRedirect) {
+        await loginWithRedirect({
+          authorizationParams: { audience: AUTH0_AUDIENCE },
+        })
+        return
+      }
+    }
+
+    try {
+      const headers: Record<string, string> = { Accept: 'application/json' }
+      if (token) headers.Authorization = `Bearer ${token}`
       const res = await fetch('/api/usuarios', {
         method: 'GET',
-        headers: { Accept: 'application/json' },
+        headers,
       })
       if (res.ok) {
         const json = await res.json()
-        if (Array.isArray(json.datos) && json.datos.length > 0) {
-          setUsers(json.datos)
+        const list = Array.isArray(json)
+          ? json
+          : Array.isArray(json?.datos)
+            ? json.datos
+            : Array.isArray(json?.usuarios)
+              ? json.usuarios
+              : null
+        if (list && list.length > 0) {
+          setUsers(list)
           if (showFeedback) {
-            setNotice('Directorio de usuarios actualizado desde /api/usuarios.')
+            setNotice('Directorio de personas actualizado desde la base de datos.')
             setTimeout(() => setNotice(''), 3000)
           }
           return
         }
       }
+      setError('No se pudo cargar el directorio remoto; mostrando cuentas locales.')
+      setUsers(DEMO_USERS)
     } catch {
-      // Fallback
+      setError('No se pudo cargar la lista de usuarios desde el servidor.')
+      setUsers(DEMO_USERS)
     }
-    setUsers(DEMO_USERS)
   }
 
   useEffect(() => {
     fetchUsuarios(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -83,13 +117,14 @@ export default function UsersPage() {
       })
       if (res.ok) {
         const json = await res.json()
-        if (Array.isArray(json.usuarios)) setUsers(json.usuarios)
+        const list = Array.isArray(json?.datos) ? json.datos : Array.isArray(json?.usuarios) ? json.usuarios : null
+        if (list) setUsers(list)
       }
     } catch {
       // ignore
     }
 
-    setNotice(`Usuario "${nuevo.nombre}" registrado en la base de datos.`)
+    setNotice(`Se agregó a "${nuevo.nombre}" al equipo.`)
     setTimeout(() => setNotice(''), 3500)
   }
 
@@ -104,17 +139,18 @@ export default function UsersPage() {
       })
       if (res.ok) {
         const json = await res.json()
-        if (Array.isArray(json.usuarios)) setUsers(json.usuarios)
+        const list = Array.isArray(json?.datos) ? json.datos : Array.isArray(json?.usuarios) ? json.usuarios : null
+        if (list) setUsers(list)
       }
     } catch {
       // ignore
     }
-    setNotice(nextActivo ? `Cuenta de ${u.email} reactivada.` : `Cuenta de ${u.email} dada de baja.`)
+    setNotice(nextActivo ? `Cuenta de ${u.email} reactivada.` : `Cuenta de ${u.email} pausada.`)
     setTimeout(() => setNotice(''), 3000)
   }
 
   const handleDeleteUser = async (u: ExtendedUser) => {
-    if (!window.confirm(`¿Confirmas eliminar el usuario "${u.email}" de la base de datos?`)) return
+    if (!window.confirm(`¿Confirmas quitar a "${u.email}" del directorio?`)) return
     setUsers((prev) => (prev || []).filter((item) => item.id !== u.id))
     try {
       const res = await fetch(`/api/usuarios?id=${encodeURIComponent(u.id)}`, {
@@ -123,12 +159,13 @@ export default function UsersPage() {
       })
       if (res.ok) {
         const json = await res.json()
-        if (Array.isArray(json.usuarios)) setUsers(json.usuarios)
+        const list = Array.isArray(json?.datos) ? json.datos : Array.isArray(json?.usuarios) ? json.usuarios : null
+        if (list) setUsers(list)
       }
     } catch {
       // ignore
     }
-    setNotice(`Usuario "${u.email}" eliminado de la base de datos.`)
+    setNotice(`Cuenta "${u.email}" eliminada.`)
     setTimeout(() => setNotice(''), 3000)
   }
 
@@ -146,10 +183,10 @@ export default function UsersPage() {
       >
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
-            Gestión de Usuarios
+            Equipo y Permisos en Sede
           </h1>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0 }}>
-            Mantenedor de cuentas, control de acceso basado en roles (RBAC) y estado institucional.
+          <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', margin: 0 }}>
+            Administra quiénes pueden coordinar talleres, pasar asistencia como voluntarios o participar en las jornadas.
           </p>
         </div>
 
@@ -167,12 +204,12 @@ export default function UsersPage() {
               cursor: 'pointer',
             }}
           >
-            Actualizar Lista
+            Sincronizar lista
           </button>
           <button
             onClick={() => setShowModal(true)}
             style={{
-              background: 'var(--brand-emerald, #10b981)',
+              background: 'var(--brand-emerald, #059669)',
               color: '#fff',
               border: 'none',
               padding: '0.6rem 1.1rem',
@@ -180,13 +217,31 @@ export default function UsersPage() {
               fontWeight: 600,
               fontSize: '0.85rem',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.22)',
             }}
           >
-            + Nuevo Usuario
+            + Agregar persona
           </button>
         </div>
       </div>
+
+      {error && (
+        <div
+          role="alert"
+          style={{
+            marginBottom: '1rem',
+            padding: '0.75rem 1rem',
+            borderRadius: '10px',
+            background: 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            color: 'var(--brand-amber)',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          {error}
+        </div>
+      )}
 
       {notice && (
         <div
@@ -196,7 +251,7 @@ export default function UsersPage() {
             borderRadius: '10px',
             background: 'rgba(16, 185, 129, 0.12)',
             border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
+            color: 'var(--brand-emerald)',
             fontSize: '0.88rem',
             fontWeight: 600,
           }}
@@ -264,10 +319,10 @@ export default function UsersPage() {
                       padding: '0.2rem 0.6rem',
                       borderRadius: '999px',
                       background: isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                      color: isActive ? '#34d399' : '#f87171',
+                      color: isActive ? 'var(--brand-emerald)' : '#f87171',
                     }}
                   >
-                    {isActive ? 'Activo' : 'De baja'}
+                    {isActive ? 'Activo' : 'Pausado'}
                   </span>
                 </div>
 
@@ -278,8 +333,8 @@ export default function UsersPage() {
                       fontWeight: 600,
                       padding: '0.25rem 0.65rem',
                       borderRadius: '8px',
-                      background: 'rgba(99, 102, 241, 0.14)',
-                      color: '#818cf8',
+                      background: 'var(--brand-indigo-light)',
+                      color: 'var(--brand-indigo)',
                     }}
                   >
                     {ROLE_LABELS[u.role] || u.role}
@@ -294,12 +349,12 @@ export default function UsersPage() {
                         padding: '0.35rem 0.7rem',
                         borderRadius: '8px',
                         border: '1px solid var(--border)',
-                        background: 'var(--bg-surface)',
+                        background: 'var(--bg-subtle)',
                         color: 'var(--text-main)',
                         cursor: 'pointer',
                       }}
                     >
-                      {isActive ? 'Dar de baja' : 'Reactivar'}
+                      {isActive ? 'Pausar' : 'Reactivar'}
                     </button>
                     <button
                       onClick={() => handleDeleteUser(u)}
@@ -314,7 +369,7 @@ export default function UsersPage() {
                         cursor: 'pointer',
                       }}
                     >
-                      Eliminar
+                      Quitar
                     </button>
                   </div>
                 </div>
@@ -329,7 +384,8 @@ export default function UsersPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(2, 6, 23, 0.75)',
+            background: 'rgba(2, 6, 23, 0.65)',
+            backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -347,11 +403,11 @@ export default function UsersPage() {
               maxWidth: '440px',
             }}
           >
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: 'var(--text-main)' }}>Registrar Nuevo Usuario</h3>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: 'var(--text-main)' }}>Agregar persona al equipo</h3>
             <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-                  Nombre completo
+                  Nombre y apellido
                 </label>
                 <input
                   type="text"
@@ -359,19 +415,12 @@ export default function UsersPage() {
                   value={formNombre}
                   onChange={(e) => setFormNombre(e.target.value)}
                   placeholder="Ej. Camila Rojas"
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-surface)',
-                    color: 'var(--text-main)',
-                  }}
+                  style={{ width: '100%' }}
                 />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-                  Correo institucional
+                  Correo electrónico
                 </label>
                 <input
                   type="email"
@@ -379,35 +428,21 @@ export default function UsersPage() {
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   placeholder="camila.rojas@duocuc.cl"
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-surface)',
-                    color: 'var(--text-main)',
-                  }}
+                  style={{ width: '100%' }}
                 />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-                  Rol del sistema (RBAC)
+                  Rol en terreno
                 </label>
                 <select
                   value={formRole}
                   onChange={(e) => setFormRole(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-surface)',
-                    color: 'var(--text-main)',
-                  }}
+                  style={{ width: '100%' }}
                 >
-                  <option value="coordinator">Docente / Coordinador</option>
+                  <option value="coordinator">Docente Coordinador</option>
                   <option value="volunteer">Estudiante Voluntario</option>
-                  <option value="attendee">Beneficiario Comunitario</option>
+                  <option value="attendee">Vecino / Beneficiario</option>
                   <option value="admin">Administrador</option>
                 </select>
               </div>
@@ -432,13 +467,13 @@ export default function UsersPage() {
                     padding: '0.6rem 1.2rem',
                     borderRadius: '10px',
                     border: 'none',
-                    background: 'var(--brand-emerald, #10b981)',
+                    background: 'var(--brand-emerald, #059669)',
                     color: '#fff',
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
                 >
-                  Guardar Usuario
+                  Guardar
                 </button>
               </div>
             </form>
