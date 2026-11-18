@@ -1,10 +1,19 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROLES_CLAIM } from '../../config/auth.ts'
 import RequireAuth from './RequireAuth.tsx'
 
 const mockUseAuth0 = vi.fn()
+const mockLoginCognito = vi.fn()
 vi.mock('@auth0/auth0-react', () => ({ useAuth0: () => mockUseAuth0() }))
+vi.mock('../../hooks/use-auth/useAuth.ts', () => ({
+  useAuth: () => ({
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+    loginWithCognito: mockLoginCognito,
+  }),
+}))
 
 function authState(state: Record<string, unknown>) {
   mockUseAuth0.mockReturnValue({
@@ -29,7 +38,7 @@ describe('RequireAuth', () => {
     expect(screen.getByText('Cargando...')).toBeInTheDocument()
   })
 
-  it('pide login si no hay sesión', () => {
+  it('pide login si no hay sesión y dispara login al hacer clic', () => {
     authState({})
     render(
       <RequireAuth>
@@ -37,6 +46,8 @@ describe('RequireAuth', () => {
       </RequireAuth>,
     )
     expect(screen.getByText(/debes iniciar sesión/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
+    expect(mockLoginCognito).toHaveBeenCalled()
     expect(screen.queryByText('secreto')).not.toBeInTheDocument()
   })
 

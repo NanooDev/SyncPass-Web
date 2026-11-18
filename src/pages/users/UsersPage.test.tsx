@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ROLES_CLAIM, AUTH0_AUDIENCE } from '../../config/auth.ts'
 import UsersPage from './UsersPage.tsx'
@@ -14,8 +14,8 @@ vi.mock('@auth0/auth0-react', () => ({
 }))
 
 const BFF_USERS = [
-  { id: '1', email: 'admin@sync-pass.test', role: 'admin' },
-  { id: '2', email: 'voluntario@sync-pass.test', role: 'volunteer' },
+  { id: '1', nombre: 'Admin Uno', email: 'admin@sync-pass.test', role: 'admin', activo: true },
+  { id: '2', nombre: 'Vol Uno', email: 'voluntario@sync-pass.test', role: 'volunteer', activo: true },
 ]
 
 describe('UsersPage', () => {
@@ -24,8 +24,9 @@ describe('UsersPage', () => {
     vi.clearAllMocks()
   })
 
-  it('pide el token con el audience y muestra los usuarios del BFF', async () => {
+  it('pide el token, muestra usuarios y permite crear, pausar y eliminar cuentas', async () => {
     mockGetToken.mockResolvedValue('tok')
+    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true))
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({ ok: true, json: async () => BFF_USERS }),
@@ -36,6 +37,19 @@ describe('UsersPage', () => {
     expect(mockGetToken).toHaveBeenCalledWith({
       authorizationParams: { audience: AUTH0_AUDIENCE },
     })
+
+    // Crear nuevo usuario en modal
+    fireEvent.click(screen.getByText('+ Agregar persona'))
+    fireEvent.change(screen.getByPlaceholderText('Ej. Camila Rojas'), { target: { value: 'Camila Rojas' } })
+    fireEvent.change(screen.getByPlaceholderText('camila.rojas@duocuc.cl'), { target: { value: 'camila@duocuc.cl' } })
+    fireEvent.click(screen.getByText('Guardar'))
+    expect(await screen.findByText(/Se agregó a "Camila Rojas"/i)).toBeInTheDocument()
+
+    // Pausar y quitar usuario
+    fireEvent.click(screen.getAllByText('Pausar')[0])
+    expect(await screen.findByText(/pausada/i)).toBeInTheDocument()
+    fireEvent.click(screen.getAllByText('Quitar')[0])
+    expect(await screen.findByText(/eliminada/i)).toBeInTheDocument()
   })
 
   it('muestra error si el BFF no responde', async () => {

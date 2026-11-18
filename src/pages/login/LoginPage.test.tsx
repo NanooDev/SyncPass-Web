@@ -1,29 +1,80 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import LoginPage from './LoginPage.tsx'
+
+const mockLoginLocal = vi.fn()
+const mockLoginCognito = vi.fn()
 
 vi.mock('../../hooks/use-auth/useAuth.ts', () => ({
   useAuth: () => ({
-    loginWithCognito: vi.fn(),
-    loginLocal: vi.fn(),
+    loginWithCognito: mockLoginCognito,
+    loginLocal: mockLoginLocal,
     switchRole: vi.fn(),
   }),
 }))
 
 describe('LoginPage (Autenticación obligatoria y Registro)', () => {
-  it('renderiza pestañas Iniciar sesión y Crear cuenta sin atajos de 1 toque', () => {
-    render(<LoginPage />)
-    expect(screen.getByText('Ingresar a SyncPass')).toBeInTheDocument()
-    expect(screen.getByText('Continuar con Amazon Cognito')).toBeInTheDocument()
-    expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument()
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    localStorage.clear()
   })
 
-  it('permite cambiar a la pestaña Crear cuenta y validar campos', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('valida campos vacíos, contraseña corta, permite login con credenciales y botón Cognito', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, data: { accessToken: 'tok', idToken: 'id' } }),
+      }),
+    )
+
     render(<LoginPage />)
-    const tabCrear = screen.getAllByText('Crear cuenta')[0]
-    fireEvent.click(tabCrear)
-    expect(screen.getAllByLabelText(/nombre y apellido/i)[0]).toBeInTheDocument()
-    expect(screen.getAllByText(/crear cuenta e ingresar/i)[0]).toBeInTheDocument()
+    expect(screen.getByText('Ingresar a SyncPass')).toBeInTheDocument()
+
+    const emailInput = screen.getByLabelText(/correo electrónico/i)
+    const passInput = screen.getByLabelText(/contraseña/i)
+    const submitBtn = screen.getAllByRole('button', { name: 'Iniciar sesión' })[1]
+
+    fireEvent.change(emailInput, { target: { value: 'voluntario@duocuc.cl' } })
+    fireEvent.change(passInput, { target: { value: '123' } })
+    fireEvent.submit(emailInput.closest('form')!)
+    expect(screen.getByText(/al menos 6 caracteres/i)).toBeInTheDocument()
+
+    fireEvent.change(passInput, { target: { value: '123456' } })
+    fireEvent.change(screen.getByLabelText(/perfil de trabajo/i), { target: { value: 'volunteer' } })
+    fireEvent.click(submitBtn)
+
+    await waitFor(() => expect(mockLoginLocal).toHaveBeenCalledWith('voluntario@duocuc.cl', 'volunteer'))
+
+    fireEvent.click(screen.getByText('Continuar con Amazon Cognito'))
+    expect(mockLoginCognito).toHaveBeenCalled()
+  })
+
+  it('permite cambiar a la pestaña Crear cuenta y registrar usuario', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, message: 'Cuenta creada con éxito' }),
+      }),
+    )
+
+    render(<LoginPage />)
+    fireEvent.click(screen.getAllByText('Crear cuenta')[0])
+
+    const nameInput = screen.getByLabelText(/nombre y apellido/i)
+    const emailInput = screen.getByLabelText(/correo electrónico/i)
+    const passInput = screen.getByLabelText(/contraseña/i)
+
+    fireEvent.change(nameInput, { target: { value: 'Mariano Acevedo' } })
+    fireEvent.change(emailInput, { target: { value: 'mariano@duocuc.cl' } })
+    fireEvent.change(passInput, { target: { value: '123456' } })
+    fireEvent.submit(nameInput.closest('form')!)
+
+    expect(await screen.findByText(/cuenta creada/i)).toBeInTheDocument()
   })
 })
