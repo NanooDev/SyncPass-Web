@@ -37,7 +37,7 @@ async function lookupRoleInDatabase(email) {
 }
 
 async function handleLogin(req, res, body) {
-  const email = String(body.email || '').trim().toLowerCase()
+  const email = (String(body.email || '').trim() || String(body.username || '').trim()).toLowerCase()
   const password = String(body.password || '')
 
   if (!email || !password || password.length < 6) {
@@ -95,6 +95,10 @@ async function handleLogin(req, res, body) {
   const accessToken = signSessionJwt({ id, email, name, roles: [role] })
   res.status(200).json({
     success: true,
+    access_token: accessToken,
+    token_type: 'Bearer',
+    expires_in: 86400,
+    user: { username: email, email, name, roles: [role] },
     data: {
       accessToken,
       idToken: accessToken,
