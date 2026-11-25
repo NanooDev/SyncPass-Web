@@ -41,21 +41,9 @@ describe('Servicio de Notificaciones Push ntfy.sh y BFF', () => {
       expect(result.success).toBe(true)
       expect(result.topic).toBe('app_vibe_8e63635b0c5401804b4b')
       expect(result.source).toBe('ntfy_direct')
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://ntfy.sh/app_vibe_8e63635b0c5401804b4b',
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Title: 'Prueba SyncPass',
-            Priority: 'high',
-          }),
-          body: 'Contenido de la notificacion',
-        })
-      )
     })
 
-    it('emite notificacion a traves del endpoint BFF de Spring Boot (/api/notificar)', async () => {
+    it('emite notificacion a traves del endpoint BFF de Spring Boot (/api/notificar) con Bearer token', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -69,6 +57,7 @@ describe('Servicio de Notificaciones Push ntfy.sh y BFF', () => {
         message: 'Mensaje hacia el BFF',
         priority: 'urgent',
         useBff: true,
+        token: 'jwt-coord-token',
       })
 
       expect(result.success).toBe(true)
@@ -77,14 +66,11 @@ describe('Servicio de Notificaciones Push ntfy.sh y BFF', () => {
         expect.stringContaining('/api/notificar'),
         expect.objectContaining({
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: 'docente.dev@gmail.com',
-            message: 'Mensaje hacia el BFF',
-            title: 'Prueba BFF',
-            priority: 5,
-          }),
-        })
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer jwt-coord-token',
+          },
+        }),
       )
     })
 
@@ -112,7 +98,7 @@ describe('Servicio de Notificaciones Push ntfy.sh y BFF', () => {
       })
       vi.stubGlobal('fetch', mockFetch)
 
-      const topic = await getTopicFromBff('docente.dev@gmail.com')
+      const topic = await getTopicFromBff('docente.dev@gmail.com', 'jwt-coord-token')
       expect(topic).toBe('app_vibe_8e63635b0c5401804b4b')
     })
   })

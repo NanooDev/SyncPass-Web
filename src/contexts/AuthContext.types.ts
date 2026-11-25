@@ -5,7 +5,7 @@ export interface SyncPassUser {
   email: string
   name?: string
   roles: Role[]
-  authProvider: 'cognito' | 'local' | 'auth0'
+  authProvider: 'cognito' | 'bff' | 'auth0'
 }
 
 export interface AuthContextType {
@@ -13,9 +13,14 @@ export interface AuthContextType {
   roles: Role[]
   isAuthenticated: boolean
   isLoading: boolean
+  authError: string | null
   loginWithCognito: () => void
+  loginWithToken: (
+    token: string,
+    userInfo?: Partial<SyncPassUser>,
+    provider?: SyncPassUser['authProvider'],
+  ) => boolean
+  clearAuthError: () => void
   logout: () => void
-  loginLocal: (email: string, role?: Role) => void
-  switchRole: (role: Role) => void
   token: string | null
 }

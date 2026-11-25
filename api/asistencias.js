@@ -1,19 +1,10 @@
 import crypto from 'node:crypto'
-
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nxbsqkpnkawbkdksmnym.supabase.co'
-const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
+import { applyCors, requireAuth } from './_lib/auth.js'
+import { SUPABASE_URL, requireSupabaseConfigured, supabaseHeaders } from './_lib/supabase.js'
 
 const DEFAULT_EVENTO_ID = '00000000-0000-0000-0002-000000000001'
 const DEFAULT_VOLUNTARIO_ID = '00000000-0000-0000-0000-000000000002'
 const DEFAULT_BENEFICIARIO_ID = '00000000-0000-0000-0003-000000000001'
-
-function supabaseHeaders(extra = {}) {
-  return {
-    apikey: SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    ...extra,
-  }
-}
 
 function mapAsistenciaRow(row) {
   const ben = row.beneficiario || {}
@@ -23,7 +14,7 @@ function mapAsistenciaRow(row) {
     rut: ben.identificador_sintetico || ben.qr_code || 'BEN-00101',
     nombreBeneficiario: ben.nombre_ficticio || 'Beneficiario Acreditado',
     timestamp: row.timestamp_marcacion ? new Date(row.timestamp_marcacion).getTime() : Date.now(),
-    metodo: (ben.qr_code || '').startsWith('QR') ? 'QR' : 'QR',
+    metodo: (ben.qr_code || '').startsWith('QR') ? 'QR' : 'MANUAL',
     sincronizado: Boolean(row.is_synced ?? true),
     latitud: Number(row.latitud_marcacion ?? -33.5015),
     longitud: Number(row.longitud_marcacion ?? -70.6887),
@@ -82,14 +73,13 @@ async function resolveOrCreateBeneficiario(rutOrCode, nombreBeneficiario) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  const corsHandled = applyCors(req, res, 'GET,POST,OPTIONS')
+  if (corsHandled !== null) return
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
+  const auth = await requireAuth(req, res, ['admin', 'coordinator', 'volunteer'])
+  if (!auth.ok) return
+
+  if (!requireSupabaseConfigured(res)) return
 
   try {
     if (req.method === 'GET') {
@@ -105,16 +95,32 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
       const items = Array.isArray(body.registros) ? body.registros : [body]
+      if (items.length === 0) {
+        res.status(400).json({
+          exito: false,
+          mensaje: 'Debe enviar al menos un registro de asistencia para sincronizar',
+        })
+        return
+      }
+
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       const nowIso = new Date().toISOString()
 
       for (const item of items) {
+        if (!item || typeof item !== 'object' || (!item.rut && !item.codigoQr)) {
+          res.status(400).json({
+            exito: false,
+            mensaje: 'Cada asistencia debe incluir rut o codigoQr válido',
+          })
+          return
+        }
+
         const id_registro = uuidRegex.test(String(item.id || '')) ? item.id : crypto.randomUUID()
         const id_evento = uuidRegex.test(String(item.tallerId || item.id_evento || ''))
           ? (item.tallerId || item.id_evento)
           : DEFAULT_EVENTO_ID
         const id_beneficiario = await resolveOrCreateBeneficiario(
-          item.rut || item.codigoQr || `BEN-${id_registro.slice(0, 6).toUpperCase()}`,
+          item.rut || item.codigoQr,
           item.nombreBeneficiario || 'Beneficiario Acreditado'
         )
         const tsIso = item.timestamp ? new Date(Number(item.timestamp)).toISOString() : nowIso
@@ -124,7 +130,7 @@ export default async function handler(req, res) {
         const estado_validacion = ['valido', 'invalido', 'fuera_de_rango', 'duplicado'].includes(item.estadoValidacion)
           ? item.estadoValidacion
           : (distancia_recinto_m <= 150 ? 'valido' : 'fuera_de_rango')
-        const device_id = String(item.deviceId || 'ANDROID-SYNCPASS-OFFLINE').slice(0, 100)
+        const device_id = String(item.deviceId || 'WEB-SYNCPASS').slice(0, 100)
 
         const payload = {
           id_registro,
@@ -143,11 +149,16 @@ export default async function handler(req, res) {
           device_id,
         }
 
-        await fetch(`${SUPABASE_URL}/rest/v1/registro_asistencia?on_conflict=id_evento,id_beneficiario`, {
+        const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/registro_asistencia?on_conflict=id_evento,id_beneficiario`, {
           method: 'POST',
           headers: supabaseHeaders({ Prefer: 'resolution=merge-duplicates,return=representation' }),
           body: JSON.stringify(payload),
         })
+
+        if (!upsertRes.ok) {
+          const errText = await upsertRes.text()
+          throw new Error(`Supabase POST registro_asistencia (${upsertRes.status}): ${errText}`)
+        }
 
         await fetch(`${SUPABASE_URL}/rest/v1/sync_log`, {
           method: 'POST',

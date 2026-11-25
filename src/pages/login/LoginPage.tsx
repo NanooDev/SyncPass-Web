@@ -8,7 +8,7 @@ import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
   useDocumentTitle('Iniciar sesión | SyncPass')
-  const { loginWithCognito, loginLocal } = useAuth()
+  const { loginWithCognito, loginWithToken, authError, clearAuthError } = useAuth()
   const [, setLocation] = useLocation()
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
@@ -16,7 +16,6 @@ export default function LoginPage() {
   // Campos de Login
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [selectedRole, setSelectedRole] = useState<Role>(ROLES.coordinator)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -24,7 +23,7 @@ export default function LoginPage() {
   const [regNombre, setRegNombre] = useState('')
   const [regEmail, setRegEmail] = useState('')
   const [regPassword, setRegPassword] = useState('')
-  const [regRole, setRegRole] = useState<Role>(ROLES.coordinator)
+  const [regRole, setRegRole] = useState<Role>(ROLES.volunteer)
   const [regSuccessMsg, setRegSuccessMsg] = useState('')
   const [regErrorMsg, setRegErrorMsg] = useState('')
   const [regLoading, setRegLoading] = useState(false)
@@ -32,6 +31,7 @@ export default function LoginPage() {
   const handleLocalSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    clearAuthError?.()
     if (!email.trim() || !password) {
       setError('Por favor ingresa tu correo y contraseña.')
       return
@@ -40,31 +40,37 @@ export default function LoginPage() {
       setError('La contraseña debe tener al menos 6 caracteres.')
       return
     }
+
     setLoading(true)
     try {
-      try {
-        const raw = localStorage.getItem('syncpass_registered_users')
-        const storedUsers = raw ? JSON.parse(raw) : []
-        if (!storedUsers.some((u: { email: string }) => u.email.toLowerCase() === email.trim().toLowerCase())) {
-          storedUsers.unshift({
-            id: `usr-${Date.now()}`,
-            email: email.trim(),
-            role: selectedRole,
-          })
-          localStorage.setItem('syncpass_registered_users', JSON.stringify(storedUsers))
-        }
-      } catch {
-        // Fallback silencioso
+      const res = await apiLogin(email.trim(), password)
+      const sessionToken = res.data?.idToken || res.data?.accessToken
+      if (!res.success || !sessionToken) {
+        setError(res.message || 'Credenciales inválidas o backend de autenticación no disponible.')
+        return
       }
 
-      await apiLogin(email.trim(), password)
+      const backendRoles = (res.data?.user?.roles as Role[] | undefined) || []
+      const ok = loginWithToken(
+        sessionToken,
+        {
+          id: res.data?.user?.id,
+          email: res.data?.user?.email || email.trim(),
+          name: res.data?.user?.name,
+          roles: backendRoles.length > 0 ? backendRoles : undefined,
+        },
+        'bff',
+      )
+      if (!ok) {
+        setError('La sesión emitida por el servidor no pudo validarse.')
+        return
+      }
+
+      setLocation(backendRoles.includes(ROLES.admin) ? '/users' : '/dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión al iniciar sesión.')
+    } finally {
       setLoading(false)
-      loginLocal(email.trim(), selectedRole)
-      setLocation(selectedRole === ROLES.admin ? '/users' : '/dashboard')
-    } catch {
-      setLoading(false)
-      loginLocal(email.trim(), selectedRole)
-      setLocation(selectedRole === ROLES.admin ? '/users' : '/dashboard')
     }
   }
 
@@ -80,44 +86,52 @@ export default function LoginPage() {
       setRegErrorMsg('La contraseña debe tener al menos 6 caracteres.')
       return
     }
+
     setRegLoading(true)
     try {
-      try {
-        await fetch('/api/usuarios', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nombre: regNombre.trim(),
-            email: regEmail.trim().toLowerCase(),
-            role: regRole,
-            activo: true,
-          }),
-        })
-      } catch {
-        // ignore
-      }
-
       const res = await apiRegister({
         nombre: regNombre.trim(),
         email: regEmail.trim(),
         password: regPassword,
         roles: [regRole],
       })
+
+      if (!res.success) {
+        setRegErrorMsg(res.message || 'No se pudo completar el registro en el servidor.')
+        return
+      }
+
+      const sessionToken = res.data?.idToken || res.data?.accessToken
+      if (sessionToken) {
+        const backendRoles = (res.data?.user?.roles as Role[] | undefined) || [regRole]
+        const ok = loginWithToken(
+          sessionToken,
+          {
+            id: res.data?.user?.id,
+            email: res.data?.user?.email || regEmail.trim(),
+            name: regNombre.trim(),
+            roles: backendRoles,
+          },
+          'bff',
+        )
+        if (ok) {
+          setRegSuccessMsg(res.message || '¡Cuenta creada! Ingresando al panel...')
+          setLocation('/dashboard')
+          return
+        }
+      }
+
+      setRegSuccessMsg(res.message || '¡Cuenta creada! Inicia sesión con tus credenciales.')
+      setActiveTab('login')
+      setEmail(regEmail.trim())
+    } catch (err) {
+      setRegErrorMsg(err instanceof Error ? err.message : 'Error al registrar la cuenta.')
+    } finally {
       setRegLoading(false)
-      setRegSuccessMsg(res.message || '¡Cuenta creada! Ingresando al panel...')
-      setTimeout(() => {
-        loginLocal(regEmail.trim(), regRole)
-        setLocation(regRole === ROLES.admin ? '/users' : '/dashboard')
-      }, 900)
-    } catch {
-      setRegLoading(false)
-      setRegSuccessMsg('¡Cuenta creada! Ingresando al panel...')
-      setTimeout(() => {
-        loginLocal(regEmail.trim(), regRole)
-        setLocation(regRole === ROLES.admin ? '/users' : '/dashboard')
-      }, 900)
     }
   }
+
+  const displayError = error || authError || ''
 
   return (
     <div className={styles.loginContainer}>
@@ -215,8 +229,25 @@ export default function LoginPage() {
         {activeTab === 'login' && (
           <div>
             <form onSubmit={handleLocalSubmit}>
-              {error && (
+              {regSuccessMsg && (
                 <div
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.14)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    color: 'var(--brand-emerald)',
+                    padding: '0.75rem',
+                    borderRadius: '10px',
+                    fontSize: '0.84rem',
+                    marginBottom: '1rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {regSuccessMsg}
+                </div>
+              )}
+              {displayError && (
+                <div
+                  role="alert"
                   style={{
                     background: 'rgba(239, 68, 68, 0.12)',
                     border: '1px solid rgba(239, 68, 68, 0.35)',
@@ -228,7 +259,7 @@ export default function LoginPage() {
                     fontWeight: 600,
                   }}
                 >
-                  {error}
+                  {displayError}
                 </div>
               )}
               <div style={{ marginBottom: '1rem' }}>
@@ -255,7 +286,7 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '1.25rem' }}>
                 <label
                   htmlFor="login-password"
                   style={{
@@ -277,32 +308,6 @@ export default function LoginPage() {
                   placeholder="Mínimo 6 caracteres"
                   style={{ width: '100%', boxSizing: 'border-box' }}
                 />
-              </div>
-
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label
-                  htmlFor="login-role"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.83rem',
-                    fontWeight: 600,
-                    color: 'var(--text-main)',
-                    marginBottom: '0.35rem',
-                  }}
-                >
-                  Perfil de trabajo
-                </label>
-                <select
-                  id="login-role"
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as Role)}
-                  style={{ width: '100%', boxSizing: 'border-box' }}
-                >
-                  <option value={ROLES.coordinator}>Docente Coordinador</option>
-                  <option value={ROLES.volunteer}>Estudiante Voluntario</option>
-                  <option value={ROLES.attendee}>Vecino / Beneficiario</option>
-                  <option value={ROLES.admin}>Administrador</option>
-                </select>
               </div>
 
               <button
@@ -394,6 +399,7 @@ export default function LoginPage() {
 
             {regErrorMsg && (
               <div
+                role="alert"
                 style={{
                   background: 'rgba(239, 68, 68, 0.12)',
                   border: '1px solid rgba(239, 68, 68, 0.35)',
@@ -492,7 +498,7 @@ export default function LoginPage() {
                   marginBottom: '0.35rem',
                 }}
               >
-                Perfil de trabajo
+                Perfil solicitado
               </label>
               <select
                 id="reg-role"
@@ -500,10 +506,9 @@ export default function LoginPage() {
                 onChange={(e) => setRegRole(e.target.value as Role)}
                 style={{ width: '100%', boxSizing: 'border-box' }}
               >
-                <option value={ROLES.coordinator}>Docente Coordinador</option>
                 <option value={ROLES.volunteer}>Estudiante Voluntario</option>
+                <option value={ROLES.coordinator}>Docente Coordinador</option>
                 <option value={ROLES.attendee}>Vecino / Beneficiario</option>
-                <option value={ROLES.admin}>Administrador</option>
               </select>
             </div>
 

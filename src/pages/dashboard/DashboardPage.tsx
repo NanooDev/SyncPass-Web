@@ -5,7 +5,16 @@ import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitl
 import { useUserRoles } from '../../hooks/use-roles/useRoles.ts'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { ROLES, type Role } from '../../config/auth.ts'
+import { apiSyncAsistencias, authHeaders } from '../../clients/api.ts'
 import { sendPushNotification } from '../../services/ntfy.ts'
+import {
+  enqueueOfflineRecord,
+  loadOfflineMode,
+  loadOfflineQueue,
+  removeSyncedRecords,
+  saveOfflineMode,
+  type PendingAsistenciaRecord,
+} from '../../services/offlineQueue.ts'
 import styles from './DashboardPage.module.css'
 
 interface CommunityProject {
@@ -55,8 +64,16 @@ const INITIAL_PROJECTS: CommunityProject[] = [
 export default function DashboardPage() {
   useDocumentTitle('Dashboard | Sync Pass')
   const roles = useUserRoles()
-  const activeRole: Role = (roles[0] as Role) || ROLES.coordinator
+  const primaryRole: Role = (roles[0] as Role) || ROLES.coordinator
   const localAuth = useAuth()
+  const [selectedViewRole, setSelectedViewRole] = useState<Role | null>(null)
+  const allowedSwitchRoles: Role[] = roles.includes(ROLES.admin)
+    ? [ROLES.coordinator, ROLES.volunteer, ROLES.attendee, ROLES.admin]
+    : roles.includes(ROLES.coordinator)
+      ? [ROLES.coordinator, ROLES.volunteer, ROLES.attendee]
+      : [primaryRole]
+  const activeRole: Role =
+    selectedViewRole && allowedSwitchRoles.includes(selectedViewRole) ? selectedViewRole : primaryRole
 
   const [projects, setProjects] = useState<CommunityProject[]>(() => {
     try {
@@ -69,9 +86,15 @@ export default function DashboardPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>('T-101')
   const selectedProject = projects.find((p) => p.id === selectedProjectId) || projects[0] || INITIAL_PROJECTS[0]
   const [isSyncingApi, setIsSyncingApi] = useState<boolean>(false)
-  const [offlineMode, setOfflineMode] = useState<boolean>(false)
-  const [pendingSyncCount, setPendingSyncCount] = useState<number>(3)
+  const [offlineMode, setOfflineModeState] = useState<boolean>(() => loadOfflineMode())
+  const [offlineQueue, setOfflineQueue] = useState<PendingAsistenciaRecord[]>(() => loadOfflineQueue())
+  const pendingSyncCount = offlineQueue.length
   const [manualRut, setManualRut] = useState<string>('')
+
+  const toggleOfflineMode = (nextValue: boolean) => {
+    setOfflineModeState(nextValue)
+    saveOfflineMode(nextValue)
+  }
   const getFormattedRecentTime = (minusMinutes = 0) => {
     const d = new Date(Date.now() - minusMinutes * 60 * 1000)
     const hh = String(d.getHours()).padStart(2, '0')
@@ -117,7 +140,7 @@ export default function DashboardPage() {
     try {
       const res = await fetch('/api/talleres', {
         method: 'GET',
-        headers: { Accept: 'application/json' },
+        headers: authHeaders(localAuth.token, { Accept: 'application/json' }),
       })
       if (res.ok) {
         const json = await res.json()
@@ -136,34 +159,41 @@ export default function DashboardPage() {
     }
   }
 
-  const fetchAsistenciasFromApi = async () => {
-    try {
-      const res = await fetch('/api/asistencias', {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-      })
-      if (res.ok) {
-        const json = await res.json()
-        if (Array.isArray(json.datos) && json.datos.length > 0) {
-          const mapped = json.datos.slice(0, 8).map((item: { nombreBeneficiario?: string; rut?: string; timestamp?: number; metodo?: string }) => {
-            const d = item.timestamp ? new Date(Number(item.timestamp)) : new Date()
-            const hh = String(d.getHours()).padStart(2, '0')
-            const mm = String(d.getMinutes()).padStart(2, '0')
-            const metodoLabel = item.metodo === 'QR' ? 'QR Validado' : 'Registro Manual'
-            return `${item.nombreBeneficiario || 'Vecino'} (${item.rut || 'S/R'}) · ${hh}:${mm} hrs · ${metodoLabel}`
-          })
-          setAccreditedList(mapped)
-        }
-      }
-    } catch {
-      // Mantener lista local si no hay red
-    }
-  }
-
   useEffect(() => {
-    fetchTalleresFromApi(false)
-    fetchAsistenciasFromApi()
-  }, [])
+    let active = true
+    const headers = authHeaders(localAuth.token, { Accept: 'application/json' })
+    fetch('/api/talleres', { method: 'GET', headers })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!active || !json || !Array.isArray(json.datos) || json.datos.length === 0) return
+        setProjects(json.datos)
+        try {
+          localStorage.setItem('syncpass_projects', JSON.stringify(json.datos))
+        } catch {
+          // Fallback
+        }
+      })
+      .catch(() => {})
+
+    fetch('/api/asistencias', { method: 'GET', headers })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!active || !json || !Array.isArray(json.datos) || json.datos.length === 0) return
+        const mapped = json.datos.slice(0, 8).map((item: { nombreBeneficiario?: string; rut?: string; timestamp?: number; metodo?: string }) => {
+          const d = item.timestamp ? new Date(Number(item.timestamp)) : new Date()
+          const hh = String(d.getHours()).padStart(2, '0')
+          const mm = String(d.getMinutes()).padStart(2, '0')
+          const metodoLabel = item.metodo === 'QR' ? 'QR Validado' : 'Registro Manual'
+          return `${item.nombreBeneficiario || 'Vecino'} (${item.rut || 'S/R'}) · ${hh}:${mm} hrs · ${metodoLabel}`
+        })
+        setAccreditedList(mapped)
+      })
+      .catch(() => {})
+
+    return () => {
+      active = false
+    }
+  }, [localAuth.token])
 
   const openCreateModal = () => {
     setEditingProject(null)
@@ -194,7 +224,7 @@ export default function DashboardPage() {
       try {
         await fetch(`/api/talleres?id=${encodeURIComponent(projId)}`, {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(localAuth.token, { 'Content-Type': 'application/json' }),
         })
       } catch {
         // ignore
@@ -223,7 +253,7 @@ export default function DashboardPage() {
       try {
         const res = await fetch('/api/talleres', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(localAuth.token, { 'Content-Type': 'application/json' }),
           body: JSON.stringify(updatedItem),
         })
         if (res.ok) {
@@ -252,7 +282,7 @@ export default function DashboardPage() {
       try {
         const res = await fetch('/api/talleres', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(localAuth.token, { 'Content-Type': 'application/json' }),
           body: JSON.stringify(newProj),
         })
         if (res.ok) {
@@ -285,6 +315,7 @@ export default function DashboardPage() {
       message: pushMessage,
       priority: 'high',
       useBff: true,
+      token: localAuth.token,
     })
     setPushLoading(false)
     if (res.success) {
@@ -378,6 +409,71 @@ export default function DashboardPage() {
     }).catch(() => {})
   }, [showQrModal, selectedProjectId, selectedProject.name, selectedProject.id])
 
+  const persistAttendanceOrEnqueue = async (
+    rut: string,
+    metodo: 'QR' | 'MANUAL',
+    distanciaMetros: number,
+  ) => {
+    const recordId =
+      typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `att-${Date.now()}`
+    const payload = {
+      id: recordId,
+      tallerId: selectedProject.id,
+      rut,
+      nombreBeneficiario: `Vecino (${rut})`,
+      metodo,
+      timestamp: Date.now(),
+      latitud: -33.5015,
+      longitud: -70.6887,
+      distanciaMetros,
+      estadoValidacion: 'valido',
+      deviceId: 'WEB-SYNCPASS-PANEL',
+    }
+
+    if (offlineMode) {
+      try {
+        setOfflineQueue(enqueueOfflineRecord(payload))
+        setActionNotice(
+          metodo === 'QR'
+            ? 'Pase QR leído y guardado en cola offline persistente.'
+            : 'Asistencia guardada en cola offline persistente.',
+        )
+      } catch (err) {
+        setActionNotice(err instanceof Error ? err.message : 'Error persistiendo registro offline.')
+      }
+      return
+    }
+
+    try {
+      const res = await fetch('/api/asistencias', {
+        method: 'POST',
+        headers: authHeaders(localAuth.token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ ...payload, sincronizado: true }),
+      })
+      if (res.ok) {
+        setActionNotice(
+          metodo === 'QR'
+            ? 'Pase QR verificado y registrado en PostgreSQL.'
+            : 'Asistencia registrada y guardada en la nube.',
+        )
+        return
+      }
+      try {
+        setOfflineQueue(enqueueOfflineRecord(payload))
+        setActionNotice(`Servidor respondió HTTP ${res.status}; asistencia respaldada en cola local.`)
+      } catch (err) {
+        setActionNotice(err instanceof Error ? err.message : `Error HTTP ${res.status} y fallo al respaldar localmente.`)
+      }
+    } catch {
+      try {
+        setOfflineQueue(enqueueOfflineRecord(payload))
+        setActionNotice('Sin conexión con el servidor; asistencia respaldada en cola offline persistente.')
+      } catch (err) {
+        setActionNotice(err instanceof Error ? err.message : 'Sin conexión y error al guardar en cola local.')
+      }
+    }
+  }
+
   const handleAccreditation = async (e: React.FormEvent) => {
     e.preventDefault()
     const cleanRut = manualRut.trim()
@@ -387,51 +483,29 @@ export default function DashboardPage() {
     const entry = `${cleanRut} · ${now} hrs · Registro Manual`
     setAccreditedList([entry, ...accreditedList])
     setManualRut('')
-    if (offlineMode) {
-      setPendingSyncCount((c) => c + 1)
-      setActionNotice('Asistencia guardada en el dispositivo (pendiente de subir).')
-    } else {
-      try {
-        await fetch('/api/asistencias', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tallerId: selectedProject.id,
-            rut: cleanRut,
-            nombreBeneficiario: `Vecino (${cleanRut})`,
-            metodo: 'MANUAL',
-            sincronizado: true,
-            latitud: -33.5015,
-            longitud: -70.6887,
-            distanciaMetros: 28,
-            estadoValidacion: 'valido',
-            deviceId: 'WEB-SYNCPASS-PANEL',
-          }),
-        })
-      } catch {
-        // fallback local
-      }
-      setActionNotice('Asistencia registrada y guardada en la nube.')
-    }
+    await persistAttendanceOrEnqueue(cleanRut, 'MANUAL', 28)
     setTimeout(() => setActionNotice(''), 3500)
   }
 
   const handleSyncNow = async () => {
-    setActionNotice(`Subiendo ${pendingSyncCount} asistencia(s) pendientes a la base de datos...`)
+    if (offlineQueue.length === 0) return
+    setIsSyncingApi(true)
+    setActionNotice(`Subiendo ${offlineQueue.length} asistencia(s) reales a la base de datos...`)
     try {
-      await fetch('/api/asistencias/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ registros: [] }),
-      })
-    } catch {
-      // ignore
+      await apiSyncAsistencias(offlineQueue, localAuth.token)
+      const syncedIds = offlineQueue.map((item) => item.id)
+      setOfflineQueue(removeSyncedRecords(syncedIds))
+      setActionNotice(`Se sincronizaron ${syncedIds.length} asistencia(s) en PostgreSQL.`)
+    } catch (err) {
+      setActionNotice(
+        err instanceof Error
+          ? `No se pudo sincronizar (${err.message}). Los ${offlineQueue.length} registros siguen guardados localmente.`
+          : 'Error al sincronizar. La cola offline se mantiene intacta.',
+      )
+    } finally {
+      setIsSyncingApi(false)
+      setTimeout(() => setActionNotice(''), 4000)
     }
-    setTimeout(() => {
-      setPendingSyncCount(0)
-      setActionNotice('Todas las asistencias pendientes quedaron sincronizadas.')
-      setTimeout(() => setActionNotice(''), 3500)
-    }, 800)
   }
 
   const handleSimulatedScan = async () => {
@@ -450,42 +524,16 @@ export default function DashboardPage() {
     )
     saveProjects(updated)
 
-    if (offlineMode) {
-      setPendingSyncCount((c) => c + 1)
-      setActionNotice('Pase QR leído y guardado sin conexión.')
-    } else {
-      try {
-        await fetch('/api/asistencias', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tallerId: selectedProject.id,
-            rut: randomRut,
-            nombreBeneficiario: `Vecino (${randomRut})`,
-            metodo: 'QR',
-            sincronizado: true,
-            latitud: -33.5015,
-            longitud: -70.6887,
-            distanciaMetros: 22,
-            estadoValidacion: 'valido',
-            deviceId: 'WEB-SYNCPASS-PANEL',
-          }),
-        })
-      } catch {
-        // fallback
-      }
-      setActionNotice('Pase QR verificado y registrado al instante.')
-    }
+    await persistAttendanceOrEnqueue(randomRut, 'QR', 22)
     setTimeout(() => setActionNotice(''), 3500)
   }
 
   const handleSurveySubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSurveySubmitted(true)
     try {
-      await fetch('/api/encuestas', {
+      const res = await fetch('/api/encuestas', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(localAuth.token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           tallerId: selectedProject.id,
           rutBeneficiario: 'BEN-00101',
@@ -496,10 +544,16 @@ export default function DashboardPage() {
           deviceId: 'WEB-SYNCPASS-PANEL',
         }),
       })
+      if (!res.ok) {
+        setActionNotice(`No se pudo guardar la encuesta (HTTP ${res.status}).`)
+        setTimeout(() => setActionNotice(''), 4000)
+        return
+      }
+      setSurveySubmitted(true)
+      setActionNotice('¡Gracias! Tu opinión sobre el taller quedó guardada.')
     } catch {
-      // ignore
+      setActionNotice('Error de red al enviar la encuesta al servidor.')
     }
-    setActionNotice('¡Gracias! Tu opinión sobre el taller quedó guardada.')
     setTimeout(() => setActionNotice(''), 4000)
   }
 
@@ -552,32 +606,40 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Modern Segmented Role Switcher */}
+        {/* Selector de vista limitado a los roles autorizados del usuario autenticado */}
         <div className={styles.roleSegment}>
-          <button
-            onClick={() => localAuth.switchRole(ROLES.coordinator)}
-            className={[styles.roleBtn, activeRole === ROLES.coordinator ? styles.activeRole : ''].filter(Boolean).join(' ')}
-          >
-            Docente
-          </button>
-          <button
-            onClick={() => localAuth.switchRole(ROLES.volunteer)}
-            className={[styles.roleBtn, activeRole === ROLES.volunteer ? styles.activeRole : ''].filter(Boolean).join(' ')}
-          >
-            Voluntario
-          </button>
-          <button
-            onClick={() => localAuth.switchRole(ROLES.attendee)}
-            className={[styles.roleBtn, activeRole === ROLES.attendee ? styles.activeRole : ''].filter(Boolean).join(' ')}
-          >
-            Beneficiario
-          </button>
-          <button
-            onClick={() => localAuth.switchRole(ROLES.admin)}
-            className={[styles.roleBtn, activeRole === ROLES.admin ? styles.activeRole : ''].filter(Boolean).join(' ')}
-          >
-            Admin
-          </button>
+          {allowedSwitchRoles.includes(ROLES.coordinator) && (
+            <button
+              onClick={() => setSelectedViewRole(ROLES.coordinator)}
+              className={[styles.roleBtn, activeRole === ROLES.coordinator ? styles.activeRole : ''].filter(Boolean).join(' ')}
+            >
+              Docente
+            </button>
+          )}
+          {allowedSwitchRoles.includes(ROLES.volunteer) && (
+            <button
+              onClick={() => setSelectedViewRole(ROLES.volunteer)}
+              className={[styles.roleBtn, activeRole === ROLES.volunteer ? styles.activeRole : ''].filter(Boolean).join(' ')}
+            >
+              Voluntario
+            </button>
+          )}
+          {allowedSwitchRoles.includes(ROLES.attendee) && (
+            <button
+              onClick={() => setSelectedViewRole(ROLES.attendee)}
+              className={[styles.roleBtn, activeRole === ROLES.attendee ? styles.activeRole : ''].filter(Boolean).join(' ')}
+            >
+              Beneficiario
+            </button>
+          )}
+          {allowedSwitchRoles.includes(ROLES.admin) && (
+            <button
+              onClick={() => setSelectedViewRole(ROLES.admin)}
+              className={[styles.roleBtn, activeRole === ROLES.admin ? styles.activeRole : ''].filter(Boolean).join(' ')}
+            >
+              Admin
+            </button>
+          )}
         </div>
       </div>
 
@@ -964,7 +1026,7 @@ export default function DashboardPage() {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <button
-                  onClick={() => setOfflineMode(!offlineMode)}
+                  onClick={() => toggleOfflineMode(!offlineMode)}
                   style={{
                     background: offlineMode ? 'var(--brand-amber-light)' : 'var(--brand-emerald-light)',
                     color: offlineMode ? 'var(--brand-amber)' : 'var(--brand-emerald)',
@@ -993,6 +1055,7 @@ export default function DashboardPage() {
                 {pendingSyncCount > 0 && (
                   <button
                     onClick={handleSyncNow}
+                    disabled={isSyncingApi}
                     style={{
                       background: 'var(--brand-indigo)',
                       color: '#ffffff',
@@ -1002,10 +1065,10 @@ export default function DashboardPage() {
                       fontSize: '0.82rem',
                       fontWeight: 700,
                       boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
-                      cursor: 'pointer',
+                      cursor: isSyncingApi ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    Sincronizar {pendingSyncCount} pendientes
+                    {isSyncingApi ? 'Sincronizando...' : `Sincronizar ${pendingSyncCount} pendientes`}
                   </button>
                 )}
               </div>

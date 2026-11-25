@@ -1,18 +1,9 @@
 import crypto from 'node:crypto'
-
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nxbsqkpnkawbkdksmnym.supabase.co'
-const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
+import { applyCors, requireAuth } from './_lib/auth.js'
+import { SUPABASE_URL, requireSupabaseConfigured, supabaseHeaders } from './_lib/supabase.js'
 
 const DEFAULT_PROYECTO_ID = '00000000-0000-0000-0001-000000000001'
 const DEFAULT_COORDINADOR_ID = '00000000-0000-0000-0000-000000000002'
-
-function supabaseHeaders(extra = {}) {
-  return {
-    apikey: SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    ...extra,
-  }
-}
 
 function mapStatusFromDb(estado) {
   switch (String(estado || '').toLowerCase()) {
@@ -83,14 +74,17 @@ async function fetchAllFromSupabase() {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  const corsHandled = applyCors(req, res, 'GET,POST,PUT,DELETE,OPTIONS')
+  if (corsHandled !== null) return
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
+  const allowedRoles =
+    req.method === 'GET'
+      ? ['admin', 'coordinator', 'volunteer', 'attendee']
+      : ['admin', 'coordinator']
+  const auth = await requireAuth(req, res, allowedRoles)
+  if (!auth.ok) return
+
+  if (!requireSupabaseConfigured(res)) return
 
   try {
     if (req.method === 'GET') {

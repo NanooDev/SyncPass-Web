@@ -1,15 +1,6 @@
 import crypto from 'node:crypto'
-
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nxbsqkpnkawbkdksmnym.supabase.co'
-const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
-
-function supabaseHeaders(extra = {}) {
-  return {
-    apikey: SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    ...extra,
-  }
-}
+import { applyCors, requireAuth } from './_lib/auth.js'
+import { SUPABASE_URL, requireSupabaseConfigured, supabaseHeaders } from './_lib/supabase.js'
 
 function mapRoleFromDb(rol) {
   switch (String(rol || '').toLowerCase()) {
@@ -63,14 +54,13 @@ async function fetchAllUsersFromSupabase() {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  const corsHandled = applyCors(req, res, 'GET,POST,PATCH,DELETE,OPTIONS')
+  if (corsHandled !== null) return
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
+  const auth = await requireAuth(req, res, ['admin'])
+  if (!auth.ok) return
+
+  if (!requireSupabaseConfigured(res)) return
 
   try {
     if (req.method === 'GET') {
@@ -89,6 +79,10 @@ export default async function handler(req, res) {
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       const id_usuario = uuidRegex.test(String(body.id || '')) ? body.id : crypto.randomUUID()
       const correo = String(body.email || body.correo || '').trim().toLowerCase()
+      if (!correo) {
+        res.status(400).json({ exito: false, mensaje: 'Correo electrónico requerido' })
+        return
+      }
       const nombre = String(body.nombre || body.name || correo.split('@')[0] || 'Usuario SyncPass').trim()
       const rol = mapRoleToDb(body.role || (Array.isArray(body.roles) ? body.roles[0] : 'volunteer'))
 

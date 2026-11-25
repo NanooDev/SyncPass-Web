@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { AUTH0_AUDIENCE, type BffUser } from '../../config/auth.ts'
+import { useAuth } from '../../hooks/use-auth/useAuth.ts'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import styles from './UsersPage.module.css'
 
@@ -8,13 +9,6 @@ interface ExtendedUser extends BffUser {
   nombre?: string
   activo?: boolean
 }
-
-const DEMO_USERS: ExtendedUser[] = [
-  { id: 'usr-1', nombre: 'Administrador SyncPass', email: 'admin.syncpass@duocuc.cl', role: 'admin', activo: true },
-  { id: 'usr-2', nombre: 'Prof. Mariano Acevedo', email: 'docente.coordinador@duocuc.cl', role: 'coordinator', activo: true },
-  { id: 'usr-3', nombre: 'Álvaro León (Voluntario)', email: 'voluntario.estudiante@duocuc.cl', role: 'volunteer', activo: true },
-  { id: 'usr-4', nombre: 'María González (Vecina)', email: 'maria.gonzalez@comunidad.cl', role: 'attendee', activo: true },
-]
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
@@ -25,8 +19,10 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function UsersPage() {
   useDocumentTitle('Equipo y Usuarios | Sync Pass')
+  const auth = useAuth()
   const { getAccessTokenSilently, loginWithRedirect } = useAuth0()
   const [users, setUsers] = useState<ExtendedUser[] | null>(null)
+  const [activeToken, setActiveToken] = useState<string>('')
   const [error, setError] = useState<string>('')
   const [notice, setNotice] = useState<string>('')
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -34,16 +30,25 @@ export default function UsersPage() {
   const [formEmail, setFormEmail] = useState<string>('')
   const [formRole, setFormRole] = useState<string>('volunteer')
 
+  const resolveBearerToken = async (): Promise<string> => {
+    if (auth.token) return auth.token
+    if (activeToken) return activeToken
+    if (getAccessTokenSilently) {
+      const tok =
+        (await getAccessTokenSilently({
+          authorizationParams: { audience: AUTH0_AUDIENCE },
+        })) || ''
+      if (tok) setActiveToken(tok)
+      return tok
+    }
+    return ''
+  }
+
   const fetchUsuarios = async (showFeedback = false) => {
     setError('')
     let token = ''
     try {
-      if (getAccessTokenSilently) {
-        token =
-          (await getAccessTokenSilently({
-            authorizationParams: { audience: AUTH0_AUDIENCE },
-          })) || ''
-      }
+      token = await resolveBearerToken()
     } catch (err) {
       const code = (err as { error?: string })?.error
       if ((code === 'consent_required' || code === 'login_required') && loginWithRedirect) {
@@ -69,28 +74,33 @@ export default function UsersPage() {
             ? json.datos
             : Array.isArray(json?.usuarios)
               ? json.usuarios
-              : null
-        if (list && list.length > 0) {
-          setUsers(list)
-          if (showFeedback) {
-            setNotice('Directorio de personas actualizado desde la base de datos.')
-            setTimeout(() => setNotice(''), 3000)
-          }
-          return
+              : []
+        setUsers(list)
+        if (showFeedback) {
+          setNotice('Directorio de personas actualizado desde la base de datos.')
+          setTimeout(() => setNotice(''), 3000)
         }
+        return
       }
-      setError('No se pudo cargar el directorio remoto; mostrando cuentas locales.')
-      setUsers(DEMO_USERS)
+
+      const errJson = await res.json().catch(() => ({}))
+      setUsers([])
+      setError(
+        errJson.mensaje ||
+          (res.status === 401 || res.status === 403
+            ? 'No tienes autorización del servidor para consultar el directorio.'
+            : 'No se pudo cargar la lista de usuarios desde el servidor.'),
+      )
     } catch {
+      setUsers([])
       setError('No se pudo cargar la lista de usuarios desde el servidor.')
-      setUsers(DEMO_USERS)
     }
   }
 
   useEffect(() => {
     fetchUsuarios(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [auth.token])
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,69 +114,105 @@ export default function UsersPage() {
       activo: true,
     }
 
-    setUsers((prev) => [nuevo, ...(prev || [])])
-    setShowModal(false)
-    setFormNombre('')
-    setFormEmail('')
-
     try {
+      const token = await resolveBearerToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers.Authorization = `Bearer ${token}`
+
       const res = await fetch('/api/usuarios', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(nuevo),
       })
-      if (res.ok) {
-        const json = await res.json()
-        const list = Array.isArray(json?.datos) ? json.datos : Array.isArray(json?.usuarios) ? json.usuarios : null
-        if (list) setUsers(list)
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        setError(errJson.mensaje || `No se pudo crear usuario (HTTP ${res.status})`)
+        return
       }
-    } catch {
-      // ignore
-    }
+      const json = await res.json()
+      const list = Array.isArray(json?.usuarios)
+        ? json.usuarios
+        : Array.isArray(json?.datos)
+          ? json.datos
+          : Array.isArray(json)
+            ? json
+            : null
+      if (list) setUsers(list)
+      else setUsers((prev) => [nuevo, ...(prev || [])])
 
-    setNotice(`Se agregó a "${nuevo.nombre}" al equipo.`)
-    setTimeout(() => setNotice(''), 3500)
+      setShowModal(false)
+      setFormNombre('')
+      setFormEmail('')
+      setNotice(`Se agregó a "${nuevo.nombre}" al equipo.`)
+      setTimeout(() => setNotice(''), 3500)
+    } catch {
+      setError('Error de red al guardar el usuario en el servidor.')
+    }
   }
 
   const handleToggleActivo = async (u: ExtendedUser) => {
     const nextActivo = u.activo === false
-    setUsers((prev) => (prev || []).map((item) => (item.id === u.id ? { ...item, activo: nextActivo } : item)))
     try {
+      const token = await resolveBearerToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers.Authorization = `Bearer ${token}`
+
       const res = await fetch('/api/usuarios', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ id: u.id, activo: nextActivo }),
       })
-      if (res.ok) {
-        const json = await res.json()
-        const list = Array.isArray(json?.datos) ? json.datos : Array.isArray(json?.usuarios) ? json.usuarios : null
-        if (list) setUsers(list)
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        setError(errJson.mensaje || `No se pudo actualizar estado (HTTP ${res.status})`)
+        return
       }
+      const json = await res.json()
+      const list = Array.isArray(json?.usuarios)
+        ? json.usuarios
+        : Array.isArray(json?.datos)
+          ? json.datos
+          : null
+      if (list) setUsers(list)
+      else setUsers((prev) => (prev || []).map((item) => (item.id === u.id ? { ...item, activo: nextActivo } : item)))
+
+      setNotice(nextActivo ? `Cuenta de ${u.email} reactivada.` : `Cuenta de ${u.email} pausada.`)
+      setTimeout(() => setNotice(''), 3000)
     } catch {
-      // ignore
+      setError('Error de red al actualizar estado de usuario.')
     }
-    setNotice(nextActivo ? `Cuenta de ${u.email} reactivada.` : `Cuenta de ${u.email} pausada.`)
-    setTimeout(() => setNotice(''), 3000)
   }
 
   const handleDeleteUser = async (u: ExtendedUser) => {
     if (!window.confirm(`¿Confirmas quitar a "${u.email}" del directorio?`)) return
-    setUsers((prev) => (prev || []).filter((item) => item.id !== u.id))
     try {
+      const token = await resolveBearerToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers.Authorization = `Bearer ${token}`
+
       const res = await fetch(`/api/usuarios?id=${encodeURIComponent(u.id)}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
       })
-      if (res.ok) {
-        const json = await res.json()
-        const list = Array.isArray(json?.datos) ? json.datos : Array.isArray(json?.usuarios) ? json.usuarios : null
-        if (list) setUsers(list)
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        setError(errJson.mensaje || `No se pudo eliminar usuario (HTTP ${res.status})`)
+        return
       }
+      const json = await res.json()
+      const list = Array.isArray(json?.usuarios)
+        ? json.usuarios
+        : Array.isArray(json?.datos)
+          ? json.datos
+          : null
+      if (list) setUsers(list)
+      else setUsers((prev) => (prev || []).filter((item) => item.id !== u.id))
+
+      setNotice(`Cuenta "${u.email}" eliminada.`)
+      setTimeout(() => setNotice(''), 3000)
     } catch {
-      // ignore
+      setError('Error de red al eliminar usuario.')
     }
-    setNotice(`Cuenta "${u.email}" eliminada.`)
-    setTimeout(() => setNotice(''), 3000)
   }
 
   return (

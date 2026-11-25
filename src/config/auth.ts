@@ -1,16 +1,12 @@
-// Config centralizada del front: un solo archivo.
-// Cada valor sale de `VITE_*` (/.env.local en local) con default en duro.
+// Config centralizada del front (cliente SPA público con OAuth2 + PKCE, sin secretos en el navegador).
 const env = import.meta.env
 
-// Configuración AWS Cognito de Mariano (User Pool SyncPass)
+// Configuración AWS Cognito (User Pool SyncPass - cliente público PKCE)
 export const COGNITO_USER_POOL_ID: string =
   env.VITE_COGNITO_USER_POOL_ID ?? 'us-east-1_RlB8Ft9Z2'
 
 export const COGNITO_CLIENT_ID: string =
   env.VITE_COGNITO_CLIENT_ID ?? '2988naivr3qfmjhhm35k5lubvd'
-
-export const COGNITO_CLIENT_SECRET: string =
-  env.VITE_COGNITO_CLIENT_SECRET ?? 'ag77dltf1fn5mhrrdcgl46sg77tbe7bf53krlb8tibl4neqa4va'
 
 export const COGNITO_DOMAIN: string =
   env.VITE_COGNITO_DOMAIN ??
@@ -21,22 +17,17 @@ export const COGNITO_REDIRECT_URI: string =
     ? `${window.location.origin}/`
     : (env.VITE_COGNITO_REDIRECT_URI ?? 'http://localhost:5173/')
 
-// URL de login con flujo seguro Authorization Code Grant (estándar AWS Cognito)
-export const COGNITO_LOGIN_URL = `${COGNITO_DOMAIN}/login?client_id=${COGNITO_CLIENT_ID}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(
-  COGNITO_REDIRECT_URI,
-)}`
-
 export const COGNITO_LOGOUT_URL = `${COGNITO_DOMAIN}/logout?client_id=${COGNITO_CLIENT_ID}&logout_uri=${encodeURIComponent(
   COGNITO_REDIRECT_URI,
 )}`
 
-// Configuración Auth0 (mantenida para compatibilidad con código base)
+// Configuración Auth0 (compatibilidad con integración OIDC existente)
 export const AUTH0_DOMAIN: string =
   env.VITE_AUTH0_DOMAIN ?? 'dev-qd6i88udlr5yzjtv.us.auth0.com'
 export const AUTH0_CLIENT_ID: string =
   env.VITE_AUTH0_CLIENT_ID ?? 'zpg5yYHLp9KiFYj0tNaZO8eaSfMGrgcZ'
 
-// Custom claim donde la Post-Login Action inyecta los roles
+// Custom claim donde se inyectan los roles
 export const ROLES_CLAIM: string =
   env.VITE_AUTH0_ROLES_CLAIM ?? 'https://sync-pass/roles'
 

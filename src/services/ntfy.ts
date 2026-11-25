@@ -1,7 +1,7 @@
 /**
  * Servicio de notificaciones push via ntfy.sh (Server-Sent Events / SSE)
- * Integra el algoritmo de microtopicos por usuario usando hash SHA-256
- * y soporte para el endpoint BFF (/api/notificar) de Spring Boot.
+ * Integra el algoritmo de microtópicos por usuario usando hash SHA-256
+ * y soporte autenticado para /api/notificar (BFF Spring Boot o Vercel API).
  */
 import { BFF_URL } from '../config/auth.ts'
 
@@ -10,7 +10,7 @@ export const TOPIC_PREFIX = 'app_vibe_'
 export const TOPIC_HASH_LENGTH = 20
 
 /**
- * Deriva el topico secreto de ntfy a partir del email del usuario.
+ * Deriva el tópico de ntfy a partir del email del usuario.
  */
 export async function deriveNtfyTopic(email: string): Promise<string> {
   const normalized = email.trim().toLowerCase()
@@ -40,6 +40,7 @@ export interface PushNotificationPayload {
   priority?: 'min' | 'low' | 'default' | 'high' | 'urgent'
   tags?: string[]
   useBff?: boolean
+  token?: string | null
 }
 
 export interface PushNotificationResult {
@@ -61,12 +62,15 @@ function mapPriorityToNumber(priority?: string): number {
 }
 
 /**
- * Publica una notificacion push mediante el BFF de Spring Boot (/api/notificar)
- * o directamente en ntfy.sh como mecanismo de fallback y desarrollo local.
+ * Publica una notificación push mediante el BFF de Spring Boot (/api/notificar)
+ * o la ruta serverless autenticada (/api/notificar).
  */
 export async function sendPushNotification(payload: PushNotificationPayload): Promise<PushNotificationResult> {
   const email = payload.email || ''
   const topic = payload.topic || (email ? await deriveNtfyTopic(email) : `${TOPIC_PREFIX}default`)
+  const authHeader: Record<string, string> = payload.token
+    ? { Authorization: `Bearer ${payload.token}` }
+    : {}
 
   if (payload.useBff && email) {
     try {
@@ -74,6 +78,7 @@ export async function sendPushNotification(payload: PushNotificationPayload): Pr
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeader,
         },
         body: JSON.stringify({
           email,
@@ -87,25 +92,45 @@ export async function sendPushNotification(payload: PushNotificationPayload): Pr
       if (bffResponse.ok) {
         return { success: true, topic, source: 'bff' }
       }
-    } catch {
-      // Fallback a ruta serverless local /api/notificar si BFF externo no responde
-      try {
-        const apiRes = await fetch('/api/notificar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            topic,
-            message: payload.message,
-            title: payload.title,
-            priority: payload.priority || 'high',
-          }),
-        })
-        if (apiRes.ok) {
-          return { success: true, topic, source: 'bff' }
+      if (bffResponse.status === 401 || bffResponse.status === 403) {
+        return {
+          success: false,
+          topic,
+          error: `Acceso denegado en /api/notificar (HTTP ${bffResponse.status})`,
         }
-      } catch {
-        // continuar al envio directo ntfy.sh
+      }
+    } catch {
+      // Continuar hacia la función serverless autenticada /api/notificar si BFF externo no responde
+    }
+
+    try {
+      const apiRes = await fetch('/api/notificar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader,
+        },
+        body: JSON.stringify({
+          email,
+          topic,
+          message: payload.message,
+          title: payload.title,
+          priority: payload.priority || 'high',
+        }),
+      })
+      if (apiRes.ok) {
+        return { success: true, topic, source: 'bff' }
+      }
+      return {
+        success: false,
+        topic,
+        error: `Error HTTP ${apiRes.status} al emitir notificación`,
+      }
+    } catch (err) {
+      return {
+        success: false,
+        topic,
+        error: err instanceof Error ? err.message : 'Servicio de notificaciones no disponible',
       }
     }
   }
@@ -143,11 +168,13 @@ export async function sendPushNotification(payload: PushNotificationPayload): Pr
 }
 
 /**
- * Consulta el topico generado por el BFF de Spring Boot
+ * Consulta el tópico generado por el BFF autenticado.
  */
-export async function getTopicFromBff(email: string): Promise<string> {
+export async function getTopicFromBff(email: string, token?: string | null): Promise<string> {
   try {
-    const res = await fetch(`${BFF_URL}/api/notificar/topic/${encodeURIComponent(email)}`)
+    const res = await fetch(`${BFF_URL}/api/notificar/topic/${encodeURIComponent(email)}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
     if (res.ok) {
       const json = await res.json()
       if (json.data) return json.data

@@ -38,11 +38,16 @@ Siguiendo la arquitectura en capas enseñada en clases (**Inversión de Dependen
 
 ---
 
-## 2. Pruebas Unitarias en Web React (`SyncPass-Web`)
+## 2. Pruebas Unitarias y de Seguridad en Web React + API (`SyncPass-Web`)
 
-* **Framework:** Vitest + React Testing Library (`jsdom`) + `@vitest/coverage-v8`.
-* **Cobertura medida:** **36 pruebas unitarias en 12 archivos (`100% passing`)**, con **74.77% de statements** / **77% de líneas** globales y **>80% por componente** (`StatusBadge`, `MetricCard`, `WorkshopSummaryBanner`, `PageShell`, `UserCard`, `Layout` 87.5%, `UsersPage` 84.76%, `RequireAuth` 83.33%).
-* **Comando:**
+* **Framework Frontend / Vercel API:** Vitest + React Testing Library (`jsdom` + `@vitest-environment node` para `api/security.test.ts`) + `@vitest/coverage-v8`.
+* **Cobertura medida:** **41 pruebas unitarias en 14 archivos (`100% passing`)**, con **73.55% de statements** / **75.92% de líneas** globales y **100% por componente atómico** (`StatusBadge`, `MetricCard`, `WorkshopSummaryBanner`, `PageShell`, `UserCard`, además de `offlineQueue.ts` 78.78% líneas, `UsersPage` 81.51% líneas, `RequireAuth` 81.25% líneas, `Layout` 90% líneas).
+* **Seguridad RBAC Vercel (`api/security.test.ts`):** Valida rechazo `401` sin token o con token falso, bloqueo CORS fuera de lista blanca, `403` por rol insuficiente en `/api/usuarios`, `POST /api/talleres` y `/api/notificar`, rechazo `400` ante lotes vacíos en `/api/asistencias` y sincronización exitosa con JWT válido.
+* **BFF Spring Boot (`bff/`):** `.\gradlew.bat test` ejecuta pruebas de contexto, `RolesClaimConverterTest`, `UserControllerTest` y `BffRbacControllersTest` con `MockMvc` + `@MockitoBean SupabaseGatewayService` validando `401`/`403` RBAC y sincronización batch.
+* **Comandos:**
 ```powershell
+npm run lint
+npm run build
 npx vitest run --coverage
+cd bff && .\gradlew.bat test --no-daemon --console=plain
 ```

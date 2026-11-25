@@ -9,8 +9,7 @@ import LoginPage from './pages/login/LoginPage.tsx'
 import { useAuth } from './hooks/use-auth/useAuth.ts'
 
 export default function App() {
-  const auth = useAuth()
- console.log('auth', auth)
+  useAuth()
   return (
     <Layout>
       <Switch>

@@ -5,6 +5,7 @@ server:
 supabase:
   url: ${SUPABASE_URL:https://nxbsqkpnkawbkdksmnym.supabase.co}
   jdbc-url: ${SUPABASE_JDBC_URL:jdbc:postgresql://db.nxbsqkpnkawbkdksmnym.supabase.co:5432/postgres}
+  key: ${SUPABASE_KEY:}
 
 # Todo sobreescribible por env: AUTH0_ISSUER, AUTH0_JWK_SET_URI, AUTH0_AUDIENCE, AUTH0_ROLES_CLAIM
 auth0:

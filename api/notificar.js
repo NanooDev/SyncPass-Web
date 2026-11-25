@@ -1,8 +1,11 @@
 import crypto from 'node:crypto'
+import { applyCors, requireAuth } from './_lib/auth.js'
 
 const NTFY_BASE_URL = 'https://ntfy.sh'
 const TOPIC_PREFIX = 'app_vibe_'
 const TOPIC_HASH_LENGTH = 20
+const VALID_TOPIC_REGEX = /^app_vibe_[a-z0-9_]{4,40}$/
+const VALID_PRIORITIES = new Set(['min', 'low', 'default', 'high', 'urgent'])
 
 function deriveTopic(email) {
   const normalized = String(email || '').trim().toLowerCase()
@@ -11,20 +14,30 @@ function deriveTopic(email) {
   return `${TOPIC_PREFIX}${hex.substring(0, TOPIC_HASH_LENGTH)}`
 }
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+function sanitizeHeaderValue(value, maxLen = 120) {
+  return String(value || '').replace(/[\r\n]+/g, ' ').trim().slice(0, maxLen)
+}
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
+export default async function handler(req, res) {
+  const corsHandled = applyCors(req, res, 'GET,POST,OPTIONS')
+  if (corsHandled !== null) return
+
+  const auth = await requireAuth(req, res, ['admin', 'coordinator'])
+  if (!auth.ok) return
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
     const email = body.email || req.query?.email || ''
-    const topic = body.topic || deriveTopic(email)
+    const requestedTopic = body.topic ? String(body.topic).trim() : ''
+    const topic = requestedTopic || deriveTopic(email)
+
+    if (!VALID_TOPIC_REGEX.test(topic)) {
+      res.status(400).json({
+        exito: false,
+        mensaje: 'Tópico de notificación inválido',
+      })
+      return
+    }
 
     if (req.method === 'GET') {
       res.status(200).json({ exito: true, data: topic })
@@ -32,11 +45,19 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const title = body.title || 'SyncPass Alerta'
-      const message = body.message || 'Notificación institucional SyncPass'
-      const priority = String(body.priority || 'high')
+      const title = sanitizeHeaderValue(body.title || 'SyncPass Alerta', 100) || 'SyncPass Alerta'
+      const message = String(body.message || '').trim().slice(0, 500)
+      if (!message) {
+        res.status(400).json({
+          exito: false,
+          mensaje: 'El mensaje de notificación es obligatorio',
+        })
+        return
+      }
+      const rawPriority = String(body.priority || 'high').toLowerCase()
+      const priority = VALID_PRIORITIES.has(rawPriority) ? rawPriority : 'high'
 
-      const ntfyRes = await fetch(`${NTFY_BASE_URL}/${topic}`, {
+      const ntfyRes = await fetch(`${NTFY_BASE_URL}/${encodeURIComponent(topic)}`, {
         method: 'POST',
         headers: {
           Title: title,

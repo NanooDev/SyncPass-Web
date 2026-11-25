@@ -6,10 +6,11 @@ export const defaultAuthContext: AuthContextType = {
   roles: [],
   isAuthenticated: false,
   isLoading: false,
+  authError: null,
   loginWithCognito: () => {},
+  loginWithToken: () => false,
+  clearAuthError: () => {},
   logout: () => {},
-  loginLocal: () => {},
-  switchRole: () => {},
   token: null,
 }
 

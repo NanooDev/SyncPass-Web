@@ -1,28 +1,22 @@
 import crypto from 'node:crypto'
-
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nxbsqkpnkawbkdksmnym.supabase.co'
-const SUPABASE_KEY = process.env.SUPABASE_KEY || ''
+import { applyCors, requireAuth } from './_lib/auth.js'
+import { SUPABASE_URL, requireSupabaseConfigured, supabaseHeaders } from './_lib/supabase.js'
 
 const DEFAULT_EVENTO_ID = '00000000-0000-0000-0002-000000000001'
 const DEFAULT_BENEFICIARIO_ID = '00000000-0000-0000-0003-000000000001'
 
-function supabaseHeaders(extra = {}) {
-  return {
-    apikey: SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    ...extra,
-  }
-}
-
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  const corsHandled = applyCors(req, res, 'GET,POST,OPTIONS')
+  if (corsHandled !== null) return
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
+  const allowedRoles =
+    req.method === 'GET'
+      ? ['admin', 'coordinator']
+      : ['admin', 'coordinator', 'volunteer', 'attendee']
+  const auth = await requireAuth(req, res, allowedRoles)
+  if (!auth.ok) return
+
+  if (!requireSupabaseConfigured(res)) return
 
   try {
     if (req.method === 'GET') {
@@ -30,7 +24,11 @@ export default async function handler(req, res) {
         `${SUPABASE_URL}/rest/v1/encuesta_valoracion?select=*&order=created_locally_at.desc`,
         { headers: supabaseHeaders() }
       )
-      const rows = getRes.ok ? await getRes.json() : []
+      if (!getRes.ok) {
+        const errText = await getRes.text()
+        throw new Error(`Supabase GET encuesta_valoracion (${getRes.status}): ${errText}`)
+      }
+      const rows = await getRes.json()
       res.status(200).json({
         exito: true,
         mensaje: 'Encuestas de satisfacción obtenidas desde PostgreSQL (Supabase)',
@@ -49,10 +47,9 @@ export default async function handler(req, res) {
         : DEFAULT_EVENTO_ID
       const estrellas = Math.min(5, Math.max(1, Number(body.calificacionEstrellas ?? body.estrellas ?? 5)))
       const nivel_utilidad = Math.min(5, Math.max(1, Number(body.utilidad ?? body.nivel_utilidad ?? 4)))
-      const comentarios = String(body.comentarios || 'Taller muy útil para la comunidad').trim()
-      const device_id = String(body.deviceId || 'ANDROID-SYNCPASS').slice(0, 100)
+      const comentarios = String(body.comentarios || 'Taller muy útil para la comunidad').trim().slice(0, 600)
+      const device_id = String(body.deviceId || 'WEB-SYNCPASS').slice(0, 100)
 
-      // Crear un beneficiario sintético único por encuesta si no viene un UUID válido
       let id_beneficiario = uuidRegex.test(String(body.beneficiarioId || ''))
         ? body.beneficiarioId
         : DEFAULT_BENEFICIARIO_ID

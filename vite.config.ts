@@ -1,16 +1,44 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 // @ts-expect-error serverless handler sin archivo d.ts
-import talleresHandler from './api/talleres.js'
+import authHandler from './api/auth.js'
 // @ts-expect-error serverless handler sin archivo d.ts
-import usuariosHandler from './api/usuarios.js'
+import asistenciasHandler from './api/asistencias.js'
+// @ts-expect-error serverless handler sin archivo d.ts
+import encuestasHandler from './api/encuestas.js'
 // @ts-expect-error serverless handler sin archivo d.ts
 import healthHandler from './api/health.js'
 // @ts-expect-error serverless handler sin archivo d.ts
 import notificarHandler from './api/notificar.js'
+// @ts-expect-error serverless handler sin archivo d.ts
+import talleresHandler from './api/talleres.js'
+// @ts-expect-error serverless handler sin archivo d.ts
+import usuariosHandler from './api/usuarios.js'
+
+function loadServerLocalEnv() {
+  for (const file of ['.env.local', '.env']) {
+    const full = path.resolve(process.cwd(), file)
+    if (!fs.existsSync(full)) continue
+    const lines = fs.readFileSync(full, 'utf8').split(/\r?\n/)
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eqIdx = trimmed.indexOf('=')
+      if (eqIdx <= 0) continue
+      const key = trimmed.slice(0, eqIdx).trim()
+      const value = trimmed.slice(eqIdx + 1).trim()
+      if (key && !(key in process.env)) {
+        process.env[key] = value
+      }
+    }
+  }
+}
 
 function syncpassLocalApiPlugin() {
+  loadServerLocalEnv()
   return {
     name: 'syncpass-local-api',
     configureServer(server: { middlewares: { use: (fn: (req: any, res: any, next: () => void) => void) => void } }) {
@@ -52,11 +80,20 @@ function syncpassLocalApiPlugin() {
           return res
         }
 
+        if (pathname.startsWith('/api/auth/')) {
+          return authHandler(req, res)
+        }
         if (pathname === '/api/talleres') {
           return talleresHandler(req, res)
         }
         if (pathname === '/api/usuarios') {
           return usuariosHandler(req, res)
+        }
+        if (pathname === '/api/asistencias' || pathname === '/api/asistencias/sync') {
+          return asistenciasHandler(req, res)
+        }
+        if (pathname === '/api/encuestas') {
+          return encuestasHandler(req, res)
         }
         if (pathname === '/api/health') {
           return healthHandler(req, res)

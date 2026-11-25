@@ -2,7 +2,7 @@
 
 > **Integrantes (Dupla):** Mariano Acevedo (@NanooDev) y Álvaro León (alv.leon@duocuc.cl)  
 > **Servicio Cloud:** Amazon Web Services (AWS) — Amazon Cognito User Pools  
-> **Estado:** Configurado y Operativo
+> **Flujo:** Cliente SPA Público con Authorization Code + PKCE (RFC 7636, sin `client_secret`)
 
 ---
 
@@ -10,52 +10,26 @@
 
 - **Región:** `us-east-1` (US East - N. Virginia)
 - **User Pool ID:** `us-east-1_RlB8Ft9Z2`
-- **App Client ID:** `2988naivr3qfmjhhm35k5lubvd`
+- **App Client:** Cliente público **sin secreto de cliente** (PKCE S256)
 - **Dominio Hosted UI:** `https://us-east-1rlb8ft9z2.auth.us-east-1.amazoncognito.com`
-- **Flujo OAuth:** Authorization Code Grant con PKCE (Proof Key for Code Exchange / RFC 7636)
+- **Flujo OAuth:** Authorization Code Grant con PKCE S256 (`code_challenge` + `code_verifier`)
 - **Scopes permitidos:** `openid`, `email`, `phone`
-- **URL de Retorno Web:** `http://localhost:5173/`
+- **URL de Retorno Web:** `http://localhost:5173/` y dominio Vercel configurado
 
 ---
 
-## 2. Solución al Error "Invalid request" en AWS Cognito
+## 2. Reglas de Seguridad Aplicadas (SPA Pública)
 
-### Causa del error:
-Al presionar el botón de inicio de sesión con Cognito, la pantalla mostraba:
-```text
-Invalid request
-Please check your input and try again.
-```
-Esto ocurría porque el enlace anterior utilizaba el parámetro `response_type=token` (*Implicit Grant*). 
-
-En las versiones modernas de AWS Cognito, el flujo *Implicit Grant* viene **deshabilitado por defecto** por motivos de seguridad en favor del flujo recomendado por el estándar OAuth 2.1: **Authorization Code Grant con PKCE** (`response_type=code`). Al recibir `response_type=token`, Cognito rechazaba la petición de inmediato con error 400.
-
-### Solución implementada:
-1. Se actualizó el endpoint a **`response_type=code`** con desafío criptográfico **PKCE S256** generado dinámicamente en el navegador.
-2. Al autorizar al usuario, Cognito devuelve un código temporal en la URL (`http://localhost:5173/?code=...`).
-3. El frontend intercambia automáticamente el código por los tokens JWT (`id_token` y `access_token`) en el endpoint `/oauth2/token` de Cognito.
-4. Se extraen el correo y los grupos/roles del usuario y se inicia la sesión de forma transparente.
+1. **Cero secretos en el cliente Vite:** Nunca se define ni exporta `VITE_COGNITO_CLIENT_SECRET` en `.env`, `.env.production` ni `src/config/auth.ts`. El App Client en AWS Cognito debe configurarse como **Public client** ("Don't generate a client secret").
+2. **Validación estricta en backend y BFF:** El navegador valida estructura y expiración (`exp`) del JWT recibido; los endpoints `/api/*` de Vercel y Spring Boot (`bff`) verifican la firma criptográfica del JWT (`RS256` vía JWKS de Cognito/Auth0 o `HS256` vía `SYNCPASS_JWT_SECRET` en servidor) y exigen los roles RBAC correspondientes.
+3. **Sin sesiones ficticias de respaldo:** Si falla el intercambio OAuth2 (`?code=...`) o el login contra backend, la sesión permanece cerrada y se muestra el error correspondiente sin generar tokens simulados.
 
 ---
 
-## ⚙️ 3. Verificación en la Consola de AWS (1 minuto)
+## 3. Verificación en la Consola de AWS
 
-Para asegurar que tu App Client acepte la redirección web:
-
-1. Entra a tu consola de **AWS Cognito** ➔ User Pool `us-east-1_RlB8Ft9Z2`.
-2. Ve a la pestaña **App integration** (Integración de aplicaciones).
-3. Baja hasta **App client list** y haz clic en el cliente `SyncPass` (`2988naivr3qfmjhhm35k5lubvd`).
-4. En la sección **Login pages**, verifica o añade:
-   - **Allowed callback URLs:**
-     ```text
-     http://localhost:5173/
-     com.example.kotlinlogin://cognito/callback
-     ```
-   - **Allowed sign-out URLs:**
-     ```text
-     http://localhost:5173/
-     com.example.kotlinlogin://cognito/callback
-     ```
-5. En **OAuth 2.0 grant types**, asegúrate de que esté marcado **Authorization code grant**.
-6. En **OpenID Connect scopes**, asegúrate de que estén marcados **OpenID**, **Email** y **Phone**.
-7. Guarda los cambios.
+1. Entra a **AWS Cognito** → User Pool `us-east-1_RlB8Ft9Z2`.
+2. Ve a **App integration** → **App clients**.
+3. Asegúrate de usar un **Public client** (sin Client Secret; si existía un secreto previo en el repositorio, rótalo o crea un nuevo cliente público sin secreto).
+4. Verifica **Allowed callback URLs** / **Allowed sign-out URLs** (`http://localhost:5173/`, dominio Vercel de producción y `com.example.kotlinlogin://cognito/callback` para Android).
+5. Habilita **Authorization code grant** y los scopes **OpenID**, **Email** y **Phone**.

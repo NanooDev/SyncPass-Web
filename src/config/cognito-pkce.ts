@@ -1,6 +1,6 @@
 /**
- * Utilidades para el flujo OAuth 2.0 Authorization Code Grant con PKCE
- * compatible con Amazon Cognito User Pools (RFC 7636).
+ * Utilidades para el flujo OAuth 2.0 Authorization Code Grant con PKCE (RFC 7636)
+ * para cliente SPA público (sin client_secret expuesto en el navegador).
  */
 
 export function generateRandomString(length = 64): string {
@@ -23,7 +23,7 @@ export function generateRandomString(length = 64): string {
 
 export async function generateCodeChallenge(verifier: string): Promise<string> {
   if (typeof window === 'undefined' || !window.crypto?.subtle) {
-    return verifier
+    throw new Error('Web Crypto API requerida para generar desafío PKCE S256')
   }
   const encoder = new TextEncoder()
   const data = encoder.encode(verifier)
@@ -41,7 +41,6 @@ export async function startCognitoLogin(
 ): Promise<void> {
   const verifier = generateRandomString(64)
   sessionStorage.setItem('cognito_code_verifier', verifier)
-  try { localStorage.setItem('cognito_code_verifier', verifier) } catch {}
   const challenge = await generateCodeChallenge(verifier)
 
   const params = new URLSearchParams({
@@ -62,38 +61,31 @@ export async function exchangeCodeForTokens(
   redirectUri: string,
   code: string,
   verifier: string,
-  clientSecret?: string,
 ): Promise<{ id_token: string; access_token: string }> {
+  const trimmedVerifier = verifier.trim()
+  if (!trimmedVerifier) {
+    throw new Error('Falta code_verifier PKCE para intercambiar el código de Cognito')
+  }
+
   const params = new URLSearchParams({
     grant_type: 'authorization_code',
     client_id: clientId,
     code,
     redirect_uri: redirectUri,
+    code_verifier: trimmedVerifier,
   })
-
-  // Solo incluir code_verifier si está presente (para no romper logins sin PKCE)
-  if (verifier && verifier.trim().length > 0) {
-    params.append('code_verifier', verifier.trim())
-  }
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  }
-
-  // Estándar RFC 6749 y AWS Cognito: autenticar cliente confidencial mediante Basic Auth
-  if (clientSecret) {
-    headers['Authorization'] = `Basic ${btoa(`${clientId}:${clientSecret}`)}`
-  }
 
   const res = await fetch(`${domain}/oauth2/token`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
     body: params.toString(),
   })
 
   if (!res.ok) {
     const errorBody = await res.text()
-    throw new Error(`Cognito token error: ${errorBody}`)
+    throw new Error(`Cognito token error (${res.status}): ${errorBody}`)
   }
 
   return res.json() as Promise<{ id_token: string; access_token: string }>

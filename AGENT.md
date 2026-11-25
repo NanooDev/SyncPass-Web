@@ -1,62 +1,50 @@
 # Directrices de Agente IA, Registro de Prompts y Plan de Ejecución (`AGENT.md`)
 
-**Proyecto:** SyncPass – Aplicación Móvil Nativa (Kotlin) & Cloud (Supabase / AWS / Spring Boot)  
-**Propósito de este documento:** Establecer el contexto arquitectónico portátil entre sesiones de IA, documentar el uso estratégico y controlado de Inteligencia Artificial (evitando alucinaciones y código acoplado) y mantener el **Plan de Trabajo con Checklist verificable** exigido en la evaluación de Prueba 3.
+**Repositorio:** `SyncPass-Web` — Frontend Web (React / TypeScript / Vite), API Serverless (Vercel `/api/*`), BFF Spring Boot (`bff/`) y DDL PostgreSQL (`docs/syncpass-ddl.sql`)  
+**Repositorio hermano (Android Kotlin):** `SyncPass-Android` (`https://github.com/NanooDev/SyncPass-Android`)
 
 ---
 
 ## 1. Reglas de Ingeniería para el Agente IA (System Guidelines)
 
-1. **Separación Estricta de Capas (MVVM + Clean Architecture):**
-   * **Prohibido** colocar llamadas HTTP (`Retrofit`/`OkHttp`), consultas SQL (`Room`) o lógica de negocio dentro de funciones `@Composable` (`*Screen.kt`).
-   * Toda vista (`DocenteScreen`, `VoluntarioScreen`, `BeneficiarioScreen`, `AdminScreen`, `LoginScreen`, `HomeScreen`) debe observar un único `StateFlow<*UiState>` expuesto por su `*ViewModel` y emitir eventos mediante funciones `onAlgo(...)`.
-2. **Inversión de Dependencias (Principio SOLID - DIP):**
-   * Los `ViewModels` solo pueden depender de la interfaz `SyncPassRepository` ubicada en el paquete `domain/repository`.
-   * La implementación `SyncPassRepositoryImpl` (`data/repository`) coordina `SyncPassLocalDataSource` y `SyncPassRemoteDataSource` (`data/datasource`), los cuales encapsulan a `SyncPassDao` (`Room`) y `SyncPassApiService` (`Retrofit`).
-   * La instanciación de clientes pesados (`OkHttpClient`, `Retrofit`, `AppDatabase`, `SyncPassRepository`) se realiza una sola vez (`@Singleton`) dentro del paquete `di/` (`NetworkModule`, `DatabaseModule`, `RepositoryModule`).
-3. **Diseño Offline-First Real:**
-   * Toda operación de terreno (acreditación QR/manual, creación de taller, encuesta de satisfacción) debe guardarse primero en el almacenamiento local (`AppDatabase`) con el atributo `sincronizado` (`true` si se envió a la nube, `false` si se operó sin red).
-   * El botón explícito **"Sincronizar Registros Pendientes"** debe enviar los registros con `sincronizado == false` hacia los endpoints `/api/asistencias` y `/api/encuestas` en **Supabase PostgreSQL**, registrar la operación en `sync_log` y marcar los registros locales como `sincronizado = true`.
-4. **Seguridad y Secretos:**
-   * Jamás exponer claves privadas (`sb_secret_...` de Supabase) en el código fuente versionado ni llamar a servicios de terceros directamente desde el navegador cuando exista riesgo de CORS o fuga de credenciales; utilizar siempre el BFF (`/api/*`) con variables de entorno en el servidor.
+1. **Seguridad y Secretos en Cliente SPA:**
+   * **Prohibido** exponer secretos (`VITE_COGNITO_CLIENT_SECRET`, `SUPABASE_KEY` o claves privadas) en variables `VITE_*` o en archivos `.env` versionados.
+   * AWS Cognito en el navegador utiliza **Authorization Code Grant + PKCE S256** como cliente público sin `client_secret`.
+   * Todos los endpoints en `api/*` (Vercel) y `bff/` (Spring Boot) validan tokens JWT firmados (`RS256` vía JWKS de Cognito/Auth0 o `HS256` vía `SYNCPASS_JWT_SECRET` en servidor), aplican RBAC por rol y restringen CORS a orígenes autorizados.
+2. **Autenticación Real Obligatoria (Sin Sesiones Ficticias):**
+   * El frontend nunca crea tokens `mock-token-*` ni otorga sesiones de respaldo ante fallos de red, rechazo de credenciales o errores en Cognito PKCE.
+   * Solo `loginWithToken` restaura o inicia sesión con un JWT estructuralmente válido y no expirado emitido por el backend o Cognito.
+3. **Cola Offline Persistente (Web + Vercel/BFF):**
+   * Las acreditaciones registradas sin conexión o ante caída temporal de red se almacenan con estructura completa en `localStorage` (`src/services/offlineQueue.ts`).
+   * El botón **"Sincronizar pendientes"** envía el lote real de registros hacia `/api/asistencias/sync` con `Authorization: Bearer <token>` y **solo limpia de la cola los registros confirmados con HTTP 2xx**.
+4. **Persistencia Unificada en PostgreSQL (Supabase):**
+   * El esquema relacional oficial reside en [`docs/syncpass-ddl.sql`](docs/syncpass-ddl.sql).
+   * Tanto las funciones serverless `api/*.js` como los controladores Spring Boot en `bff/` (`SupabaseGatewayService`) leen y escriben en Supabase PostgREST con autorización RBAC verificada en servidor.
 
 ---
 
-## 2. Plan Maestro de Ingeniería y Checklist de Avance
+## 2. Checklist de Ingeniería Verificable (`SyncPass-Web`)
 
-- [x] **Fase 1: Base de Datos Relacional e Infraestructura Cloud (Supabase + BFF)**
-  - [x] Ejecutar script DDL relacional (`docs/syncpass-ddl.sql`) en PostgreSQL de Supabase (`nxbsqkpnkawbkdksmnym.supabase.co`) con 9 tablas (`usuario`, `docente`, `estudiante_voluntario`, `beneficiario`, `proyecto_comunitario`, `evento_taller`, `registro_asistencia`, `encuesta_valoracion`, `sync_log`).
-  - [x] Conectar endpoints REST `/api/talleres`, `/api/usuarios`, `/api/asistencias`, `/api/encuestas` y `/api/health` a Supabase PostgREST y actualizar controladores Spring Boot (`bff`).
-  - [x] Configurar variables de entorno seguras (`SUPABASE_URL`, `SUPABASE_KEY`) en producción (Vercel) y verificar persistencia real `GET`/`POST`/`DELETE`.
-- [x] **Fase 2: Refactorización Arquitectónica MVVM + Clean Architecture en Android**
-  - [x] Definir modelos de dominio (`SyncPassModels.kt`) e interfaz `SyncPassRepository` en `domain/repository/`.
-  - [x] Implementar persistencia local `data/local/` (`TallerEntity`, `AsistenciaEntity`, `EncuestaEntity`, `SyncPassDao`, `AppDatabase`).
-  - [x] Implementar capa remota `data/remote/` (`SyncPassApiService` con Retrofit y DTOs con `@SerializedName`).
-  - [x] Implementar fuentes de datos `data/datasource/` (`SyncPassLocalDataSource` y `SyncPassRemoteDataSource`) y repositorio `SyncPassRepositoryImpl`.
-  - [x] Configurar módulos de Inversión de Dependencias en `di/` (`NetworkModule`, `DatabaseModule`, `RepositoryModule`).
-  - [x] Separar `UiState` y `ViewModel` en todas las vistas (`VoluntarioViewModel`, `DocenteViewModel`, `BeneficiarioViewModel`, `AdminViewModel`, `LoginViewModel`, `HomeViewModel`).
-- [x] **Fase 3: Integración de Hardware Nativo (3 APIs de Android)**
-  - [x] **API Nativa #1 – Geolocalización GPS (`LocationHardwareHelper`):** Captura de coordenadas con `LocationManager` y cálculo trigonométrico de Haversine para validar geocerca a 150 metros del recinto.
-  - [x] **API Nativa #2 – Cámara y Escáner QR (`QrCameraHardwareHelper`):** Verificación de sensor óptico trasero con `CameraManager` y decodificación de pases QR institucionales.
-  - [x] **API Nativa #3 – Almacenamiento de Archivos (`ActaStorageHelper`):** Exportación local de actas de asistencia en formato `.csv` dentro del almacenamiento del dispositivo.
-- [x] **Fase 4: Calidad de Software, Pruebas Unitarias y Cobertura JaCoCo (>30%)**
-  - [x] Configurar plugin `jacoco` y tarea `jacocoTestReport` en `app/build.gradle.kts`.
-  - [x] Implementar suite de pruebas unitarias (`SyncPassUnitTests.kt`) cubriendo ViewModels, Repositorio Offline-First, DataSources, Hardware Helpers, Decodificador JWT y Módulos DI.
-  - [x] Verificar ejecución exitosa de `./gradlew testDebugUnitTest jacocoTestReport` superando holgadamente el 30% de cobertura mínima exigida.
-- [x] **Fase 5: Documentación Arquitectónica C4, Alcance, Mockups y Evidencia de Video Hito 2**
-  - [x] Redactar `docs/ARQUITECTURA.md` con diagramas Mermaid C4 (Niveles C1 Contexto, C2 Contenedores y C3 Componentes MVVM).
-  - [x] Redactar `docs/ALCANCE.md` con RF, RNF, Casos de Uso detallados y diagrama de secuencia Offline-First.
-  - [x] Redactar `docs/MOCKUPS.md` con presentación de las 7 vistas y matriz de trazabilidad (Implementado vs. Backlog).
-  - [x] Generar video demostrativo oficial `Videoequipo1.mp4` ($\le 90\text{ s}$, resolución $720 \times 1280$, $< 50\text{ MB}$) e instructivo de carga mediante `AzCopy`.
+- [x] **Seguridad OAuth2 / PKCE y Secretos:**
+  - [x] Retirar `VITE_COGNITO_CLIENT_SECRET` de `src/config/auth.ts`, `src/config/cognito-pkce.ts`, `src/contexts/AuthProvider.tsx` y `.gitignore`ar `.env` / `.env.*` dejando solo `.env.example`.
+  - [x] Eliminar `loginLocal`, `switchRole` sin respaldo y el fallback ficticio de Cognito en `AuthProvider.tsx` y `LoginPage.tsx`.
+- [x] **Autorización Uniforme y RBAC (`/api/*` + `bff/`):**
+  - [x] Implementar `api/_lib/auth.js` (CORS por lista blanca, verificación RS256/JWKS y HS256, control de roles por endpoint y método).
+  - [x] Proteger `/api/usuarios`, `/api/talleres`, `/api/asistencias`, `/api/asistencias/sync`, `/api/encuestas` y `/api/notificar` (evitando envío anónimo de avisos push).
+  - [x] Conectar los 6 handlers + `/api/auth/*` + `/api/asistencias/sync` tanto en `vercel.json` como en el middleware local de `vite.config.ts`.
+  - [x] Conectar `bff/` (`UserController`, `TallerController`, `AsistenciaController`, `EncuestaController`, `NotificarController`) a `SupabaseGatewayService` con `@PreAuthorize` RBAC y pruebas `MockMvc`.
+- [x] **Operación Offline Persistente y DDL:**
+  - [x] Implementar cola durable en `src/services/offlineQueue.ts` integrada en `DashboardPage.tsx`.
+  - [x] Versionar el esquema SQL en `docs/syncpass-ddl.sql`.
 
 ---
 
-## 3. Registro de Prompts y Decisiones Técnicas con IA (Auditoría de Uso Controlado)
+## 3. Registro de Decisiones de Auditoría (Segunda Opinión Codex + Corrección)
 
-| Iteración | Prompt / Solicitud de Ingeniería realizada al Agente IA | Validación Humana y Decisión Arquitectónica Aplicada |
-| :--- | :--- | :--- |
-| **Prompt 1 (Levantamiento y Modelo de Datos)** | *"Analiza el caso de Vinculación con el Medio de Duoc UC (SyncPass) y diseña un esquema relacional PostgreSQL para Supabase que soporte operación Offline-First en Android, validación de geocerca GPS, protección de datos personales mediante códigos sintéticos y auditoría de sincronizaciones."* | Se verificó que la tabla `beneficiario` no almacenara RUTs reales (cumpliendo la restricción ética del caso) y se incorporaron las columnas `is_synced`, `created_locally_at`, `synced_at` y `device_id` en `registro_asistencia` y `encuesta_valoracion`, además de la tabla `sync_log`. |
-| **Prompt 2 (Desacoplamiento MVVM y DIP)** | *"Refactoriza la aplicación Android para que ninguna pantalla `@Composable` tenga estado de negocio ni llamadas directas a repositorios. Aplica el patrón enseñado en clases: `Screen -> ViewModel (UiState) -> SyncPassRepository (interfaz en domain) -> SyncPassRepositoryImpl -> LocalDataSource (Room) & RemoteDataSource (Retrofit)` con inyección en `di/`."* | Se revisó que `VoluntarioViewModel`, `DocenteViewModel`, `BeneficiarioViewModel` y `AdminViewModel` importen únicamente `com.example.kotlin_login.domain.repository.SyncPassRepository`, eliminando cualquier acoplamiento de la capa de dominio con `Retrofit` o `Room`. |
-| **Prompt 3 (Sincronización Offline-First y Geocerca GPS)** | *"Implementa el flujo completo de acreditación en terreno en `VoluntarioViewModel`: cálculo de distancia Haversine contra las coordenadas de la sede (-33.5012, -70.6890, radio 150m), guardado local en `AppDatabase` cuando `isOffline = true`, y sincronización por lote hacia `/api/asistencias` en Supabase al presionar el botón Sincronizar."* | Se probó que al escanear un QR en modo Offline el contador `pendingSyncCount` se incremente y el registro quede con badge `Pendiente`; al pulsar sincronizar, se envía el lote JSON a Supabase, se inserta en `sync_log` y el badge cambia a `Sincronizado`. |
-| **Prompt 4 (Pruebas Unitarias y Cobertura JaCoCo)** | *"Configura JaCoCo en `app/build.gradle.kts` e implementa pruebas unitarias en JUnit 4 + `kotlinx-coroutines-test` con un `FakeSyncPassApiService` para validar todos los ViewModels, el repositorio Offline-First y los helpers de hardware superando el 30% de cobertura."* | Se excluyeron las clases generadas por Android (`R`, `BuildConfig`) y las funciones visuales declarativas puras (`*Screen.kt`), enfocando la medición de cobertura en las capas de lógica de negocio (`ui/*ViewModel`, `domain/*`, `data/*`, `core/*`, `di/*`). |
-| **Prompt 5 (Modularización `MainDispatcherRule`, `fakes/` y Casos de Error – Clase 20-11)** | *"Refactoriza las pruebas unitarias siguiendo la estructura vista en clases (`rules/MainDispatcherRule.kt`, paquete `fakes/` con fakes por interfaz y clases dedicadas `VoluntarioViewModelTest`, `DocenteViewModelTest` y `SyncPassRepositoryImplTest`) agregando pruebas explícitas de estado inicial, caso de éxito Offline-First y manejo controlado de errores."* | Se incorporó manejo de errores con `runCatching` en `VoluntarioViewModel` y `DocenteViewModel` para evitar caídas ante fallos del repositorio, alcanzando **67% de cobertura de instrucciones (`75.3%` de líneas)** en JaCoCo (`BUILD SUCCESSFUL`). Documentado en `docs/TESTING.md`. |
+| Hallazgo auditado | Corrección aplicada y verificada |
+| :--- | :--- |
+| **1. Secreto de Cognito y `.env` versionados** | Se eliminó `COGNITO_CLIENT_SECRET` del frontend, se desversionaron `.env` y `.env.production` (`git rm --cached`), se actualizó `.gitignore` y se migró `cognito-pkce.ts` a cliente público PKCE S256 puro. *(Importante: rotar el App Client en la consola de AWS Cognito).* |
+| **2. Falta de validación JWT/RBAC en Vercel API y CORS `*`** | Se creó `api/_lib/auth.js` con verificación criptográfica JWT (`RS256` JWKS / `HS256`), RBAC por rol y CORS restringido en `usuarios.js`, `talleres.js`, `asistencias.js`, `encuestas.js` y `notificar.js`. |
+| **3. Login y Cognito con sesiones locales ficticias** | Se eliminó `loginLocal`, el fallback de coordinador en `AuthProvider.tsx` y el bypass de `switchRole`; ahora `LoginPage.tsx` exige respuesta exitosa con JWT del backend (`api/auth.js` o API Gateway). |
+| **4. Modo offline sin cola durable ni envío real** | Se creó `src/services/offlineQueue.ts` respaldado en `localStorage`; `DashboardPage.tsx` envía los registros reales a `/api/asistencias/sync` con token Bearer y solo limpia la cola tras respuesta exitosa. |
+| **5. Desalineación entre `bff/`, `vite.config.ts` y documentos** | Se conectó `bff/` a `SupabaseGatewayService` con `@PreAuthorize`, se expusieron los 6 endpoints y `/api/asistencias/sync` en `vite.config.ts`/`vercel.json`, se incorporó `docs/syncpass-ddl.sql` y se actualizaron `AGENT.md`, `03-GUIA-AWS-COGNITO.md` y `TESTING.md`. |

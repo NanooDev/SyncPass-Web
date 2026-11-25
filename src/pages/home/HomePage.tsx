@@ -4,7 +4,6 @@ import { Link, useLocation } from 'wouter'
 import QRCode from 'qrcode'
 import { useDocumentTitle } from '../../hooks/use-document-title/useDocumentTitle.ts'
 import { useAuth } from '../../hooks/use-auth/useAuth.ts'
-import { ROLES, type Role } from '../../config/auth.ts'
 import styles from './HomePage.module.css'
 
 export default function HomePage() {
@@ -83,9 +82,8 @@ export default function HomePage() {
     }
   }
 
-  const handleSelectRole = (role: Role) => {
-    auth.switchRole(role)
-    setLocation('/dashboard')
+  const handleSelectRole = () => {
+    setLocation(isAuthenticated ? '/dashboard' : '/login')
   }
 
   return (
@@ -242,7 +240,7 @@ export default function HomePage() {
 
           <div className={styles.roleCardsGrid}>
             {/* 1. Docente / Coordinador */}
-            <div className={styles.roleCard} onClick={() => handleSelectRole(ROLES.coordinator)}>
+            <div className={styles.roleCard} onClick={() => handleSelectRole()}>
               <div className={styles.roleCardTop}>
                 <div className={styles.roleIconWrapper} style={{ background: 'var(--brand-emerald-light)', color: 'var(--brand-emerald)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -272,7 +270,7 @@ export default function HomePage() {
             </div>
 
             {/* 2. Estudiante Voluntario */}
-            <div className={styles.roleCard} onClick={() => handleSelectRole(ROLES.volunteer)}>
+            <div className={styles.roleCard} onClick={() => handleSelectRole()}>
               <div className={styles.roleCardTop}>
                 <div className={styles.roleIconWrapper} style={{ background: 'var(--brand-indigo-light)', color: 'var(--brand-indigo)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -304,7 +302,7 @@ export default function HomePage() {
             </div>
 
             {/* 3. Beneficiario Comunitario */}
-            <div className={styles.roleCard} onClick={() => handleSelectRole(ROLES.attendee)}>
+            <div className={styles.roleCard} onClick={() => handleSelectRole()}>
               <div className={styles.roleCardTop}>
                 <div className={styles.roleIconWrapper} style={{ background: 'var(--brand-amber-light)', color: 'var(--brand-amber)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -334,7 +332,7 @@ export default function HomePage() {
             </div>
 
             {/* 4. Administrador General */}
-            <div className={styles.roleCard} onClick={() => handleSelectRole(ROLES.admin)}>
+            <div className={styles.roleCard} onClick={() => handleSelectRole()}>
               <div className={styles.roleCardTop}>
                 <div className={styles.roleIconWrapper} style={{ background: 'var(--brand-cyan-light)', color: 'var(--brand-cyan)' }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
